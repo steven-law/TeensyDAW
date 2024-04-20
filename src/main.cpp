@@ -277,7 +277,7 @@ public:
     tft->setFont(Arial_9);
     tft->setCursor(STEP_FRAME_W * POSITION_LOAD_BUTTON + 4, 3);
     tft->print("L");
-    tft->updateScreenAsync();
+  
   }
 
   // stepsequencer
@@ -1335,7 +1335,7 @@ void input_behaviour()
     // if Shift button is NOT pressed
     if (!buttonPressed[BUTTON_SHIFT])
     {
-      encoder_SetCursor();                          // Encoder: 0,1
+      encoder_SetCursor(14);                          // Encoder: 0,1
       allTracks[active_track]->set_octave(2);       // Encoder: 2
       allTracks[active_track]->set_clip_to_edit(3); // Encoder: 3
 
@@ -1356,7 +1356,8 @@ void input_behaviour()
     // if Shift button is NOT pressed
     if (!buttonPressed[BUTTON_SHIFT])
     {
-      encoder_SetCursor(); // Encoder: 0,1
+      gridTouchY=0;
+      encoder_SetCursor(8); // Encoder: 0,1
       allTracks[gridTouchY - 1]->set_clip_to_play(2, pixelTouchX);
       allTracks[gridTouchY - 1]->set_note_offset(3, pixelTouchX);
     }
@@ -1425,7 +1426,7 @@ void readEncoders()
     }
   }
 }
-void encoder_SetCursor()
+void encoder_SetCursor(byte maxY)
 {
 
   if (enc_moved[0])
@@ -1436,7 +1437,7 @@ void encoder_SetCursor()
   }
   if (enc_moved[1])
   {
-    gridTouchY = constrain(gridTouchY + encoded[1], 0, 14);
+    gridTouchY = constrain(gridTouchY + encoded[1], 0, maxY);
     enc_moved[1] = false;
     cursor_moved = true;
   }
