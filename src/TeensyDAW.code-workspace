@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "TeensyDAW",
+			"path": ".."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"*.tcc": "cpp"
+		}
+	}
+}
