@@ -6,7 +6,8 @@
 #include <SerialFlash.h>
 
 // TeensyDAW: begin automatically generated code
-
+extern float *note_frequency;
+extern int tuning;
 class Plugin_1
 {
 public:
@@ -70,8 +71,8 @@ public:
     }
     void noteOn(byte notePlayed)
     {
-        //float frequency = Output::note_frequency[notePlayed] * Output::tuning;
-        //Voice1.frequency(frequency);
+        float frequency = note_frequency[notePlayed] * tuning;
+        Voice1.frequency(frequency);
         envelope1.noteOn();
         envelope.noteOn();
     }

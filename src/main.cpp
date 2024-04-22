@@ -13,7 +13,6 @@
 #include <Output.h>
 Output MasterOut(3);
 
-
 // Plugin_1 plugin1();
 //  sizes and positions
 #define STEP_QUANT 16
@@ -125,10 +124,10 @@ int gridTouchY = 0;
 byte active_page = TRACK_1_PAGE;
 byte active_track = ACTIVE_TRACK_1;
 byte lastPotRow = 0;
-//notenumber to frequency chart
+
+// notenumber to frequency chart
 
 #define SAMPLE_ROOT 69
-
 
 // individual trackcolors
 int trackColor[9]{6150246, 8256638, 1095334, 12643941, 2583100, 9365295, 12943157, 5678954, ILI9341_WHITE};
@@ -842,7 +841,7 @@ public:
           noteToPlay[v] = array[clip_to_play[internal_clock_bar]][cloock][v] + noteOffset[internal_clock_bar];
           note_is_on[v] = true;
           usbMIDI.sendNoteOn(noteToPlay[v], VELOCITY_NOTE_ON, MIDI_channel_out); // Send a Note (pitch 42, velo 127 on channel 1)
-          MasterOut.plugin1.noteOn(noteToPlay[v]);
+          MasterOut.plugin1.noteOn(noteToPlay[0]);
           Serial.printf("ON   tick: %d, voice: %d, note: %d\n", cloock, v, noteToPlay[v]);
         }
       }
@@ -1285,11 +1284,12 @@ void setup()
 
   AudioMemory(20);
   MasterOut.setup();
-  MasterOut.note_frequency = new float[128];
-  for (int r = 0; r < 128; r++) {
-    MasterOut.note_frequency[r] = pow(2.0, ((double)(r - SAMPLE_ROOT) / 12.0));
+  note_frequency = new float[128];
+  for (int r = 0; r < 128; r++)
+  {
+    note_frequency[r] = pow(2.0, ((double)(r - SAMPLE_ROOT) / 12.0));
   }
- 
+
   usbMIDI.begin(); // Launch MIDI and listen to channel 4
   background.startUpScreen();
 }
@@ -1369,7 +1369,7 @@ void input_behaviour()
     // if Shift button is NOT pressed
     if (!buttonPressed[BUTTON_SHIFT])
     {
-      //gridTouchY = 0;
+      // gridTouchY = 0;
       encoder_SetCursor(8); // Encoder: 0,1
       allTracks[gridTouchY - 1]->set_clip_to_play(2, pixelTouchX);
       allTracks[gridTouchY - 1]->set_note_offset(3, pixelTouchX);
@@ -1517,6 +1517,7 @@ void buttons_SetPlayStatus()
     for (int t = 0; t < NUM_TRACKS; t++)
     {
       allTracks[t]->internal_clock = -1;
+      allTracks[t]->internal_clock_bar = 0;
       for (int v = 0; v < MAX_VOICES; v++)
       {
         usbMIDI.sendNoteOff(allTracks[t]->array[allTracks[t]->clip_to_edit][Masterclock.MIDItick][v], VELOCITY_NOTE_OFF, allTracks[t]->MIDI_channel_out); // Send a Note (pitch 42, velo 127 on channel 1)

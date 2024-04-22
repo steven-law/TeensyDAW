@@ -5,14 +5,14 @@
 #include <SD.h>
 #include <SerialFlash.h>
 #include "Plugin_1.h"
-//Plugin_1 plugin1(1);
- 
+// Plugin_1 plugin1(1);
+int tuning = 440;
+float *note_frequency;
 // TeensyDAW: begin automatically generated code
 class Output
 {
 public:
-#define tuning 440
-    float *note_frequency;
+   
     Plugin_1 plugin1;
     AudioMixer4 mixer4;
     AudioOutputI2S i2s;
