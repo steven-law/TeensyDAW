@@ -8,10 +8,12 @@
 // TeensyDAW: begin automatically generated code
 extern float *note_frequency;
 extern int tuning;
+extern void drawPot(int XPos, byte YPos, int dvalue, char *dname, int color);
+
 class Plugin_1
 {
 public:
-
+    byte potentiometer[16];
     AudioSynthWaveform LFO1;
     AudioSynthWaveformModulated Voice1;
     AudioSynthWaveformModulated Voice2;
@@ -81,6 +83,165 @@ public:
         // float frequency = note_frequency[notePlayed] * tuning;
         envelope1.noteOff();
         envelope.noteOff();
+    }
+    void set_parameters(byte row)
+    {
+        if (row == 0)
+        {
+            set_voice1_waveform(0, 0, "W~Form 1", 0, 12);
+            set_voice2_waveform(1, 0, "W~Form 2", 0, 12);
+            set_voice3_waveform(2, 0, "W~Form 3", 0, 12);
+            set_voice4_waveform(3, 0, "W~Form 4", 0, 12);
+        }
+
+        if (row == 1)
+        {
+            set_voice1_amplitude(0, 1, "Volume 1", 0, 1);
+            set_voice2_amplitude(1, 1, "Volume 2", 0, 1);
+            set_voice3_amplitude(2, 1, "Volume 3", 0, 1);
+            set_voice4_amplitude(3, 1, "Volume 4", 0, 1);
+        }
+        if (row == 2)
+        {
+            set_filter_frequency(0, 2, "Filt-Frq", 60, 10000);
+            set_filter_resonance(1, 2, "Resonance", 0, 5);
+        }
+        if (row == 3)
+        {
+            set_envelope_attack(0, 3, "Attack", 0, 2000);
+            set_envelope_decay(1, 3, "Decay", 0, 2000);
+            set_envelope_sustain(2, 3, "Sustain", 0, 1);
+            set_envelope_release(3, 3, "Release", 0, 2000);
+        }
+    }
+
+    void set_voice1_waveform(byte XPos, byte YPos, char *name, int min, int max)
+    {
+        int n = XPos + (YPos * NUM_ENCODERS);
+        encoder_to_value(XPos, n);
+        int waveform = map(potentiometer[n], 0, MIDI_CC_RANGE, min, max);
+        Voice1.begin(waveform);
+        drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+    }
+    void set_voice2_waveform(byte XPos, byte YPos, char *name, int min, int max)
+    {
+        int n = XPos + (YPos * NUM_ENCODERS);
+        encoder_to_value(XPos, n);
+        int waveform = map(potentiometer[n], 0, MIDI_CC_RANGE, min, max);
+        Voice2.begin(waveform);
+        drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+    }
+    void set_voice3_waveform(byte XPos, byte YPos, char *name, int min, int max)
+    {
+        int n = XPos + (YPos * NUM_ENCODERS);
+        encoder_to_value(XPos, n);
+        int waveform = map(potentiometer[n], 0, MIDI_CC_RANGE, min, max);
+        Voice3.begin(waveform);
+        drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+    }
+    void set_voice4_waveform(byte XPos, byte YPos, char *name, int min, int max)
+    {
+        int n = XPos + (YPos * NUM_ENCODERS);
+        encoder_to_value(XPos, n);
+        int waveform = map(potentiometer[n], 0, MIDI_CC_RANGE, min, max);
+        Voice4.begin(waveform);
+        drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+    }
+
+    void set_voice1_amplitude(byte XPos, byte YPos, char *name, int min, int max)
+    {
+        int n = XPos + (YPos * NUM_ENCODERS);
+        encoder_to_value(XPos, n);
+        float amplitude = (float)map(potentiometer[n], 0, MIDI_CC_RANGE, min, max);
+        Voice1.amplitude(amplitude);
+        drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+    }
+    void set_voice2_amplitude(byte XPos, byte YPos, char *name, int min, int max)
+    {
+        int n = XPos + (YPos * NUM_ENCODERS);
+        encoder_to_value(XPos, n);
+        float amplitude = (float)map(potentiometer[n], 0, MIDI_CC_RANGE, min, max);
+        Voice2.amplitude(amplitude);
+        drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+    }
+    void set_voice3_amplitude(byte XPos, byte YPos, char *name, int min, int max)
+    {
+        int n = XPos + (YPos * NUM_ENCODERS);
+        encoder_to_value(XPos, n);
+        float amplitude = (float)map(potentiometer[n], 0, MIDI_CC_RANGE, min, max);
+        Voice3.amplitude(amplitude);
+        drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+    }
+    void set_voice4_amplitude(byte XPos, byte YPos, char *name, int min, int max)
+    {
+        int n = XPos + (YPos * NUM_ENCODERS);
+        encoder_to_value(XPos, n);
+        float amplitude = (float)map(potentiometer[n], 0, MIDI_CC_RANGE, min, max);
+        Voice4.amplitude(amplitude);
+        drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+    }
+
+    void set_filter_frequency(byte XPos, byte YPos, char *name, int min, int max)
+    {
+        int n = XPos + (YPos * NUM_ENCODERS);
+        encoder_to_value(XPos, n);
+        int frequency = note_frequency[potentiometer[n]];
+        filter.frequency(frequency);
+        drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+    }
+    void set_filter_resonance(byte XPos, byte YPos, char *name, int min, int max)
+    {
+        int n = XPos + (YPos * NUM_ENCODERS);
+        encoder_to_value(XPos, n);
+        float resonance = (float)map(potentiometer[n], 0, MIDI_CC_RANGE, min, max);
+        filter.resonance(resonance);
+        drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+    }
+
+    void set_envelope_attack(byte XPos, byte YPos, char *name, int min, int max)
+    {
+        int n = XPos + (YPos * NUM_ENCODERS);
+        encoder_to_value(XPos, n);
+        int attack = map(potentiometer[n], 0, MIDI_CC_RANGE, min, max);
+        envelope1.attack(attack);
+        envelope.attack(attack);
+        drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+    }
+    void set_envelope_decay(byte XPos, byte YPos, char *name, int min, int max)
+    {
+        int n = XPos + (YPos * NUM_ENCODERS);
+        encoder_to_value(XPos, n);
+        int decay = map(potentiometer[n], 0, MIDI_CC_RANGE, min, max);
+        envelope1.decay(decay);
+        envelope.decay(decay);
+        drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+    }
+    void set_envelope_sustain(byte XPos, byte YPos, char *name, int min, int max)
+    {
+        int n = XPos + (YPos * NUM_ENCODERS);
+        encoder_to_value(XPos, n);
+        float sustain = (float)map(potentiometer[n], 0, MIDI_CC_RANGE, min, max);
+        envelope1.sustain(sustain);
+        envelope.sustain(sustain);
+        drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+    }
+    void set_envelope_release(byte XPos, byte YPos, char *name, int min, int max)
+    {
+        int n = XPos + (YPos * NUM_ENCODERS);
+        encoder_to_value(XPos, n);
+        int release = map(potentiometer[n], 0, MIDI_CC_RANGE, min, max);
+        envelope1.release(release);
+        envelope.release(release);
+        drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+    }
+
+    void encoder_to_value(byte XPos, byte n)
+    {
+        if (enc_moved[XPos])
+        {
+            potentiometer[n] = constrain(potentiometer[n] + encoded[XPos], 0, 127);
+            enc_moved[XPos] = false;
+        }
     }
 };
 // TeensyDAW: end automatically generated code

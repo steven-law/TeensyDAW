@@ -7,12 +7,16 @@
 #include "Plugin_1.h"
 // Plugin_1 plugin1(1);
 int tuning = 440;
-float *note_frequency;
+extern float *note_frequency;
+
+// Encoder Pins
+extern bool enc_moved[4];
+extern int encoded[4];
+
 // TeensyDAW: begin automatically generated code
 class Output
 {
 public:
-   
     Plugin_1 plugin1;
     AudioMixer4 mixer4;
     AudioOutputI2S i2s;

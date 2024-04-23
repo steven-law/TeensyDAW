@@ -9,15 +9,14 @@
 #include <Wire.h>
 #include <Bounce2.h>
 #include <MIDI.h>
-
+#include <global_stuff.h>
 #include <Output.h>
 Output MasterOut(3);
 
 // Plugin_1 plugin1();
 //  sizes and positions
 #define STEP_QUANT 16
-#define STEP_FRAME_W 16
-#define STEP_FRAME_H 16
+
 #define ARRANGER_FRAME_H 24
 #define TRACK_FRAME_H 24
 #define SEQ_GRID_LEFT 30
@@ -99,12 +98,17 @@ Output MasterOut(3);
 #define SONGMODE_PAGE_15 24
 #define SONGMODE_PAGE_16 25
 
+#define PLUGIN1_PAGE1 100
+#define PLUGIN2_PAGE1 105
+#define PLUGIN3_PAGE1 110
+
 // encoder functions
 #define INPUT_FUNCTIONS_FOR_CURSOR 0
 #define INPUT_FUNCTIONS_FOR_SEQUENCER 1
 #define INPUT_FUNCTIONS_FOR_SEQUENCER_ALT 2
 #define INPUT_FUNCTIONS_FOR_ARRANGER 3
 #define INPUT_FUNCTIONS_FOR_ARRANGER_ALT 4
+#define INPUT_FUNCTIONS_FOR_PLUGIN 5
 
 // active Tracks
 //  pages
@@ -161,15 +165,13 @@ byte colPins[COLS] = {41, 38, 39, 40}; // connect to the column pinouts of the k
 Adafruit_Keypad kpd = Adafruit_Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
 //  Encoder Pins
-#define NUM_ENCODERS 4
+
 RotaryEncoder Enc1(31, 32);
 RotaryEncoder Enc2(27, 28);
 RotaryEncoder Enc3(24, 25);
 RotaryEncoder Enc4(2, 3);
 RotaryEncoder *allEncoders[NUM_ENCODERS]{&Enc1, &Enc2, &Enc3, &Enc4};
-// Encoder Pins
-bool enc_moved[4]{0, 0, 0, 0};
-int encoded[4];
+
 long oldEnc[4] = {-999, -999, -999, -999};
 // Encoder Buttons
 const uint8_t BUTTON_PINS[NUM_ENCODERS] = {30, 29, 26, 4};
@@ -379,6 +381,12 @@ public:
     }
   }
 
+  // plugin view
+  void pluginView()
+  {
+    clearWorkSpace();
+  }
+
   void setBackgroundTo(int page)
   {
     clearWorkSpace();
@@ -399,6 +407,14 @@ public:
       {
         encoder_function = INPUT_FUNCTIONS_FOR_ARRANGER; // enable cursor in this screen
         gridSongMode(i);
+      }
+    }
+    for (int i = PLUGIN1_PAGE1; i <= PLUGIN3_PAGE1; i++) // select the songmode/arranger pages
+    {
+      if (active_page == i)
+      {
+        encoder_function = INPUT_FUNCTIONS_FOR_PLUGIN; // enable cursor in this screen
+        pluginView();
       }
     }
   }
@@ -1240,6 +1256,7 @@ void buttons_SetNoteOnTick(int x, byte y);
 void buttons_Set_potRow();
 void input_behaviour();
 void clock_to_notes();
+void drawPot(int XPos, byte YPos, int dvalue, int min, int max, char *dname, int color);
 void USBMIDI_noteOn(byte channel, byte pitch, byte velocity);
 void USBMIDI_noteOff(byte channel, byte pitch, byte velocity);
 
@@ -1282,7 +1299,7 @@ void setup()
   tft.updateScreenAsync();
   delay(1000);
 
-  AudioMemory(20);
+  AudioMemory(200);
   MasterOut.setup();
   note_frequency = new float[128];
   for (int r = 0; r < 128; r++)
@@ -1379,6 +1396,15 @@ void input_behaviour()
       Masterclock.set_tempo(1);         // Encoder: 1
       Masterclock.set_start_of_loop(2); // Encoder: 2
       Masterclock.set_end_of_loop(3);   // Encoder: 3
+    }
+  }
+  // if we are in one of the pluginpages
+  if (background.encoder_function == INPUT_FUNCTIONS_FOR_PLUGIN)
+  {
+    // if Shift button is NOT pressed
+    if (!buttonPressed[BUTTON_SHIFT])
+    {
+      MasterOut.plugin1.set_parameters(lastPotRow);
     }
   }
 }
@@ -1563,7 +1589,7 @@ void buttons_SelectPlugin()
 { // select active plugin from choosen track
   if (buttonPressed[BUTTON_PLUGIN])
   {
-    active_page = STARTUPSCREEN_PAGE;
+    active_page = PLUGIN1_PAGE1;
     background.setBackgroundTo(active_page);
     buttonPressed[BUTTON_PLUGIN] = false;
   }
@@ -1659,4 +1685,42 @@ void buttons_Set_potRow()
 
     buttonPressed[BUTTON_ROW] = false;
   }
+}
+//void drawPot(int XPos, byte YPos, int dvalue, int min, int max, char *dname, int color)
+void drawPot(int XPos, byte YPos, int dvalue, char *dname, int color)
+{ // xposition, yposition, value 1-100, value to draw, name to draw, color
+  // drawPot Variables
+  static float circlePos[4];
+  static float circlePos_old[4];
+  static int dvalue_old[4];
+  //byte fvalue = map(dvalue, 0, 127, min, max);
+  int xPos;
+  if (XPos == 0)
+    xPos = 3;
+  if (XPos == 1)
+    xPos = 7;
+  if (XPos == 2)
+    xPos = 11;
+  if (XPos == 3)
+    xPos = 15;
+
+  int yPos = (YPos + 1) * 3;
+
+  circlePos[XPos] = dvalue / 63.5;
+
+  tft.setFont(Arial_8);
+  tft.setTextColor(ILI9341_DARKGREY);
+  tft.setCursor(STEP_FRAME_W * xPos + 4, STEP_FRAME_H * yPos - 3);
+  tft.print(dvalue_old[XPos]);
+  tft.setTextColor(ILI9341_WHITE);
+  tft.setCursor(STEP_FRAME_W * xPos + 4, STEP_FRAME_H * yPos - 3);
+  tft.print(dvalue);
+  tft.setCursor(STEP_FRAME_W * xPos, STEP_FRAME_H * (yPos + 1) + 3);
+  tft.print(dname);
+
+  tft.fillCircle(STEP_FRAME_W * (xPos + 1) + 16 * cos((2.5 * circlePos_old[XPos]) + 2.25), STEP_FRAME_H * yPos + 16 * sin((2.5 * circlePos_old[XPos]) + 2.25), 4, ILI9341_DARKGREY);
+  tft.drawCircle(STEP_FRAME_W * (xPos + 1), STEP_FRAME_H * yPos, 16, ILI9341_LIGHTGREY);
+  tft.fillCircle(STEP_FRAME_W * (xPos + 1) + 16 * cos((2.5 * circlePos[XPos]) + 2.25), STEP_FRAME_H * yPos + 16 * sin((2.5 * circlePos[XPos]) + 2.25), 4, color);
+  circlePos_old[XPos] = circlePos[XPos];
+  dvalue_old[XPos] = dvalue;
 }
