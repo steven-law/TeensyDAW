@@ -25,7 +25,23 @@ Output MasterOut(3);
 #define SEQ_GRID_BOTTOM 12
 #define GRID_LENGTH_HOR 256
 #define GRID_LENGTH_VERT 192
-
+#define OCTAVE_CHANGE_LEFTMOST 18
+#define OCTAVE_CHANGE_RIGHTMOST 20
+#define OCTAVE_CHANGE_UP_TOPMOST 2
+#define OCTAVE_CHANGE_UP_BOTTOMMOST 3
+#define OCTAVE_CHANGE_DOWN_TOPMOST 4
+#define OCTAVE_CHANGE_DOWN_BOTTOMMOST 5
+#define POSITION_ARR_BUTTON 18
+#define POSITION_BPM_BUTTON 11
+#define POSITION_SCALE_BUTTON 16
+#define POSITION_LOAD_BUTTON 15
+#define POSITION_SAVE_BUTTON 13
+#define POSITION_STOP_BUTTON 10
+#define POSITION_PLAY_BUTTON 8
+#define POSITION_RECORD_BUTTON 7
+#define STARTUPSCREEN 0
+#define STEP_SEQUENCER_VIEW 1
+#define ARRANGMENT_VIEW 2
 #define POSITION_BAR_BUTTON 5
 #define DOT_OFFSET_X 40 // STEP_FRAME_W * 2 + 8
 #define DOT_OFFSET_Y 24 // STEP_FRAME_H + 8
@@ -45,9 +61,6 @@ Output MasterOut(3);
 #define MAX_CLIPS 9
 #define NUM_USER_CLIPS 7
 #define NO_NOTE 128
-#define NUM_TRACKS 8
-#define VELOCITY_NOTE_OFF 0
-#define VELOCITY_NOTE_ON 127
 
 #define BUTTON_LEFT 0
 #define BUTTON_RIGHT 1
@@ -81,26 +94,22 @@ Output MasterOut(3);
 #define TRACK_8_PAGE 7
 #define STARTUPSCREEN_PAGE 8
 // #define EMPTY 9
-#define SONGMODE_PAGE_1 10
-#define SONGMODE_PAGE_2 11
-#define SONGMODE_PAGE_3 12
-#define SONGMODE_PAGE_4 13
-#define SONGMODE_PAGE_5 14
-#define SONGMODE_PAGE_6 15
-#define SONGMODE_PAGE_7 16
-#define SONGMODE_PAGE_8 17
-#define SONGMODE_PAGE_9 18
-#define SONGMODE_PAGE_10 19
-#define SONGMODE_PAGE_11 20
-#define SONGMODE_PAGE_12 21
-#define SONGMODE_PAGE_13 22
-#define SONGMODE_PAGE_14 23
-#define SONGMODE_PAGE_15 24
-#define SONGMODE_PAGE_16 25
-
-#define PLUGIN1_PAGE1 100
-#define PLUGIN2_PAGE1 105
-#define PLUGIN3_PAGE1 110
+#define SONGMODE_PAGE_1 0
+#define SONGMODE_PAGE_2 1
+#define SONGMODE_PAGE_3 2
+#define SONGMODE_PAGE_4 3
+#define SONGMODE_PAGE_5 4
+#define SONGMODE_PAGE_6 5
+#define SONGMODE_PAGE_7 6
+#define SONGMODE_PAGE_8 7
+#define SONGMODE_PAGE_9 8
+#define SONGMODE_PAGE_10 9
+#define SONGMODE_PAGE_11 10
+#define SONGMODE_PAGE_12 11
+#define SONGMODE_PAGE_13 12
+#define SONGMODE_PAGE_14 13
+#define SONGMODE_PAGE_15 14
+#define SONGMODE_PAGE_16 15
 
 // encoder functions
 #define INPUT_FUNCTIONS_FOR_CURSOR 0
@@ -125,9 +134,10 @@ bool cursor_moved;
 bool otherCtrlButtons = true;
 int pixelTouchX = 0;
 int gridTouchY = 0;
-byte active_page = TRACK_1_PAGE;
 byte active_track = ACTIVE_TRACK_1;
+byte arrangerpage;
 byte lastPotRow = 0;
+byte encoder_function = 0;
 
 // notenumber to frequency chart
 
@@ -178,248 +188,6 @@ const uint8_t BUTTON_PINS[NUM_ENCODERS] = {30, 29, 26, 4};
 Bounce *encButtons = new Bounce[NUM_ENCODERS];
 // micros object for midiclock
 elapsedMicros msecsclock;
-
-class Background
-{
-public:
-#define OCTAVE_CHANGE_LEFTMOST 18
-#define OCTAVE_CHANGE_RIGHTMOST 20
-#define OCTAVE_CHANGE_UP_TOPMOST 2
-#define OCTAVE_CHANGE_UP_BOTTOMMOST 3
-#define OCTAVE_CHANGE_DOWN_TOPMOST 4
-#define OCTAVE_CHANGE_DOWN_BOTTOMMOST 5
-#define POSITION_ARR_BUTTON 18
-#define POSITION_BPM_BUTTON 11
-#define POSITION_SCALE_BUTTON 16
-#define POSITION_LOAD_BUTTON 15
-#define POSITION_SAVE_BUTTON 13
-#define POSITION_STOP_BUTTON 10
-#define POSITION_PLAY_BUTTON 8
-#define POSITION_RECORD_BUTTON 7
-#define STARTUPSCREEN 0
-#define STEP_SEQUENCER_VIEW 1
-#define ARRANGMENT_VIEW 2
-  ILI9341_t3n *tft; // Pointer to the display object
-  byte active_page = 0;
-  const char *noteNames[12]{"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
-  byte encoder_function = 0;
-  Background(ILI9341_t3n *display)
-  {
-    tft = display;
-  }
-  // general
-  void clearWorkSpace()
-  {                                                                                                        // clear the whole grid from Display
-    tft->fillRect(STEP_FRAME_W, STEP_FRAME_H, STEP_FRAME_W * 21, STEP_FRAME_H * 13 + 4, ILI9341_DARKGREY); // Xmin, Ymin, Xlength, Ylength, color
-                                                                                                           // tft->fillRect(STEP_FRAME_W, STEP_FRAME_H, STEP_FRAME_W, STEP_FRAME_H * 12, ILI9341_DARKGREY);
-  }
-  void startUpScreen()
-  {
-
-    // static Display rendering
-    tft->fillScreen(ILI9341_DARKGREY);
-
-    tft->setFont(Arial_9);
-
-    // songmode button
-    tft->setTextColor(ILI9341_BLACK);
-    tft->fillRect(1, 1, 15, ARRANGER_FRAME_H, ILI9341_MAGENTA); // Xmin, Ymin, Xlength, Ylength, color
-    tft->setCursor(4, 3);
-    tft->print("S");
-
-    // Drumtrack button
-    tft->fillRect(1, STEP_FRAME_H + 8, 15, TRACK_FRAME_H, trackColor[0]); // Xmin, Ymin, Xlength, Ylength, color
-    tft->setCursor(4, TRACK_FRAME_H + 8);
-    tft->print("D");
-
-    // other tracks buttons
-    for (int otherTracks = 2; otherTracks <= 8; otherTracks++)
-    {
-      tft->fillRect(1, TRACK_FRAME_H * otherTracks, 15, TRACK_FRAME_H, trackColor[otherTracks - 1]); // Xmin, Ymin, Xlength, Ylength, color
-      tft->setCursor(4, TRACK_FRAME_H * otherTracks + 6);
-      tft->print(otherTracks);
-    }
-    // Mixer button
-    tft->fillRect(1, STEP_FRAME_H * 13 + 8, 15, TRACK_FRAME_H, ILI9341_LIGHTGREY); // Xmin, Ymin, Xlength, Ylength, color
-    tft->setCursor(3, STEP_FRAME_H * 13 + 14);
-    tft->print("M");
-
-    // scale Select
-    tft->drawRect(STEP_FRAME_W * POSITION_SCALE_BUTTON, 0, STEP_FRAME_W * 2, STEP_FRAME_H, ILI9341_WHITE);
-
-    // arrangment Select
-    tft->drawRect(STEP_FRAME_W * POSITION_ARR_BUTTON, 0, STEP_FRAME_W * 2, STEP_FRAME_H, ILI9341_WHITE);
-
-    // record button & Rectangle
-    tft->drawRect(STEP_FRAME_W * POSITION_RECORD_BUTTON, 0, STEP_FRAME_W, STEP_FRAME_H, ILI9341_WHITE);
-    tft->fillCircle(STEP_FRAME_W * POSITION_RECORD_BUTTON + 7, 7, DOT_RADIUS + 1, ILI9341_LIGHTGREY);
-
-    // Play button & Rectangle
-    tft->drawRect(STEP_FRAME_W * POSITION_PLAY_BUTTON, 0, STEP_FRAME_W * 2, STEP_FRAME_H, ILI9341_WHITE);                                                                     // PLAY RECT FRAME
-    tft->fillTriangle(STEP_FRAME_W * POSITION_PLAY_BUTTON + 12, 3, STEP_FRAME_W * POSITION_PLAY_BUTTON + 12, 13, STEP_FRAME_W * POSITION_PLAY_BUTTON + 22, 8, ILI9341_GREEN); // x1, y1, x2, y2, x3, y3
-
-    // stop button & Rectangle
-    tft->drawRect(STEP_FRAME_W * POSITION_STOP_BUTTON, 0, STEP_FRAME_W, STEP_FRAME_H, ILI9341_WHITE);
-    tft->fillRect(STEP_FRAME_W * POSITION_STOP_BUTTON + 3, 3, 10, 10, ILI9341_LIGHTGREY);
-
-    // barcounter & Rectangle
-    tft->drawRect(STEP_FRAME_W * POSITION_BAR_BUTTON, 0, STEP_FRAME_W * 2, STEP_FRAME_H, ILI9341_WHITE);
-
-    // tempo button & Rectangle
-    tft->drawRect(STEP_FRAME_W * POSITION_BPM_BUTTON, 0, STEP_FRAME_W * 2, STEP_FRAME_H, ILI9341_WHITE);
-
-    // save button & Rectangle
-    tft->drawRect(STEP_FRAME_W * POSITION_SAVE_BUTTON, 0, STEP_FRAME_W * 2, STEP_FRAME_H, ILI9341_WHITE);
-    tft->fillRect(STEP_FRAME_W * POSITION_SAVE_BUTTON + 1, 1, STEP_FRAME_W * 2 - 2, STEP_FRAME_H - 2, ILI9341_ORANGE);
-    tft->setTextColor(ILI9341_BLACK);
-    tft->setFont(Arial_9);
-    tft->setCursor(STEP_FRAME_W * POSITION_SAVE_BUTTON + 2, 3);
-    tft->print("SAV");
-
-    // load button & Rectangle
-    tft->drawRect(STEP_FRAME_W * POSITION_LOAD_BUTTON, 0, STEP_FRAME_W, STEP_FRAME_H, ILI9341_WHITE);
-    tft->fillRect(STEP_FRAME_W * POSITION_LOAD_BUTTON + 1, 1, STEP_FRAME_W - 2, STEP_FRAME_H - 2, ILI9341_GREENYELLOW);
-    tft->setTextColor(ILI9341_BLACK);
-    tft->setFont(Arial_9);
-    tft->setCursor(STEP_FRAME_W * POSITION_LOAD_BUTTON + 4, 3);
-    tft->print("L");
-  }
-
-  // stepsequencer
-  void drawStepSequencerStatic(int track)
-  {
-
-    draw_Notenames(track);
-    drawOctaveTriangle();
-    draw_Clipselector();
-    // draw the Main Grid
-    for (int i = 0; i < 17; i++)
-    { // vert Lines
-      int step_Frame_X = i * 12;
-      tft->drawFastVLine(step_Frame_X + STEP_FRAME_W * 2, STEP_FRAME_H, GRID_LENGTH_VERT, ILI9341_WHITE); //(x, y-start, length, color)
-      if (i % 4 == 0)
-      {
-        tft->drawFastVLine((i * 12) + 32, STEP_FRAME_H, STEP_FRAME_H * 12, ILI9341_LIGHTGREY); //(x, y-start, y-length, color)
-      }
-    }
-    for (int i = 0; i < 13; i++)
-    { // hor lines
-      int step_Frame_Y = i * 16;
-      tft->drawFastHLine(STEP_FRAME_W * 2, step_Frame_Y + STEP_FRAME_H, NUM_STEPS * 12, ILI9341_WHITE); //(x-start, y, length, color)
-    }
-    tft->asyncUpdateActive();
-  }
-  void draw_Notenames(int track)
-  {
-    for (int n = 0; n < NUM_NOTES; n++)
-    { // hor notes
-      tft->fillRect(STEP_FRAME_W, STEP_FRAME_H * n + STEP_FRAME_H, STEP_FRAME_W, STEP_FRAME_H, trackColor[track]);
-      tft->setCursor(20, STEP_FRAME_H * n + 20);
-      tft->setFont(Arial_8);
-      tft->setTextColor(ILI9341_BLACK);
-      tft->setTextSize(1);
-      tft->print(noteNames[n]);
-    }
-  }
-  void drawOctaveTriangle()
-  {
-    // draw Octavebuttons
-    int leftmost = STEP_FRAME_W * OCTAVE_CHANGE_LEFTMOST;
-    int rightmost = STEP_FRAME_W * OCTAVE_CHANGE_RIGHTMOST;
-    int UP_topmost = STEP_FRAME_H * OCTAVE_CHANGE_UP_TOPMOST;
-    int UP_bottommost = STEP_FRAME_H * OCTAVE_CHANGE_UP_BOTTOMMOST;
-    int DOWN_topmost = STEP_FRAME_H * OCTAVE_CHANGE_DOWN_TOPMOST;
-    int DOWN_bottommost = STEP_FRAME_H * OCTAVE_CHANGE_DOWN_BOTTOMMOST;
-    tft->fillRect(leftmost + 1, STEP_FRAME_H * 2, STEP_FRAME_W * 2, STEP_FRAME_H * 3, ILI9341_DARKGREY);
-    tft->fillTriangle(leftmost + 1, UP_bottommost, rightmost, UP_bottommost, leftmost + STEP_FRAME_W, UP_topmost, ILI9341_LIGHTGREY);        // octave arrow up
-    tft->fillTriangle(leftmost + 1, DOWN_topmost, rightmost - 2, DOWN_topmost, leftmost + STEP_FRAME_W, DOWN_bottommost, ILI9341_LIGHTGREY); // x1, y1, x2, y2, x3, y3
-  }
-  void draw_Clipselector()
-  {
-    for (int ClipNr = 0; ClipNr < 8; ClipNr++)
-    {
-      tft->fillRect(STEP_FRAME_W * 2 * ClipNr + STEP_FRAME_W * 2 + 1, STEP_FRAME_H * 13 + 2, STEP_FRAME_W * 2 - 2, STEP_FRAME_H - 3, trackColor[active_track] + (ClipNr * 20));
-      tft->setCursor(STEP_FRAME_W * 2 * ClipNr + STEP_FRAME_W * 2 + 4, STEP_FRAME_H * 13 + 4);
-      tft->setFont(Arial_8);
-      tft->setTextColor(ILI9341_BLACK);
-      tft->setTextSize(1);
-      tft->print("Clip ");
-      tft->print(ClipNr);
-    }
-  }
-
-  // songmode / arranger
-  void drawsongmodepageselector()
-  {
-    // draw 16 rects of 16x16px in the 13th row
-    for (int pages = 2; pages < 18; pages++)
-    {
-      // drawActiveRect(pages, 13, 1, 1, selectPage == pages + 8, "", ILI9341_LIGHTGREY);
-      tft->drawRect(STEP_FRAME_W * pages, STEP_FRAME_H * 13 + 4, STEP_FRAME_W, STEP_FRAME_H, ILI9341_WHITE);
-      tft->setFont(Arial_8);
-      tft->setTextColor(ILI9341_WHITE);
-      tft->setCursor(STEP_FRAME_W * pages + 3, STEP_FRAME_H * 13 + 8);
-      tft->print((pages - 1));
-    }
-  }
-  void gridSongMode(int songpageNumber)
-  { // static Display rendering
-    // int page_phrase_start = songpageNumber * 16;
-    // int page_phrase_end = (songpageNumber + 1) * 16;
-    drawsongmodepageselector();
-    // drawActiveRect(18, 3, 2, 2, false, "clear", ILI9341_RED);
-
-    // vertical pointer Lines
-    int shownLines = 257 / phraseSegmentLength;
-    for (int f = 0; f < shownLines; f++)
-    {                                                                                               // do this for all phrases
-      tft->drawFastVLine((f * phraseSegmentLength) + 32, STEP_FRAME_H + 4, STEP_FRAME_H * 12, 360); //(x, y-start, y-length, color)
-      if (f % 4 == 0)
-      {
-        tft->drawFastVLine((f * phraseSegmentLength) + 32, STEP_FRAME_H + 4, STEP_FRAME_H * 12, 370); //(x, y-start, y-length, color)
-      }
-    }
-  }
-
-  // plugin view
-  void pluginView()
-  {
-    clearWorkSpace();
-  }
-
-  void setBackgroundTo(int page)
-  {
-    clearWorkSpace();
-    active_page = page;
-
-    for (int i = TRACK_1_PAGE; i <= TRACK_8_PAGE; i++) // select the track/sequencer pages
-    {
-      if (active_page == i)
-      {
-        encoder_function = INPUT_FUNCTIONS_FOR_SEQUENCER; // enable cursor in this screen
-        drawStepSequencerStatic(i);
-      }
-    }
-
-    for (int i = SONGMODE_PAGE_1; i <= SONGMODE_PAGE_16; i++) // select the songmode/arranger pages
-    {
-      if (active_page == i)
-      {
-        encoder_function = INPUT_FUNCTIONS_FOR_ARRANGER; // enable cursor in this screen
-        gridSongMode(i);
-      }
-    }
-    for (int i = PLUGIN1_PAGE1; i <= PLUGIN3_PAGE1; i++) // select the songmode/arranger pages
-    {
-      if (active_page == i)
-      {
-        encoder_function = INPUT_FUNCTIONS_FOR_PLUGIN; // enable cursor in this screen
-        pluginView();
-      }
-    }
-  }
-};
-Background background(&tft);
 
 class Cursor
 {
@@ -790,6 +558,7 @@ public:
   bool note_is_on[MAX_VOICES] = {true, true, true, true};
   bool ready_for_NoteOff[MAX_VOICES] = {false, false, false, false};
   int encoder_colour[NUM_ENCODERS] = {ILI9341_BLUE, ILI9341_RED, ILI9341_GREEN, ILI9341_WHITE};
+  const char *noteNames[12]{"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
 
   Track(ILI9341_t3n *display, byte Y, byte cI, byte cO)
   {
@@ -831,8 +600,8 @@ public:
     }
     if (internal_clock_bar == Masterclock.end_of_loop)
       internal_clock_bar = Masterclock.start_of_loop;
-    Serial.printf("bar: %d, tick: %d\n", internal_clock_bar, internal_clock);
-    // Serial.println(internal_clock_bar);
+    // Serial.printf("bar: %d, tick: %d\n", internal_clock_bar, internal_clock);
+    //  Serial.println(internal_clock_bar);
     if (internal_clock_is_on)
     {
       if (sequencer_mode == 0)
@@ -856,20 +625,17 @@ public:
         {
           noteToPlay[v] = array[clip_to_play[internal_clock_bar]][cloock][v] + noteOffset[internal_clock_bar];
           note_is_on[v] = true;
-          usbMIDI.sendNoteOn(noteToPlay[v], VELOCITY_NOTE_ON, MIDI_channel_out); // Send a Note (pitch 42, velo 127 on channel 1)
-          MasterOut.plugin1.noteOn(noteToPlay[0]);
-          Serial.printf("ON   tick: %d, voice: %d, note: %d\n", cloock, v, noteToPlay[v]);
+          MasterOut.noteOn(noteToPlay[0], VELOCITY_NOTE_ON, MIDI_channel_out);
         }
       }
-
       if (array[clip_to_play[internal_clock_bar]][cloock][v] == NO_NOTE)
       {
         if (note_is_on[v])
         {
           note_is_on[v] = false;
-          usbMIDI.sendNoteOff(noteToPlay[v], VELOCITY_NOTE_OFF, MIDI_channel_out); // Send a Note (pitch 42, velo 127 on channel 1)
+          MasterOut.Plugin_midi.noteOff(noteToPlay[v], VELOCITY_NOTE_OFF, MIDI_channel_out);
           MasterOut.plugin1.noteOff();
-          Serial.printf("OFF   tick: %d, voice: %d, note: %d\n", cloock, v, noteToPlay[v]);
+          // Serial.printf("OFF   tick: %d, voice: %d, note: %d\n", cloock, v, noteToPlay[v]);
         }
       }
     }
@@ -883,8 +649,8 @@ public:
       {
         noteToPlay[0] = random(0, 11) + (octave * 12) + noteOffset[internal_clock_bar];
         note_is_on[0] = true;
-        usbMIDI.sendNoteOn(noteToPlay[0], VELOCITY_NOTE_ON, MIDI_channel_out); // Send a Note (pitch 42, velo 127 on channel 1)
-        Serial.printf("ON   tick: %d, voice: %d, note: %d\n", cloock, 0, noteToPlay[0]);
+        MasterOut.noteOn(noteToPlay[0], VELOCITY_NOTE_ON, MIDI_channel_out); // Send a Note (pitch 42, velo 127 on channel 1)
+        // Serial.printf("ON   tick: %d, voice: %d, note: %d\n", cloock, 0, noteToPlay[0]);
       }
     }
 
@@ -893,8 +659,8 @@ public:
       if (note_is_on[0])
       {
         note_is_on[0] = false;
-        usbMIDI.sendNoteOff(noteToPlay[0], VELOCITY_NOTE_OFF, MIDI_channel_out); // Send a Note (pitch 42, velo 127 on channel 1)
-        Serial.printf("OFF   tick: %d, voice: %d, note: %d\n", cloock, 0, noteToPlay[0]);
+        MasterOut.noteOff(noteToPlay[0], VELOCITY_NOTE_ON, MIDI_channel_out); // Send a Note (pitch 42, velo 127 on channel 1)
+                                                                              // Serial.printf("OFF   tick: %d, voice: %d, note: %d\n", cloock, 0, noteToPlay[0]);
       }
     }
   }
@@ -968,7 +734,8 @@ public:
   {
     if (enc_moved[n])
     {
-      MIDI_channel_out = constrain(MIDI_channel_out + encoded[n], 1, 16);
+      MIDI_channel_out = constrain(MIDI_channel_out + encoded[n], 1, 32);
+      MasterOut.set_active_plugin_for_track(my_Arranger_Y_axis - 1, MIDI_channel_out);
       draw_MIDI_channel_out(n);
       enc_moved[n] = false;
     }
@@ -1026,7 +793,7 @@ public:
   void draw_sequencer_option(byte x, char *nameshort, int value, byte enc)
   {
     int color;
-    if (background.encoder_function == INPUT_FUNCTIONS_FOR_ARRANGER)
+    if (encoder_function == INPUT_FUNCTIONS_FOR_ARRANGER)
       color = my_Arranger_Y_axis - 1;
     else
       color = active_track;
@@ -1135,6 +902,69 @@ public:
     }
   }
 
+  // stepsequencer
+  void drawStepSequencerStatic()
+  {
+    clearWorkSpace();
+    draw_Notenames();
+    drawOctaveTriangle();
+    draw_Clipselector();
+    // draw the Main Grid
+    for (int i = 0; i < 17; i++)
+    { // vert Lines
+      int step_Frame_X = i * 12;
+      tft->drawFastVLine(step_Frame_X + STEP_FRAME_W * 2, STEP_FRAME_H, GRID_LENGTH_VERT, ILI9341_WHITE); //(x, y-start, length, color)
+      if (i % 4 == 0)
+      {
+        tft->drawFastVLine((i * 12) + 32, STEP_FRAME_H, STEP_FRAME_H * 12, ILI9341_LIGHTGREY); //(x, y-start, y-length, color)
+      }
+    }
+    for (int i = 0; i < 13; i++)
+    { // hor lines
+      int step_Frame_Y = i * 16;
+      tft->drawFastHLine(STEP_FRAME_W * 2, step_Frame_Y + STEP_FRAME_H, NUM_STEPS * 12, ILI9341_WHITE); //(x-start, y, length, color)
+    }
+    tft->asyncUpdateActive();
+  }
+  void draw_Notenames()
+  {
+    for (int n = 0; n < NUM_NOTES; n++)
+    { // hor notes
+      tft->fillRect(STEP_FRAME_W, STEP_FRAME_H * n + STEP_FRAME_H, STEP_FRAME_W, STEP_FRAME_H, trackColor[my_Arranger_Y_axis - 1]);
+      tft->setCursor(20, STEP_FRAME_H * n + 20);
+      tft->setFont(Arial_8);
+      tft->setTextColor(ILI9341_BLACK);
+      tft->setTextSize(1);
+      tft->print(noteNames[n]);
+    }
+  }
+  void drawOctaveTriangle()
+  {
+    // draw Octavebuttons
+    int leftmost = STEP_FRAME_W * OCTAVE_CHANGE_LEFTMOST;
+    int rightmost = STEP_FRAME_W * OCTAVE_CHANGE_RIGHTMOST;
+    int UP_topmost = STEP_FRAME_H * OCTAVE_CHANGE_UP_TOPMOST;
+    int UP_bottommost = STEP_FRAME_H * OCTAVE_CHANGE_UP_BOTTOMMOST;
+    int DOWN_topmost = STEP_FRAME_H * OCTAVE_CHANGE_DOWN_TOPMOST;
+    int DOWN_bottommost = STEP_FRAME_H * OCTAVE_CHANGE_DOWN_BOTTOMMOST;
+    tft->fillRect(leftmost + 1, STEP_FRAME_H * 2, STEP_FRAME_W * 2, STEP_FRAME_H * 3, ILI9341_DARKGREY);
+    tft->fillTriangle(leftmost + 1, UP_bottommost, rightmost, UP_bottommost, leftmost + STEP_FRAME_W, UP_topmost, ILI9341_LIGHTGREY);        // octave arrow up
+    tft->fillTriangle(leftmost + 1, DOWN_topmost, rightmost - 2, DOWN_topmost, leftmost + STEP_FRAME_W, DOWN_bottommost, ILI9341_LIGHTGREY); // x1, y1, x2, y2, x3, y3
+  }
+  void draw_Clipselector()
+  {
+    for (int ClipNr = 0; ClipNr < 8; ClipNr++)
+    {
+      tft->fillRect(STEP_FRAME_W * 2 * ClipNr + STEP_FRAME_W * 2 + 1, STEP_FRAME_H * 13 + 2, STEP_FRAME_W * 2 - 2, STEP_FRAME_H - 3, trackColor[active_track] + (ClipNr * 20));
+      tft->setCursor(STEP_FRAME_W * 2 * ClipNr + STEP_FRAME_W * 2 + 4, STEP_FRAME_H * 13 + 4);
+      tft->setFont(Arial_8);
+      tft->setTextColor(ILI9341_BLACK);
+      tft->setTextSize(1);
+      tft->print("Clip ");
+      tft->print(ClipNr);
+    }
+  }
+
   //----------------------------------------------------------------
   // arranger stuff
   // clip to play
@@ -1142,7 +972,7 @@ public:
   {
     if (gridTouchY == my_Arranger_Y_axis)
     {
-      byte when = ((b - SEQ_GRID_LEFT) / STEP_FRAME_W) + (BARS_PER_PAGE * (active_page - SONGMODE_PAGE_1));
+      byte when = ((b - SEQ_GRID_LEFT) / STEP_FRAME_W) + (BARS_PER_PAGE * (arrangerpage));
       if (enc_moved[n])
       {
         clip_to_play[when] = constrain(clip_to_play[when] + encoded[n], 0, NUM_USER_CLIPS + 1);
@@ -1171,7 +1001,7 @@ public:
     {
       for (int thickness = -7; thickness < 7; thickness++)
       {
-        tft->drawFastHLine(((b - (16 * (active_page - SONGMODE_PAGE_1))) * STEP_FRAME_W + STEP_FRAME_W * 2) + 1, ((my_Arranger_Y_axis)*TRACK_FRAME_H + thickness) + 12, STEP_FRAME_W - 1, ILI9341_DARKGREY); //(x-start, y, length, color)
+        tft->drawFastHLine(((b - (16 * arrangerpage)) * STEP_FRAME_W + STEP_FRAME_W * 2) + 1, ((my_Arranger_Y_axis)*TRACK_FRAME_H + thickness) + 12, STEP_FRAME_W - 1, ILI9341_DARKGREY); //(x-start, y, length, color)
       }
     }
     else
@@ -1179,7 +1009,7 @@ public:
       // for other clips
       for (int thickness = -7; thickness < 7; thickness++)
       {
-        tft->drawFastHLine(((b - (16 * (active_page - SONGMODE_PAGE_1))) * STEP_FRAME_W + STEP_FRAME_W * 2) + 1, ((my_Arranger_Y_axis)*TRACK_FRAME_H + thickness) + 12, STEP_FRAME_W - 1, trackColor[my_Arranger_Y_axis - 1] + (clip_to_play[b] * 20)); //(x-start, y, length, color)
+        tft->drawFastHLine(((b - (16 * arrangerpage)) * STEP_FRAME_W + STEP_FRAME_W * 2) + 1, ((my_Arranger_Y_axis)*TRACK_FRAME_H + thickness) + 12, STEP_FRAME_W - 1, trackColor[my_Arranger_Y_axis - 1] + (clip_to_play[b] * 20)); //(x-start, y, length, color)
       }
       draw_clipNr_arranger(n, b);
       draw_offset_arranger(n, b);
@@ -1190,7 +1020,7 @@ public:
     // draw clipnumber in the arranger
     tft->setFont(Arial_8);
     tft->setTextColor(ILI9341_BLACK);
-    tft->setCursor((b - (16 * (active_page - SONGMODE_PAGE_1))) * STEP_FRAME_W + STEP_FRAME_W * 2 + 2, (my_Arranger_Y_axis)*TRACK_FRAME_H + 6);
+    tft->setCursor((b - (16 * arrangerpage)) * STEP_FRAME_W + STEP_FRAME_W * 2 + 2, (my_Arranger_Y_axis)*TRACK_FRAME_H + 6);
     tft->print(clip_to_play[b]);
   }
   byte get_clip_to_play(byte when)
@@ -1202,7 +1032,7 @@ public:
   {
     if (gridTouchY == my_Arranger_Y_axis)
     {
-      byte when = ((b - SEQ_GRID_LEFT) / STEP_FRAME_W) + (BARS_PER_PAGE * (active_page - SONGMODE_PAGE_1));
+      byte when = ((b - SEQ_GRID_LEFT) / STEP_FRAME_W) + (BARS_PER_PAGE * arrangerpage);
       if (enc_moved[n])
       {
         noteOffset[when] = constrain(noteOffset[when] + encoded[n], -24, +24);
@@ -1226,8 +1056,41 @@ public:
     // draw clipnumber in the arranger
     tft->setFont(Arial_8);
     tft->setTextColor(ILI9341_BLACK);
-    tft->setCursor((b - (16 * (active_page - SONGMODE_PAGE_1))) * STEP_FRAME_W + STEP_FRAME_W * 2 + xoffset, (my_Arranger_Y_axis)*TRACK_FRAME_H + 11);
+    tft->setCursor((b - (16 * arrangerpage)) * STEP_FRAME_W + STEP_FRAME_W * 2 + xoffset, (my_Arranger_Y_axis)*TRACK_FRAME_H + 11);
     tft->print(noteOffset[b]);
+  }
+  // display stuff
+  //  songmode / arranger
+  void drawsongmodepageselector()
+  {
+    // draw 16 rects of 16x16px in the 13th row
+    for (int pages = 2; pages < 18; pages++)
+    {
+      // drawActiveRect(pages, 13, 1, 1, selectPage == pages + 8, "", ILI9341_LIGHTGREY);
+      tft->drawRect(STEP_FRAME_W * pages, STEP_FRAME_H * 13 + 4, STEP_FRAME_W, STEP_FRAME_H, ILI9341_WHITE);
+      tft->setFont(Arial_8);
+      tft->setTextColor(ILI9341_WHITE);
+      tft->setCursor(STEP_FRAME_W * pages + 3, STEP_FRAME_H * 13 + 8);
+      tft->print((pages - 1));
+    }
+  }
+  void gridSongMode(int songpageNumber)
+  { // static Display rendering
+    // int page_phrase_start = songpageNumber * 16;
+    // int page_phrase_end = (songpageNumber + 1) * 16;
+    drawsongmodepageselector();
+    // drawActiveRect(18, 3, 2, 2, false, "clear", ILI9341_RED);
+
+    // vertical pointer Lines
+    int shownLines = 257 / phraseSegmentLength;
+    for (int f = 0; f < shownLines; f++)
+    {                                                                                               // do this for all phrases
+      tft->drawFastVLine((f * phraseSegmentLength) + 32, STEP_FRAME_H + 4, STEP_FRAME_H * 12, 360); //(x, y-start, y-length, color)
+      if (f % 4 == 0)
+      {
+        tft->drawFastVLine((f * phraseSegmentLength) + 32, STEP_FRAME_H + 4, STEP_FRAME_H * 12, 370); //(x, y-start, y-length, color)
+      }
+    }
   }
 };
 Track track1(&tft, 1, 10, 10);
@@ -1257,9 +1120,13 @@ void buttons_Set_potRow();
 void input_behaviour();
 void clock_to_notes();
 void drawPot(int XPos, byte YPos, int dvalue, int min, int max, char *dname, int color);
-void USBMIDI_noteOn(byte channel, byte pitch, byte velocity);
-void USBMIDI_noteOff(byte channel, byte pitch, byte velocity);
+void clearWorkSpace();
+void startUpScreen();
+void drawsongmodepageselector();
+void gridSongMode(int songpageNumber);
 
+void myNoteOn(byte channel, byte note, byte velocity);
+void myNoteOff(byte channel, byte note, byte velocity);
 void setup()
 {
   // put your setup code here, to run once:
@@ -1299,6 +1166,8 @@ void setup()
   tft.updateScreenAsync();
   delay(1000);
 
+  usbMIDI.setHandleNoteOff(myNoteOff);
+  usbMIDI.setHandleNoteOn(myNoteOn);
   AudioMemory(200);
   MasterOut.setup();
   note_frequency = new float[128];
@@ -1308,12 +1177,12 @@ void setup()
   }
 
   usbMIDI.begin(); // Launch MIDI and listen to channel 4
-  background.startUpScreen();
+  startUpScreen();
 }
 
 void loop()
 {
-
+  usbMIDI.read();
   Masterclock.process_MIDItick();
 
   readEncoders();
@@ -1331,7 +1200,7 @@ void loop()
   if (millis() % 50 == 0)
   {
 
-    if (background.encoder_function == INPUT_FUNCTIONS_FOR_ARRANGER)
+    if (encoder_function == INPUT_FUNCTIONS_FOR_ARRANGER)
       cursor.update(pixelTouchX, gridTouchY, ARRANGER_FRAME_H);
     else
       cursor.update(pixelTouchX, gridTouchY, STEP_FRAME_H);
@@ -1360,7 +1229,7 @@ void input_behaviour()
     buttons_SetPlayStatus();
   }
   // if we are in one of the sequencer pages
-  if (background.encoder_function == INPUT_FUNCTIONS_FOR_SEQUENCER)
+  if (encoder_function == INPUT_FUNCTIONS_FOR_SEQUENCER)
   {
     // if Shift button is NOT pressed
     if (!buttonPressed[BUTTON_SHIFT])
@@ -1381,7 +1250,7 @@ void input_behaviour()
     }
   }
   // if we are in one of the Arrangerpages
-  if (background.encoder_function == INPUT_FUNCTIONS_FOR_ARRANGER)
+  if (encoder_function == INPUT_FUNCTIONS_FOR_ARRANGER)
   {
     // if Shift button is NOT pressed
     if (!buttonPressed[BUTTON_SHIFT])
@@ -1399,7 +1268,7 @@ void input_behaviour()
     }
   }
   // if we are in one of the pluginpages
-  if (background.encoder_function == INPUT_FUNCTIONS_FOR_PLUGIN)
+  if (encoder_function == INPUT_FUNCTIONS_FOR_PLUGIN)
   {
     // if Shift button is NOT pressed
     if (!buttonPressed[BUTTON_SHIFT])
@@ -1575,9 +1444,9 @@ void buttons_SelectTrack()
       if (buttonPressed[i])
       {
         active_track = i;
-        active_page = i;
+        encoder_function = INPUT_FUNCTIONS_FOR_SEQUENCER;
         // buttonPressed[BUTTON_TRACK] = false;
-        background.setBackgroundTo(active_page);
+        allTracks[active_track]->drawStepSequencerStatic();
         allTracks[active_track]->draw_sequencer_screen();
         allTracks[active_track]->draw_notes_in_grid();
         buttonPressed[i] = false;
@@ -1589,86 +1458,82 @@ void buttons_SelectPlugin()
 { // select active plugin from choosen track
   if (buttonPressed[BUTTON_PLUGIN])
   {
-    active_page = PLUGIN1_PAGE1;
-    background.setBackgroundTo(active_page);
-    buttonPressed[BUTTON_PLUGIN] = false;
+    for (int i = 0; i < BUTTONS_PER_ROW; i++)
+    {
+      if (buttonPressed[i])
+      {
+        MasterOut.draw_plugin(i, allTracks[i]->MIDI_channel_out);
+        encoder_function = INPUT_FUNCTIONS_FOR_PLUGIN;
+        buttonPressed[BUTTON_PLUGIN] = false;
+      }
+    }
   }
 }
 void buttons_SelectArranger()
 {
-  // select arranger pages
   if (buttonPressed[BUTTON_SONG])
   {
-    active_page = SONGMODE_PAGE_11;
-    // buttonPressed[BUTTON_SONG] = false;
+    encoder_function = INPUT_FUNCTIONS_FOR_ARRANGER;
+    arrangerpage = SONGMODE_PAGE_11;
     if (buttonPressed[BUTTON_LEFT])
     {
-      // background.setBackgroundTo(SONGMODE_PAGE_1);
-      active_page = SONGMODE_PAGE_1;
+      arrangerpage = SONGMODE_PAGE_1;
       buttonPressed[BUTTON_LEFT] = false;
       buttonPressed[BUTTON_SONG] = false;
     }
     if (buttonPressed[BUTTON_RIGHT])
     {
-      //  background.setBackgroundTo(SONGMODE_PAGE_2);
-      active_page = SONGMODE_PAGE_2;
+      arrangerpage = SONGMODE_PAGE_2;
       buttonPressed[BUTTON_RIGHT] = false;
       buttonPressed[BUTTON_SONG] = false;
     }
     if (buttonPressed[BUTTON_UP])
     {
-      //  background.setBackgroundTo(SONGMODE_PAGE_3);
-      active_page = SONGMODE_PAGE_3;
+      arrangerpage = SONGMODE_PAGE_3;
       buttonPressed[BUTTON_UP] = false;
       buttonPressed[BUTTON_SONG] = false;
     }
     if (buttonPressed[BUTTON_DOWN])
     {
-      // background.setBackgroundTo(SONGMODE_PAGE_4);
-      active_page = SONGMODE_PAGE_4;
+      arrangerpage = SONGMODE_PAGE_4;
       buttonPressed[BUTTON_DOWN] = false;
       buttonPressed[BUTTON_SONG] = false;
     }
     if (buttonPressed[BUTTON_ROW])
     {
-      // background.setBackgroundTo(SONGMODE_PAGE_5);
-      active_page = SONGMODE_PAGE_5;
+      arrangerpage = SONGMODE_PAGE_5;
       buttonPressed[BUTTON_ROW] = false;
       buttonPressed[BUTTON_SONG] = false;
     }
     if (buttonPressed[BUTTON_REC])
     {
-      // background.setBackgroundTo(SONGMODE_PAGE_6);
-      active_page = SONGMODE_PAGE_6;
+      arrangerpage = SONGMODE_PAGE_6;
       buttonPressed[BUTTON_REC] = false;
       buttonPressed[BUTTON_SONG] = false;
     }
     if (buttonPressed[BUTTON_PLAY])
     {
-      // background.setBackgroundTo(SONGMODE_PAGE_7);
-      active_page = SONGMODE_PAGE_7;
+      arrangerpage = SONGMODE_PAGE_7;
       buttonPressed[BUTTON_PLAY] = false;
       buttonPressed[BUTTON_SONG] = false;
     }
     if (buttonPressed[BUTTON_STOP])
     {
-      // background.setBackgroundTo(SONGMODE_PAGE_8);
-      active_page = SONGMODE_PAGE_8;
+      arrangerpage = SONGMODE_PAGE_8;
       buttonPressed[BUTTON_STOP] = false;
       buttonPressed[BUTTON_SONG] = false;
     }
     if (buttonPressed[BUTTON_TRACK])
     {
-      // background.setBackgroundTo(SONGMODE_PAGE_9);
-      active_page = SONGMODE_PAGE_9;
+      arrangerpage = SONGMODE_PAGE_9;
       buttonPressed[BUTTON_TRACK] = false;
       buttonPressed[BUTTON_SONG] = false;
     }
 
-    Serial.println(active_page);
-    background.setBackgroundTo(active_page);
+    Serial.println(arrangerpage);
+    gridSongMode(arrangerpage);
     for (int i = 0; i < NUM_TRACKS; i++)
-      allTracks[i]->draw_arrangment_lines(3, active_page);
+      allTracks[i]->draw_arrangment_lines(3, arrangerpage);
   }
 }
 void buttons_Set_potRow()
@@ -1679,21 +1544,21 @@ void buttons_Set_potRow()
     if (lastPotRow >= 4)
     {
       lastPotRow = 0;
-      // tft.fillRect(70, 0, 10, 16, ILI9341_DARKGREY);
     }
     tft.fillRect(70, 0, 10, 16, ILI9341_DARKGREY);
-
     buttonPressed[BUTTON_ROW] = false;
   }
 }
-//void drawPot(int XPos, byte YPos, int dvalue, int min, int max, char *dname, int color)
+// void drawPot(int XPos, byte YPos, int dvalue, int min, int max, char *dname, int color)
 void drawPot(int XPos, byte YPos, int dvalue, char *dname, int color)
-{ // xposition, yposition, value 1-100, value to draw, name to draw, color
+{
+  enc_moved[XPos] = false;
+  // xposition, yposition, value 1-100, value to draw, name to draw, color
   // drawPot Variables
   static float circlePos[4];
   static float circlePos_old[4];
   static int dvalue_old[4];
-  //byte fvalue = map(dvalue, 0, 127, min, max);
+  // byte fvalue = map(dvalue, 0, 127, min, max);
   int xPos;
   if (XPos == 0)
     xPos = 3;
@@ -1723,4 +1588,123 @@ void drawPot(int XPos, byte YPos, int dvalue, char *dname, int color)
   tft.fillCircle(STEP_FRAME_W * (xPos + 1) + 16 * cos((2.5 * circlePos[XPos]) + 2.25), STEP_FRAME_H * yPos + 16 * sin((2.5 * circlePos[XPos]) + 2.25), 4, color);
   circlePos_old[XPos] = circlePos[XPos];
   dvalue_old[XPos] = dvalue;
+}
+void clearWorkSpace()
+{                                                                                                       // clear the whole grid from Display
+  tft.fillRect(STEP_FRAME_W, STEP_FRAME_H, STEP_FRAME_W * 21, STEP_FRAME_H * 13 + 4, ILI9341_DARKGREY); // Xmin, Ymin, Xlength, Ylength, color
+                                                                                                        // tft->fillRect(STEP_FRAME_W, STEP_FRAME_H, STEP_FRAME_W, STEP_FRAME_H * 12, ILI9341_DARKGREY);
+}
+// songmode / arranger
+void drawsongmodepageselector()
+{
+  // draw 16 rects of 16x16px in the 13th row
+  for (int pages = 2; pages < 18; pages++)
+  {
+    // drawActiveRect(pages, 13, 1, 1, selectPage == pages + 8, "", ILI9341_LIGHTGREY);
+    tft.drawRect(STEP_FRAME_W * pages, STEP_FRAME_H * 13 + 4, STEP_FRAME_W, STEP_FRAME_H, ILI9341_WHITE);
+    tft.setFont(Arial_8);
+    tft.setTextColor(ILI9341_WHITE);
+    tft.setCursor(STEP_FRAME_W * pages + 3, STEP_FRAME_H * 13 + 8);
+    tft.print((pages - 1));
+  }
+}
+void gridSongMode(int songpageNumber)
+{ // static Display rendering
+  // int page_phrase_start = songpageNumber * 16;
+  // int page_phrase_end = (songpageNumber + 1) * 16;
+  clearWorkSpace();
+  drawsongmodepageselector();
+  // drawActiveRect(18, 3, 2, 2, false, "clear", ILI9341_RED);
+
+  // vertical pointer Lines
+  int shownLines = 257 / phraseSegmentLength;
+  for (int f = 0; f < shownLines; f++)
+  {                                                                                              // do this for all phrases
+    tft.drawFastVLine((f * phraseSegmentLength) + 32, STEP_FRAME_H + 4, STEP_FRAME_H * 12, 360); //(x, y-start, y-length, color)
+    if (f % 4 == 0)
+    {
+      tft.drawFastVLine((f * phraseSegmentLength) + 32, STEP_FRAME_H + 4, STEP_FRAME_H * 12, 370); //(x, y-start, y-length, color)
+    }
+  }
+}
+
+void startUpScreen()
+{
+
+  // static Display rendering
+  tft.fillScreen(ILI9341_DARKGREY);
+
+  tft.setFont(Arial_9);
+
+  // songmode button
+  tft.setTextColor(ILI9341_BLACK);
+  tft.fillRect(1, 1, 15, ARRANGER_FRAME_H, ILI9341_MAGENTA); // Xmin, Ymin, Xlength, Ylength, color
+  tft.setCursor(4, 3);
+  tft.print("S");
+
+  // Drumtrack button
+  tft.fillRect(1, STEP_FRAME_H + 8, 15, TRACK_FRAME_H, trackColor[0]); // Xmin, Ymin, Xlength, Ylength, color
+  tft.setCursor(4, TRACK_FRAME_H + 8);
+  tft.print("D");
+
+  // other tracks buttons
+  for (int otherTracks = 2; otherTracks <= 8; otherTracks++)
+  {
+    tft.fillRect(1, TRACK_FRAME_H * otherTracks, 15, TRACK_FRAME_H, trackColor[otherTracks - 1]); // Xmin, Ymin, Xlength, Ylength, color
+    tft.setCursor(4, TRACK_FRAME_H * otherTracks + 6);
+    tft.print(otherTracks);
+  }
+  // Mixer button
+  tft.fillRect(1, STEP_FRAME_H * 13 + 8, 15, TRACK_FRAME_H, ILI9341_LIGHTGREY); // Xmin, Ymin, Xlength, Ylength, color
+  tft.setCursor(3, STEP_FRAME_H * 13 + 14);
+  tft.print("M");
+
+  // scale Select
+  tft.drawRect(STEP_FRAME_W * POSITION_SCALE_BUTTON, 0, STEP_FRAME_W * 2, STEP_FRAME_H, ILI9341_WHITE);
+
+  // arrangment Select
+  tft.drawRect(STEP_FRAME_W * POSITION_ARR_BUTTON, 0, STEP_FRAME_W * 2, STEP_FRAME_H, ILI9341_WHITE);
+
+  // record button & Rectangle
+  tft.drawRect(STEP_FRAME_W * POSITION_RECORD_BUTTON, 0, STEP_FRAME_W, STEP_FRAME_H, ILI9341_WHITE);
+  tft.fillCircle(STEP_FRAME_W * POSITION_RECORD_BUTTON + 7, 7, DOT_RADIUS + 1, ILI9341_LIGHTGREY);
+
+  // Play button & Rectangle
+  tft.drawRect(STEP_FRAME_W * POSITION_PLAY_BUTTON, 0, STEP_FRAME_W * 2, STEP_FRAME_H, ILI9341_WHITE);                                                                     // PLAY RECT FRAME
+  tft.fillTriangle(STEP_FRAME_W * POSITION_PLAY_BUTTON + 12, 3, STEP_FRAME_W * POSITION_PLAY_BUTTON + 12, 13, STEP_FRAME_W * POSITION_PLAY_BUTTON + 22, 8, ILI9341_GREEN); // x1, y1, x2, y2, x3, y3
+
+  // stop button & Rectangle
+  tft.drawRect(STEP_FRAME_W * POSITION_STOP_BUTTON, 0, STEP_FRAME_W, STEP_FRAME_H, ILI9341_WHITE);
+  tft.fillRect(STEP_FRAME_W * POSITION_STOP_BUTTON + 3, 3, 10, 10, ILI9341_LIGHTGREY);
+
+  // barcounter & Rectangle
+  tft.drawRect(STEP_FRAME_W * POSITION_BAR_BUTTON, 0, STEP_FRAME_W * 2, STEP_FRAME_H, ILI9341_WHITE);
+
+  // tempo button & Rectangle
+  tft.drawRect(STEP_FRAME_W * POSITION_BPM_BUTTON, 0, STEP_FRAME_W * 2, STEP_FRAME_H, ILI9341_WHITE);
+
+  // save button & Rectangle
+  tft.drawRect(STEP_FRAME_W * POSITION_SAVE_BUTTON, 0, STEP_FRAME_W * 2, STEP_FRAME_H, ILI9341_WHITE);
+  tft.fillRect(STEP_FRAME_W * POSITION_SAVE_BUTTON + 1, 1, STEP_FRAME_W * 2 - 2, STEP_FRAME_H - 2, ILI9341_ORANGE);
+  tft.setTextColor(ILI9341_BLACK);
+  tft.setFont(Arial_9);
+  tft.setCursor(STEP_FRAME_W * POSITION_SAVE_BUTTON + 2, 3);
+  tft.print("SAV");
+
+  // load button & Rectangle
+  tft.drawRect(STEP_FRAME_W * POSITION_LOAD_BUTTON, 0, STEP_FRAME_W, STEP_FRAME_H, ILI9341_WHITE);
+  tft.fillRect(STEP_FRAME_W * POSITION_LOAD_BUTTON + 1, 1, STEP_FRAME_W - 2, STEP_FRAME_H - 2, ILI9341_GREENYELLOW);
+  tft.setTextColor(ILI9341_BLACK);
+  tft.setFont(Arial_9);
+  tft.setCursor(STEP_FRAME_W * POSITION_LOAD_BUTTON + 4, 3);
+  tft.print("L");
+}
+void myNoteOn(byte channel, byte note, byte velocity)
+{
+
+  MasterOut.plugin1.noteOn(note);
+}
+void myNoteOff(byte channel, byte note, byte velocity)
+{
+  MasterOut.plugin1.noteOff();
 }
