@@ -625,7 +625,7 @@ public:
         {
           noteToPlay[v] = array[clip_to_play[internal_clock_bar]][cloock][v] + noteOffset[internal_clock_bar];
           note_is_on[v] = true;
-          MasterOut.noteOn(noteToPlay[0], VELOCITY_NOTE_ON, MIDI_channel_out);
+          MasterOut.noteOn(noteToPlay[v], VELOCITY_NOTE_ON, MIDI_channel_out, v);
         }
       }
       if (array[clip_to_play[internal_clock_bar]][cloock][v] == NO_NOTE)
@@ -633,8 +633,8 @@ public:
         if (note_is_on[v])
         {
           note_is_on[v] = false;
-          MasterOut.Plugin_midi.noteOff(noteToPlay[v], VELOCITY_NOTE_OFF, MIDI_channel_out);
-          MasterOut.plugin1.noteOff();
+          MasterOut.noteOff(noteToPlay[v], VELOCITY_NOTE_OFF, MIDI_channel_out, v);
+          
           // Serial.printf("OFF   tick: %d, voice: %d, note: %d\n", cloock, v, noteToPlay[v]);
         }
       }
@@ -649,7 +649,7 @@ public:
       {
         noteToPlay[0] = random(0, 11) + (octave * 12) + noteOffset[internal_clock_bar];
         note_is_on[0] = true;
-        MasterOut.noteOn(noteToPlay[0], VELOCITY_NOTE_ON, MIDI_channel_out); // Send a Note (pitch 42, velo 127 on channel 1)
+        MasterOut.noteOn(noteToPlay[0], VELOCITY_NOTE_ON, MIDI_channel_out, 0); // Send a Note (pitch 42, velo 127 on channel 1)
         // Serial.printf("ON   tick: %d, voice: %d, note: %d\n", cloock, 0, noteToPlay[0]);
       }
     }
@@ -659,7 +659,7 @@ public:
       if (note_is_on[0])
       {
         note_is_on[0] = false;
-        MasterOut.noteOff(noteToPlay[0], VELOCITY_NOTE_ON, MIDI_channel_out); // Send a Note (pitch 42, velo 127 on channel 1)
+        MasterOut.noteOff(noteToPlay[0], VELOCITY_NOTE_ON, MIDI_channel_out, 0); // Send a Note (pitch 42, velo 127 on channel 1)
                                                                               // Serial.printf("OFF   tick: %d, voice: %d, note: %d\n", cloock, 0, noteToPlay[0]);
       }
     }
@@ -1273,7 +1273,9 @@ void input_behaviour()
     // if Shift button is NOT pressed
     if (!buttonPressed[BUTTON_SHIFT])
     {
-      MasterOut.plugin1.set_parameters(lastPotRow);
+      for (int i=0;i<NUM_TRACKS;i++){
+      MasterOut.set_parameters(i,lastPotRow);
+      }
     }
   }
 }
@@ -1464,7 +1466,9 @@ void buttons_SelectPlugin()
       {
         MasterOut.draw_plugin(i, allTracks[i]->MIDI_channel_out);
         encoder_function = INPUT_FUNCTIONS_FOR_PLUGIN;
-        buttonPressed[BUTTON_PLUGIN] = false;
+        Serial.println("plugin selected");
+        //buttonPressed[BUTTON_PLUGIN] = false;
+        buttonPressed[i] = false;
       }
     }
   }
@@ -1702,7 +1706,7 @@ void startUpScreen()
 void myNoteOn(byte channel, byte note, byte velocity)
 {
 
-  MasterOut.plugin1.noteOn(note);
+  MasterOut.plugin1.noteOn(note,0);
 }
 void myNoteOff(byte channel, byte note, byte velocity)
 {

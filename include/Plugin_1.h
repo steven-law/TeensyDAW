@@ -79,10 +79,10 @@ public:
         envelope1.sustain(1);
         envelope1.release(200);
     }
-    void noteOn(byte notePlayed)
+    void noteOn(byte notePlayed, byte voice)
     {
         float frequency = note_frequency[notePlayed] * tuning;
-        Voice1.frequency(frequency);
+        Voice[voice]->frequency(frequency);
         // Voice1.frequency(frequency);
         envelope1.noteOn();
         envelope.noteOn();
