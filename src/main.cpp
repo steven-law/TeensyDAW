@@ -56,7 +56,7 @@ Output MasterOut(3);
 
 #define NUM_STEPS 16
 #define NUM_NOTES 12
-#define MAX_VOICES 4
+
 #define MAX_TICKS 96
 #define MAX_CLIPS 9
 #define NUM_USER_CLIPS 7
@@ -555,8 +555,8 @@ public:
   byte array[MAX_CLIPS][MAX_TICKS + 1][MAX_VOICES];
   byte active_voice = 0;
   byte search_free_voice = 0;
-  bool note_is_on[MAX_VOICES] = {true, true, true, true};
-  bool ready_for_NoteOff[MAX_VOICES] = {false, false, false, false};
+  bool note_is_on[MAX_VOICES] = {true, true, true, true,true, true, true, true,true, true, true, true};
+  bool ready_for_NoteOff[MAX_VOICES] = {false, false, false, false,false, false, false, false,false, false, false, false};
   int encoder_colour[NUM_ENCODERS] = {ILI9341_BLUE, ILI9341_RED, ILI9341_GREEN, ILI9341_WHITE};
   const char *noteNames[12]{"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
 
@@ -576,7 +576,7 @@ public:
         }
       }
     }
-    for (int i = 0; i < 256; i++)
+    for (int i = 0; i < 255; i++)
     {
       clip_to_play[i] = 8;
       noteOffset[i] = 0;
@@ -1706,9 +1706,9 @@ void startUpScreen()
 void myNoteOn(byte channel, byte note, byte velocity)
 {
 
-  MasterOut.plugin1.noteOn(note,0);
+  MasterOut.plugin_1.noteOn(note,1,0);
 }
 void myNoteOff(byte channel, byte note, byte velocity)
 {
-  MasterOut.plugin1.noteOff();
+  MasterOut.plugin_1.noteOff(0);
 }

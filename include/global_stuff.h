@@ -3,7 +3,7 @@
 #define NUM_ENCODERS 4
 #define MIDI_CC_RANGE 127
 #define MIDI_CC_RANGE_FLOAT 127.00
-
+#define MAX_VOICES 12
 const byte PLUGIN1_PAGE1 = 100;
 const byte PLUGIN2_PAGE1 = 105;
 const byte PLUGIN3_PAGE1 = 110;
