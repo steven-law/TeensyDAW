@@ -10,6 +10,7 @@
 #include <Bounce2.h>
 #include <MIDI.h>
 #include <global_stuff.h>
+#include <AudioSamples.h>
 #include <Output.h>
 Output MasterOut(3);
 
@@ -555,8 +556,8 @@ public:
   byte array[MAX_CLIPS][MAX_TICKS + 1][MAX_VOICES];
   byte active_voice = 0;
   byte search_free_voice = 0;
-  bool note_is_on[MAX_VOICES] = {true, true, true, true,true, true, true, true,true, true, true, true};
-  bool ready_for_NoteOff[MAX_VOICES] = {false, false, false, false,false, false, false, false,false, false, false, false};
+  bool note_is_on[MAX_VOICES] = {true, true, true, true, true, true, true, true, true, true, true, true};
+  bool ready_for_NoteOff[MAX_VOICES] = {false, false, false, false, false, false, false, false, false, false, false, false};
   int encoder_colour[NUM_ENCODERS] = {ILI9341_BLUE, ILI9341_RED, ILI9341_GREEN, ILI9341_WHITE};
   const char *noteNames[12]{"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
 
@@ -634,7 +635,7 @@ public:
         {
           note_is_on[v] = false;
           MasterOut.noteOff(noteToPlay[v], VELOCITY_NOTE_OFF, MIDI_channel_out, v);
-          
+
           // Serial.printf("OFF   tick: %d, voice: %d, note: %d\n", cloock, v, noteToPlay[v]);
         }
       }
@@ -660,7 +661,7 @@ public:
       {
         note_is_on[0] = false;
         MasterOut.noteOff(noteToPlay[0], VELOCITY_NOTE_ON, MIDI_channel_out, 0); // Send a Note (pitch 42, velo 127 on channel 1)
-                                                                              // Serial.printf("OFF   tick: %d, voice: %d, note: %d\n", cloock, 0, noteToPlay[0]);
+                                                                                 // Serial.printf("OFF   tick: %d, voice: %d, note: %d\n", cloock, 0, noteToPlay[0]);
       }
     }
   }
@@ -790,7 +791,7 @@ public:
     return clip_to_edit;
   }
   // helpers
-  void draw_sequencer_option(byte x, char *nameshort, int value, byte enc)
+  void draw_sequencer_option(byte x, const char *nameshort, int value, byte enc)
   {
     int color;
     if (encoder_function == INPUT_FUNCTIONS_FOR_ARRANGER)
@@ -1119,7 +1120,7 @@ void buttons_SetNoteOnTick(int x, byte y);
 void buttons_Set_potRow();
 void input_behaviour();
 void clock_to_notes();
-void drawPot(int XPos, byte YPos, int dvalue, int min, int max, char *dname, int color);
+void drawPot(int XPos, byte YPos, int dvalue, int min, int max, const char *dname, int color);
 void clearWorkSpace();
 void startUpScreen();
 void drawsongmodepageselector();
@@ -1273,8 +1274,9 @@ void input_behaviour()
     // if Shift button is NOT pressed
     if (!buttonPressed[BUTTON_SHIFT])
     {
-      for (int i=0;i<NUM_TRACKS;i++){
-      MasterOut.set_parameters(i,lastPotRow);
+      for (int i = 0; i < NUM_TRACKS; i++)
+      {
+        MasterOut.set_parameters(i, lastPotRow);
       }
     }
   }
@@ -1467,7 +1469,7 @@ void buttons_SelectPlugin()
         MasterOut.draw_plugin(i, allTracks[i]->MIDI_channel_out);
         encoder_function = INPUT_FUNCTIONS_FOR_PLUGIN;
         Serial.println("plugin selected");
-        //buttonPressed[BUTTON_PLUGIN] = false;
+        // buttonPressed[BUTTON_PLUGIN] = false;
         buttonPressed[i] = false;
       }
     }
@@ -1553,8 +1555,8 @@ void buttons_Set_potRow()
     buttonPressed[BUTTON_ROW] = false;
   }
 }
-// void drawPot(int XPos, byte YPos, int dvalue, int min, int max, char *dname, int color)
-void drawPot(int XPos, byte YPos, int dvalue, char *dname, int color)
+// void drawPot(int XPos, byte YPos, int dvalue, int min, int max, const char *dname, int color)
+void drawPot(int XPos, byte YPos, int dvalue, const char *dname, int color)
 {
   enc_moved[XPos] = false;
   // xposition, yposition, value 1-100, value to draw, name to draw, color
@@ -1705,10 +1707,11 @@ void startUpScreen()
 }
 void myNoteOn(byte channel, byte note, byte velocity)
 {
-
-  MasterOut.plugin_1.noteOn(note,1,0);
+  if (channel < 9)
+    MasterOut.noteOn(note, VELOCITY_NOTE_ON, allTracks[channel-1]->MIDI_channel_out, 0);
 }
 void myNoteOff(byte channel, byte note, byte velocity)
 {
-  MasterOut.plugin_1.noteOff(0);
+  if (channel < 9)
+    MasterOut.noteOff(note, 0, allTracks[channel-1]->MIDI_channel_out, 0);
 }

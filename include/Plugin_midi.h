@@ -4,7 +4,7 @@ extern float *note_frequency;
 extern int tuning;
 extern const byte VELOCITY_NOTE_ON;
 extern const byte VELOCITY_NOTE_OFF;
-extern void drawPot(int XPos, byte YPos, int dvalue, char *dname, int color);
+extern void drawPot(int XPos, byte YPos, int dvalue, const char *dname, int color);
 extern void clearWorkSpace();
 class Plugin_Midi
 {

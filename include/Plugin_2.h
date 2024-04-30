@@ -9,7 +9,7 @@ extern float *note_frequency;
 extern int tuning;
 extern const byte VELOCITY_NOTE_ON;
 extern const byte VELOCITY_NOTE_OFF;
-extern void drawPot(int XPos, byte YPos, int dvalue, char *dname, int color);
+extern void drawPot(int XPos, byte YPos, int dvalue, const char *dname, int color);
 extern void clearWorkSpace();
 // TeensyDAW: begin automatically generated code
 
@@ -48,8 +48,6 @@ public:
     void setup(byte setID)
     {
         myID = setID;
-        
-       
 
         for (int i = 0; i < MAX_VOICES; i++)
         {
@@ -70,9 +68,9 @@ public:
             filter[i].octaveControl(4);
 
             fMixer[i].gain(0, 1);
-            fMixer[i].gain(1, 1);
-            fMixer[i].gain(2, 1);
-            fMixer[i].gain(3, 1);
+            fMixer[i].gain(1, 0);
+            fMixer[i].gain(2, 0);
+            fMixer[i].gain(3, 0);
 
             Aenv[i].delay(0);
             Aenv[i].attack(0);
@@ -82,7 +80,6 @@ public:
             Aenv[i].release(200);
 
             mixer.gain(i, 1);
-
         }
     }
     void noteOn(byte notePlayed, float velocity, byte voice)
@@ -115,6 +112,7 @@ public:
             set_filter_frequency(0, 2, "Filt-Frq", 60, 10000);
             set_filter_resonance(1, 2, "Resonance", 0, 5.00);
             set_filter_sweep(2, 2, "Sweep", 0, 7.00);
+            set_filter_type(3, 2, "Type", 0, 3);
         }
 
         if (row == 3)
@@ -135,6 +133,7 @@ public:
         drawPot(0, 2, potentiometer[8], "Filt-Frq", ILI9341_BLUE);
         drawPot(1, 2, potentiometer[9], "Resonance", ILI9341_BLUE);
         drawPot(2, 2, potentiometer[10], "Sweep", ILI9341_BLUE);
+        drawPot(3, 2, potentiometer[10], "Type", ILI9341_BLUE);
 
         drawPot(0, 3, potentiometer[12], "Attack", ILI9341_BLUE);
         drawPot(1, 3, potentiometer[13], "Decay", ILI9341_BLUE);
@@ -142,7 +141,7 @@ public:
         drawPot(3, 3, potentiometer[15], "Release", ILI9341_BLUE);
     }
 
-    void set_voice_waveform(byte XPos, byte YPos, char *name, int min, int max)
+    void set_voice_waveform(byte XPos, byte YPos, const char *name, int min, int max)
     {
         if (enc_moved[XPos])
         {
@@ -157,7 +156,7 @@ public:
             drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
         }
     }
-    void set_voice_amplitude(byte XPos, byte YPos, char *name, int min, int max)
+    void set_voice_amplitude(byte XPos, byte YPos, const char *name, int min, int max)
     {
         if (enc_moved[XPos])
         {
@@ -171,7 +170,7 @@ public:
         }
     }
 
-    void set_filter_frequency(byte XPos, byte YPos, char *name, int min, int max)
+    void set_filter_frequency(byte XPos, byte YPos, const char *name, int min, int max)
     {
         if (enc_moved[XPos])
         {
@@ -185,7 +184,7 @@ public:
             drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
         }
     }
-    void set_filter_resonance(byte XPos, byte YPos, char *name, float min, float max)
+    void set_filter_resonance(byte XPos, byte YPos, const char *name, float min, float max)
     {
         if (enc_moved[XPos])
         {
@@ -198,7 +197,7 @@ public:
             drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
         }
     }
-    void set_filter_sweep(byte XPos, byte YPos, char *name, float min, float max)
+    void set_filter_sweep(byte XPos, byte YPos, const char *name, float min, float max)
     {
         if (enc_moved[XPos])
         {
@@ -211,8 +210,28 @@ public:
             drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
         }
     }
+    void set_filter_type(byte XPos, byte YPos, const char *name, int min, float max)
+    {
+        if (enc_moved[XPos])
+        {
+            int n = XPos + (YPos * NUM_ENCODERS);
+            potentiometer[n] = constrain(potentiometer[n] + encoded[XPos], 0, MIDI_CC_RANGE);
+            selectFilterType(map(potentiometer[n], 0,MIDI_CC_RANGE,0,3));
+            drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+        }
+    }
+    void selectFilterType(byte mixerchannel)
+    {
+        for (int i = 0; i < MAX_VOICES; i++)
+        {
+            fMixer[i].gain(0, 0);
+            fMixer[i].gain(1, 0);
+            fMixer[i].gain(2, 0);
+            fMixer[i].gain(mixerchannel, 1);
+        }
+    }
 
-    void set_envelope_attack(byte XPos, byte YPos, char *name, int min, int max)
+    void set_envelope_attack(byte XPos, byte YPos, const char *name, int min, int max)
     {
         if (enc_moved[XPos])
         {
@@ -227,7 +246,7 @@ public:
             drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
         }
     }
-    void set_envelope_decay(byte XPos, byte YPos, char *name, int min, int max)
+    void set_envelope_decay(byte XPos, byte YPos, const char *name, int min, int max)
     {
         if (enc_moved[XPos])
         {
@@ -243,7 +262,7 @@ public:
             drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
         }
     }
-    void set_envelope_sustain(byte XPos, byte YPos, char *name, int min, int max)
+    void set_envelope_sustain(byte XPos, byte YPos, const char *name, int min, int max)
     {
         if (enc_moved[XPos])
         {
@@ -259,7 +278,7 @@ public:
             drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
         }
     }
-    void set_envelope_release(byte XPos, byte YPos, char *name, int min, int max)
+    void set_envelope_release(byte XPos, byte YPos, const char *name, int min, int max)
     {
         if (enc_moved[XPos])
         {
