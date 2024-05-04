@@ -1,10 +1,5 @@
 #include <Arduino.h>
 
-extern float *note_frequency;
-extern int tuning;
-extern const byte VELOCITY_NOTE_ON;
-extern const byte VELOCITY_NOTE_OFF;
-extern void drawPot(int XPos, byte YPos, int dvalue, const char *dname, int color);
 extern void clearWorkSpace();
 class Plugin_Midi
 {
@@ -17,10 +12,31 @@ public:
     {
         usbMIDI.sendNoteOff(note, VELOCITY_NOTE_OFF, channel); // Send a Note (pitch 42, velo 127 on channel 1)
     }
-void draw_plugin()
+    void set_parameters(byte row)
     {
-        clearWorkSpace();
+        draw_plugin();
+        if (row == 0)
+        {
+        }
+
+        if (row == 1)
+        {
+        }
+
+        if (row == 2)
+        {
+        }
+
+        if (row == 3)
+        {
+        }
     }
-
-
+    void draw_plugin()
+    {
+        if (change_plugin_row)
+        {
+            change_plugin_row = false;
+            // Serial.println("drawing MIDI plugin");
+        }
+    }
 };

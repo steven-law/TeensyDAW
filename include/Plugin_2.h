@@ -5,12 +5,8 @@
 #include <SD.h>
 #include <SerialFlash.h>
 #include "mixers.h"
-extern float *note_frequency;
+extern void drawPot(int XPos, byte YPos, int dvalue, const char *dname);
 extern int tuning;
-extern const byte VELOCITY_NOTE_ON;
-extern const byte VELOCITY_NOTE_OFF;
-extern void drawPot(int XPos, byte YPos, int dvalue, const char *dname, int color);
-extern void clearWorkSpace();
 // TeensyDAW: begin automatically generated code
 
 class Plugin_2
@@ -18,21 +14,25 @@ class Plugin_2
 public:
     byte myID;
     byte potentiometer[16];
-    AudioSynthWaveformDc dc[MAX_VOICES];
-    AudioSynthWaveform waveform[MAX_VOICES];
-    AudioEffectEnvelope Fenv[MAX_VOICES];
-    AudioFilterStateVariable filter[MAX_VOICES];
-    AudioMixer4 fMixer[MAX_VOICES];
-    AudioEffectEnvelope Aenv[MAX_VOICES];
+    AudioSynthWaveformDc dc[12];
+    AudioSynthWaveform waveform[12];
+    AudioEffectEnvelope Fenv[12];
+    AudioFilterStateVariable filter[12];
+    AudioMixer4 fMixer[12];
+    AudioEffectEnvelope Aenv[12];
     AudioMixer12 mixer;
-    AudioConnection *patchCord[96]; // total patchCordCount:96 including array typed ones.
+    AudioAmplifier MixGain;
+    AudioAmplifier SongVol;
+    AudioConnection *patchCord[98]; // total patchCordCount:98 including array typed ones.
 
     // constructor (this is called when class-object is created)
     Plugin_2()
     {
         int pci = 0; // used only for adding new patchcords
 
-        for (int i = 0; i < MAX_VOICES; i++)
+        patchCord[pci++] = new AudioConnection(mixer, 0, MixGain, 0);
+        patchCord[pci++] = new AudioConnection(MixGain, 0, SongVol, 0);
+        for (int i = 0; i < 12; i++)
         {
             patchCord[pci++] = new AudioConnection(dc[i], 0, Fenv[i], 0);
             patchCord[pci++] = new AudioConnection(waveform[i], 0, filter[i], 0);
@@ -44,7 +44,6 @@ public:
             patchCord[pci++] = new AudioConnection(Aenv[i], 0, mixer, i);
         }
     }
-
     void setup(byte setID)
     {
         myID = setID;
@@ -81,6 +80,8 @@ public:
 
             mixer.gain(i, 1);
         }
+        MixGain.gain(1);
+        SongVol.gain(1);
     }
     void noteOn(byte notePlayed, float velocity, byte voice)
     {
@@ -97,6 +98,7 @@ public:
 
     void set_parameters(byte row)
     {
+        draw_plugin();
         if (row == 0)
         {
             set_voice_waveform(0, 0, "W~Form", 0, 12);
@@ -125,20 +127,23 @@ public:
     }
     void draw_plugin()
     {
-        clearWorkSpace();
+        if (change_plugin_row)
+        {
+            change_plugin_row = false;
+            // Serial.println("drawing plugin 2");
+            drawPot(0, 0, potentiometer[0], "W~Form");
+            drawPot(1, 0, potentiometer[1], "Volume");
 
-        drawPot(0, 0, potentiometer[0], "W~Form", ILI9341_BLUE);
-        drawPot(1, 0, potentiometer[5], "Volume", ILI9341_BLUE);
+            drawPot(0, 2, potentiometer[8], "Filt-Frq");
+            drawPot(1, 2, potentiometer[9], "Resonance");
+            drawPot(2, 2, potentiometer[10], "Sweep");
+            drawPot(3, 2, potentiometer[11], "Type");
 
-        drawPot(0, 2, potentiometer[8], "Filt-Frq", ILI9341_BLUE);
-        drawPot(1, 2, potentiometer[9], "Resonance", ILI9341_BLUE);
-        drawPot(2, 2, potentiometer[10], "Sweep", ILI9341_BLUE);
-        drawPot(3, 2, potentiometer[10], "Type", ILI9341_BLUE);
-
-        drawPot(0, 3, potentiometer[12], "Attack", ILI9341_BLUE);
-        drawPot(1, 3, potentiometer[13], "Decay", ILI9341_BLUE);
-        drawPot(2, 3, potentiometer[14], "Sustain", ILI9341_BLUE);
-        drawPot(3, 3, potentiometer[15], "Release", ILI9341_BLUE);
+            drawPot(0, 3, potentiometer[12], "Attack");
+            drawPot(1, 3, potentiometer[13], "Decay");
+            drawPot(2, 3, potentiometer[14], "Sustain");
+            drawPot(3, 3, potentiometer[15], "Release");
+        }
     }
 
     void set_voice_waveform(byte XPos, byte YPos, const char *name, int min, int max)
@@ -153,7 +158,7 @@ public:
             {
                 waveform[i].begin(walveform);
             }
-            drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
     void set_voice_amplitude(byte XPos, byte YPos, const char *name, int min, int max)
@@ -166,7 +171,7 @@ public:
             {
                 waveform[i].amplitude((float)(potentiometer[n] / MIDI_CC_RANGE_FLOAT));
             }
-            drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
 
@@ -181,7 +186,7 @@ public:
             {
                 filter[i].frequency(frequency);
             }
-            drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
     void set_filter_resonance(byte XPos, byte YPos, const char *name, float min, float max)
@@ -194,7 +199,7 @@ public:
             {
                 filter[i].resonance((float)(potentiometer[n] / (MIDI_CC_RANGE_FLOAT / max)) + min);
             }
-            drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
     void set_filter_sweep(byte XPos, byte YPos, const char *name, float min, float max)
@@ -207,7 +212,7 @@ public:
             {
                 filter[i].octaveControl((float)(potentiometer[n] / (MIDI_CC_RANGE_FLOAT / max)) + min);
             }
-            drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
     void set_filter_type(byte XPos, byte YPos, const char *name, int min, float max)
@@ -216,8 +221,8 @@ public:
         {
             int n = XPos + (YPos * NUM_ENCODERS);
             potentiometer[n] = constrain(potentiometer[n] + encoded[XPos], 0, MIDI_CC_RANGE);
-            selectFilterType(map(potentiometer[n], 0,MIDI_CC_RANGE,0,3));
-            drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+            selectFilterType(map(potentiometer[n], 0, MIDI_CC_RANGE, 0, 3));
+            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
     void selectFilterType(byte mixerchannel)
@@ -243,7 +248,7 @@ public:
                 Fenv[i].attack(attack);
                 Aenv[i].attack(attack);
             }
-            drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
     void set_envelope_decay(byte XPos, byte YPos, const char *name, int min, int max)
@@ -259,7 +264,7 @@ public:
                 Aenv[i].decay(decay);
             }
 
-            drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
     void set_envelope_sustain(byte XPos, byte YPos, const char *name, int min, int max)
@@ -275,7 +280,7 @@ public:
                 Aenv[i].sustain(sustain);
             }
 
-            drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
     void set_envelope_release(byte XPos, byte YPos, const char *name, int min, int max)
@@ -291,7 +296,7 @@ public:
                 Aenv[i].release(release);
             }
 
-            drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
 };

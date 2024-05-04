@@ -4,9 +4,9 @@
 #include <SPI.h>
 #include <SD.h>
 #include <SerialFlash.h>
-
 #include "mixers.h"
-
+extern void drawPot(int XPos, byte YPos, int dvalue, const char *dname);
+extern int tuning;
 /*
 M WF    M Ratio   M Vol    C WF
 M Atk   M Dec     M St     M Rl
@@ -22,20 +22,24 @@ public:
     float modulator_ratio = 1;
     byte myID;
     byte potentiometer[16];
-    AudioSynthWaveformModulated modulator[12];
-    AudioEffectEnvelope modEnv[12];
-    AudioSynthWaveformModulated carrier[12];
-    AudioEffectEnvelope outEnv[12];
-    AudioMixer12 mixer;
-    AudioConnection *patchCord[48]; // total patchCordCount:48 including array typed ones.
+    AudioSynthWaveformModulated     modulator[12];
+    AudioEffectEnvelope             modEnv[12];
+    AudioSynthWaveformModulated     carrier[12];
+    AudioEffectEnvelope             outEnv[12];
+    AudioMixer12                    mixer;
+    AudioAmplifier                  MixGain;
+    AudioAmplifier                  SongVol;
+    AudioConnection                  *patchCord[50]; // total patchCordCount:50 including array typed ones.
+
 
     // constructor (this is called when class-object is created)
     Plugin_3()
     {
         int pci = 0; // used only for adding new patchcords
 
-        for (int i = 0; i < 12; i++)
-        {
+         patchCord[pci++] = new AudioConnection(mixer, 0, MixGain, 0);
+        patchCord[pci++] = new AudioConnection(MixGain, 0, SongVol, 0);
+        for (int i = 0; i < 12; i++) {
             patchCord[pci++] = new AudioConnection(modulator[i], 0, modEnv[i], 0);
             patchCord[pci++] = new AudioConnection(modEnv[i], 0, carrier[i], 0);
             patchCord[pci++] = new AudioConnection(carrier[i], 0, outEnv[i], 0);
@@ -71,6 +75,8 @@ public:
 
             mixer.gain(i, 1);
         }
+        MixGain.gain(1);
+        SongVol.gain(1);
     }
     void noteOn(byte notePlayed, float velocity, byte voice)
     {
@@ -89,6 +95,7 @@ public:
 
     void set_parameters(byte row)
     {
+        draw_plugin();
         if (row == 0)
         {
             set_mod_waveform(0, 0, "mW~Form", 0, 12);
@@ -119,26 +126,29 @@ public:
     }
     void draw_plugin()
     {
-        clearWorkSpace();
+        if (change_plugin_row)
+        {
+            change_plugin_row = false;
 
-        drawPot(0, 0, potentiometer[0], "mW~Form", ILI9341_BLUE);
-        drawPot(1, 0, potentiometer[5], "mRatio", ILI9341_BLUE);
-        drawPot(2, 0, potentiometer[0], "mVolume", ILI9341_BLUE);
-        drawPot(3, 0, potentiometer[5], "cW~Form", ILI9341_BLUE);
+            drawPot(0, 0, potentiometer[0], "mW~Form");
+            drawPot(1, 0, potentiometer[1], "mRatio");
+            drawPot(2, 0, potentiometer[2], "mVolume");
+            drawPot(3, 0, potentiometer[3], "cW~Form");
 
-        // drawPot(0, 2, potentiometer[8], "Filt-Frq", ILI9341_BLUE);
-        // drawPot(1, 2, potentiometer[9], "Resonance", ILI9341_BLUE);
-        // drawPot(2, 2, potentiometer[10], "Sweep", ILI9341_BLUE);
-        // drawPot(3, 2, potentiometer[10], "Type", ILI9341_BLUE);
-        drawPot(0, 1, potentiometer[12], "mAttack", ILI9341_BLUE);
-        drawPot(1, 1, potentiometer[13], "mDecay", ILI9341_BLUE);
-        drawPot(2, 1, potentiometer[14], "mSustain", ILI9341_BLUE);
-        drawPot(3, 1, potentiometer[15], "mRelease", ILI9341_BLUE);
+            // drawPot(0, 2, potentiometer[8], "Filt-Frq");
+            // drawPot(1, 2, potentiometer[9], "Resonance");
+            // drawPot(2, 2, potentiometer[10], "Sweep");
+            // drawPot(3, 2, potentiometer[10], "Type");
+            drawPot(0, 1, potentiometer[4], "mAttack");
+            drawPot(1, 1, potentiometer[5], "mDecay");
+            drawPot(2, 1, potentiometer[6], "mSustain");
+            drawPot(3, 1, potentiometer[7], "mRelease");
 
-        drawPot(0, 2, potentiometer[12], "Attack", ILI9341_BLUE);
-        drawPot(1, 2, potentiometer[13], "Decay", ILI9341_BLUE);
-        drawPot(2, 2, potentiometer[14], "Sustain", ILI9341_BLUE);
-        drawPot(3, 2, potentiometer[15], "Release", ILI9341_BLUE);
+            drawPot(0, 2, potentiometer[8], "Attack");
+            drawPot(1, 2, potentiometer[9], "Decay");
+            drawPot(2, 2, potentiometer[10], "Sustain");
+            drawPot(3, 2, potentiometer[11], "Release");
+        }
     }
 
     void set_mod_waveform(byte XPos, byte YPos, const char *name, int min, int max)
@@ -153,7 +163,7 @@ public:
             {
                 modulator[i].begin(walveform);
             }
-            drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
     void set_mod_amplitude(byte XPos, byte YPos, const char *name, int min, int max)
@@ -166,7 +176,7 @@ public:
             {
                 modulator[i].amplitude((float)(potentiometer[n] / MIDI_CC_RANGE_FLOAT));
             }
-            drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
     void set_mod_ratio(byte XPos, byte YPos, const char *name, int min, int max)
@@ -180,7 +190,7 @@ public:
             {
                 modulator_ratio = ratios[rationem];
             }
-            drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
 
@@ -196,7 +206,7 @@ public:
             {
                 carrier[i].begin(walveform);
             }
-            drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
 
@@ -211,7 +221,7 @@ public:
             {
                 outEnv[i].attack(attack);
             }
-            drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
     void set_envelope_decay(byte XPos, byte YPos, const char *name, int min, int max)
@@ -226,7 +236,7 @@ public:
                 outEnv[i].decay(decay);
             }
 
-            drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
     void set_envelope_sustain(byte XPos, byte YPos, const char *name, int min, int max)
@@ -241,7 +251,7 @@ public:
                 outEnv[i].sustain(sustain);
             }
 
-            drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
     void set_envelope_release(byte XPos, byte YPos, const char *name, int min, int max)
@@ -256,7 +266,7 @@ public:
                 outEnv[i].release(release);
             }
 
-            drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
 
@@ -271,7 +281,7 @@ public:
             {
                 modEnv[i].attack(attack);
             }
-            drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
     void set_envelope_mdecay(byte XPos, byte YPos, const char *name, int min, int max)
@@ -286,7 +296,7 @@ public:
                 modEnv[i].decay(decay);
             }
 
-            drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
     void set_envelope_msustain(byte XPos, byte YPos, const char *name, int min, int max)
@@ -301,7 +311,7 @@ public:
                 modEnv[i].sustain(sustain);
             }
 
-            drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
     void set_envelope_mrelease(byte XPos, byte YPos, const char *name, int min, int max)
@@ -316,7 +326,7 @@ public:
                 modEnv[i].release(release);
             }
 
-            drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
 };

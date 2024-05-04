@@ -4,9 +4,9 @@
 #include <SPI.h>
 #include <SD.h>
 #include <SerialFlash.h>
-
 #include "mixers.h"
-
+extern void drawPot(int XPos, byte YPos, int dvalue, const char *dname);
+extern int tuning;
 // TeensyDAW: begin automatically generated code
 
 class Plugin_4
@@ -16,13 +16,17 @@ public:
     byte potentiometer[16];
     AudioPlayMemory playMem[12];
     AudioMixer12 mixer;
-    AudioConnection *patchCord[12]; // total patchCordCount:12 including array typed ones.
+    AudioAmplifier MixGain;
+    AudioAmplifier SongVol;
+    AudioConnection *patchCord[14]; // total patchCordCount:14 including array typed ones.
 
     // constructor (this is called when class-object is created)
     Plugin_4()
     {
         int pci = 0; // used only for adding new patchcords
 
+        patchCord[pci++] = new AudioConnection(mixer, 0, MixGain, 0);
+        patchCord[pci++] = new AudioConnection(MixGain, 0, SongVol, 0);
         for (int i = 0; i < 12; i++)
         {
             patchCord[pci++] = new AudioConnection(playMem[i], 0, mixer, i);
@@ -36,6 +40,8 @@ public:
         {
             mixer.gain(i, 1);
         }
+        MixGain.gain(1);
+        SongVol.gain(1);
     }
     void noteOn(byte notePlayed, float velocity, byte voice)
     {
@@ -51,9 +57,9 @@ public:
             playMem[3].play(AudioSampleP2);
         if (notePlayed == 53)
             playMem[3].play(AudioSamplePongblip);
-        if (notePlayed == 53)
-            playMem[3].play(AudioSampleTomtom);
         if (notePlayed == 54)
+            playMem[3].play(AudioSampleTomtom);
+        if (notePlayed == 55)
             playMem[3].play(AudioSampleCashregister);
     }
     void noteOff(byte voice)
@@ -62,6 +68,7 @@ public:
 
     void set_parameters(byte row)
     {
+        draw_plugin();
         if (row == 0)
         {
             set_mixer_gain(0, 0, "Kick", 0, 1);
@@ -72,10 +79,10 @@ public:
 
         if (row == 1)
         {
-            set_mixer_gain(0, 1, "Vol", 0, 1);
-            set_mixer_gain(1, 1, "Vol", 0, 1);
-            set_mixer_gain(2, 1, "Vol", 0, 1);
-            set_mixer_gain(3, 1, "Vol", 0, 1);
+            set_mixer_gain(0, 1, "Tick", 0, 1);
+            set_mixer_gain(1, 1, "Pong", 0, 1);
+            set_mixer_gain(2, 1, "Tom", 0, 1);
+            set_mixer_gain(3, 1, "Cash", 0, 1);
         }
 
         if (row == 2)
@@ -92,26 +99,24 @@ public:
     }
     void draw_plugin()
     {
-        clearWorkSpace();
+        if (change_plugin_row)
+        {
+            change_plugin_row = false;
+            drawPot(0, 0, potentiometer[0], "Kick");
+            drawPot(1, 0, potentiometer[1], "Clap");
+            drawPot(2, 0, potentiometer[2], "HHat");
+            drawPot(3, 0, potentiometer[3], "Snare");
 
-        drawPot(0, 0, potentiometer[0], "Kick", ILI9341_BLUE);
-        drawPot(1, 0, potentiometer[5], "Clap", ILI9341_BLUE);
-        drawPot(2, 0, potentiometer[0], "HHat", ILI9341_BLUE);
-        drawPot(3, 0, potentiometer[5], "Snare", ILI9341_BLUE);
+            drawPot(0, 1, potentiometer[4], "Tick");
+            drawPot(1, 1, potentiometer[5], "Pong");
+            drawPot(2, 1, potentiometer[6], "Tom");
+            drawPot(3, 1, potentiometer[7], "Cash");
 
-        // drawPot(0, 2, potentiometer[8], "Filt-Frq", ILI9341_BLUE);
-        // drawPot(1, 2, potentiometer[9], "Resonance", ILI9341_BLUE);
-        // drawPot(2, 2, potentiometer[10], "Sweep", ILI9341_BLUE);
-        // drawPot(3, 2, potentiometer[10], "Type", ILI9341_BLUE);
-        drawPot(0, 1, potentiometer[12], "Vol", ILI9341_BLUE);
-        drawPot(1, 1, potentiometer[13], "Vol", ILI9341_BLUE);
-        drawPot(2, 1, potentiometer[14], "Vol", ILI9341_BLUE);
-        drawPot(3, 1, potentiometer[15], "Vol", ILI9341_BLUE);
-
-        drawPot(0, 2, potentiometer[12], "Vol", ILI9341_BLUE);
-        drawPot(1, 2, potentiometer[13], "Vol", ILI9341_BLUE);
-        drawPot(2, 2, potentiometer[14], "Vol", ILI9341_BLUE);
-        drawPot(3, 2, potentiometer[15], "Vol", ILI9341_BLUE);
+            drawPot(0, 2, potentiometer[8], "Vol");
+            drawPot(1, 2, potentiometer[9], "Vol");
+            drawPot(2, 2, potentiometer[10], "Vol");
+            drawPot(3, 2, potentiometer[11], "Vol");
+        }
     }
 
     void set_mixer_gain(byte XPos, byte YPos, const char *name, int min, int max)
@@ -122,7 +127,7 @@ public:
             potentiometer[n] = constrain(potentiometer[n] + encoded[XPos], 0, MIDI_CC_RANGE);
             float sustain = (float)(potentiometer[n] / MIDI_CC_RANGE_FLOAT);
             mixer.gain(n, sustain);
-            drawPot(XPos, YPos, potentiometer[n], name, ILI9341_BLUE);
+            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
 };

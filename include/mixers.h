@@ -49,15 +49,15 @@
 #define MIXERS_MULT_TYPE int16_t
 #endif
 
-class AudioMixer2 : public AudioStream
+class AudioMixer5 : public AudioStream
 {
 public:
-	AudioMixer2(void) : AudioStream(2, inputQueueArray) {
-		for (int i=0; i<2; i++) multiplier[i] = MIXERS_MAX_MULT_I;
+	AudioMixer5(void) : AudioStream(5, inputQueueArray) {
+		for (int i=0; i<5; i++) multiplier[i] = MIXERS_MAX_MULT_I;
 	}
 	virtual void update(void);
 	void gain(unsigned int channel, float gain) {
-		if (channel >= 2) return;
+		if (channel >= 5) return;
 		if (gain > MIXERS_MAX_GAIN) gain = MIXERS_MAX_GAIN;
 		else if (gain < MIXERS_MIN_GAIN) gain = MIXERS_MIN_GAIN;
 		multiplier[channel] = gain * MIXERS_MAX_MULT_F; // TODO: proper roundoff?
@@ -65,11 +65,11 @@ public:
 	void gain(float gain) {
 	    if (gain > MIXERS_MAX_GAIN) gain = MIXERS_MAX_GAIN;
 		else if (gain < MIXERS_MIN_GAIN) gain = MIXERS_MIN_GAIN;
-		for (int i=0; i<2; i++) multiplier[i] = gain * MIXERS_MAX_MULT_F;
+		for (int i=0; i<5; i++) multiplier[i] = gain * MIXERS_MAX_MULT_F;
 	}
 private:
-	MIXERS_MULT_TYPE multiplier[2];
-	audio_block_t *inputQueueArray[2];
+	MIXERS_MULT_TYPE multiplier[5];
+	audio_block_t *inputQueueArray[5];
 };
 class AudioMixer12 : public AudioStream
 {
@@ -92,6 +92,28 @@ public:
 private:
 	MIXERS_MULT_TYPE multiplier[12];
 	audio_block_t *inputQueueArray[12];
+};
+class AudioMixer2 : public AudioStream
+{
+public:
+	AudioMixer2(void) : AudioStream(2, inputQueueArray) {
+		for (int i=0; i<2; i++) multiplier[i] = MIXERS_MAX_MULT_I;
+	}
+	virtual void update(void);
+	void gain(unsigned int channel, float gain) {
+		if (channel >= 2) return;
+		if (gain > MIXERS_MAX_GAIN) gain = MIXERS_MAX_GAIN;
+		else if (gain < MIXERS_MIN_GAIN) gain = MIXERS_MIN_GAIN;
+		multiplier[channel] = gain * MIXERS_MAX_MULT_F; // TODO: proper roundoff?
+	}
+	void gain(float gain) {
+	    if (gain > MIXERS_MAX_GAIN) gain = MIXERS_MAX_GAIN;
+		else if (gain < MIXERS_MIN_GAIN) gain = MIXERS_MIN_GAIN;
+		for (int i=0; i<2; i++) multiplier[i] = gain * MIXERS_MAX_MULT_F;
+	}
+private:
+	MIXERS_MULT_TYPE multiplier[2];
+	audio_block_t *inputQueueArray[2];
 };
 
 
