@@ -2,6 +2,7 @@
 
 #include <ILI9341_t3n.h>
 #include <ili9341_t3n_font_Arial.h> // from ILI9341_t3
+#include <XPT2046_Touchscreen.h>
 #include <SPI.h>
 #include <Adafruit_Keypad.h>
 // #include <Key.h>
@@ -38,7 +39,7 @@ Output MasterOut(3);
 #define GRID_POSITION_POINTER_Y 232
 #define POSITION_POINTER_THICKNESS 3
 #define POTPICKUP 3
-
+const char *playstate[3] = {"Mute", "Play", "Solo"};
 // notenumber to frequency chart
 
 #define SAMPLE_ROOT 69
@@ -54,6 +55,16 @@ Output MasterOut(3);
 #define TFT_SCK 13                                                                   // shareable
 #define TFT_MISO 12                                                                  // shareable
 ILI9341_t3n tft = ILI9341_t3n(TFT_CS, TFT_DC, TFT_RST, TFT_MOSI, TFT_SCK, TFT_MISO); // initiate TFT-Srceen
+XPT2046_Touchscreen ts(CS_PIN);                                                      // initiate Touchscreen
+// calibrate your Screen
+//  This is calibration data for the raw touch data to the screen coordinates
+#define TS_MINX 440
+#define TS_MINY 300
+#define TS_MAXX 3850
+#define TS_MAXY 3800
+bool display_touched = false;
+int touchedX;
+int touchedY;
 
 // Let's allocate the frame buffer ourself.
 DMAMEM uint16_t tft_frame_buffer[ILI9341_TFTWIDTH * ILI9341_TFTHEIGHT];
@@ -440,6 +451,7 @@ Track *allTracks[8]{&track1, &track2, &track3, &track4, &track5, &track6, &track
 void readEncoders();
 void encoder_SetCursor(byte maxY);
 
+void readTouchinput();
 void readMainButtons();
 void buttons_SetPlayStatus();
 void buttons_SetCorsor();
@@ -453,17 +465,29 @@ void buttons_Set_potRow();
 void input_behaviour();
 void clock_to_notes();
 void drawPot(int XPos, byte YPos, int dvalue, const char *dname);
+void myDrawLine(int x0, int y0, int x1, int y1, uint16_t color);
+void myDrawRect(int x, int y, int w, int h, uint16_t color);
+void drawActiveRect(int xPos, byte yPos, byte xsize, byte ysize, bool state, const char *name, int color);
 void clearWorkSpace();
 void startUpScreen();
 void drawsongmodepageselector();
 void gridSongMode(int songpageNumber);
 
 void draw_mixer();
-void set_mixer_gain(byte XPos, byte YPos, const char *name, int min, int max);
+void set_mixer_gain(byte XPos, byte YPos, const char *name, byte trackn);
 void set_mixer(byte row);
-
+void set_mixer_mute(byte XPos, byte YPos, const char *name, int min, int max);
+void draw_mixer_FX_page1();
+void draw_mixer_FX_page2();
+void set_mixer_FX_page1(byte row);
+void set_mixer_FX_page2(byte row);
+void set_mixer_dry(byte XPos, byte YPos, const char *name, byte trackn);
+void set_mixer_FX1(byte XPos, byte YPos, const char *name, byte trackn);
+void set_mixer_FX2(byte XPos, byte YPos, const char *name, byte trackn);
+void set_mixer_FX3(byte XPos, byte YPos, const char *name, byte trackn);
 void myNoteOn(byte channel, byte note, byte velocity);
 void myNoteOff(byte channel, byte note, byte velocity);
+
 void setup()
 {
   // put your setup code here, to run once:
@@ -471,8 +495,11 @@ void setup()
   Serial.begin(15200); // set MIDI baud
 
   // initialize the TFT- and Touchscreen
+
   tft.begin();
   tft.setRotation(3);
+  ts.begin();
+  ts.setRotation(2);
   tft.fillScreen(ILI9341_BLACK);
   tft.setFrameBuffer(tft_frame_buffer);
   tft.useFrameBuffer(true);
@@ -524,6 +551,7 @@ void loop()
 
   readEncoders();
   readMainButtons();
+  readTouchinput();
   input_behaviour();
 
   clock_to_notes();
@@ -615,15 +643,6 @@ void input_behaviour()
       MasterOut.set_parameters(active_track, lastPotRow);
     }
   }
-  if (encoder_function == INPUT_FUNCTIONS_FOR_MIXER1)
-  {
-    // if Shift button is NOT pressed
-    if (!buttonPressed[BUTTON_SHIFT])
-    {
-      set_mixer(lastPotRow);
-    }
-  }
-
   if (encoder_function == INPUT_FUNCTIONS_FOR_SEQUENCER_MODES)
   {
     // if Shift button is NOT pressed
@@ -635,6 +654,17 @@ void input_behaviour()
       }
     }
   }
+
+  if (encoder_function == INPUT_FUNCTIONS_FOR_MIXER1)
+    set_mixer(lastPotRow);
+  if (encoder_function == INPUT_FUNCTIONS_FOR_MIXER2)
+    set_mixer_FX_page1(lastPotRow);
+  if (encoder_function == INPUT_FUNCTIONS_FOR_MIXER3)
+    set_mixer_FX_page2(lastPotRow);
+  if (encoder_function == INPUT_FUNCTIONS_FOR_FX1)
+    MasterOut.fx_section.set_freeverb(lastPotRow);
+  if (encoder_function == INPUT_FUNCTIONS_FOR_FX2)
+    MasterOut.fx_section.set_Bitcrusher(lastPotRow);
 }
 void clock_to_notes()
 {
@@ -651,6 +681,35 @@ void clock_to_notes()
   }
 }
 
+void readTouchinput()
+{
+  
+  /*
+  // Serial.println("would like to be touched");
+    if (ts.touched())
+    {
+      
+
+      TS_Point touch = ts.getPoint();
+      //touch.x = map(touch.x, TS_MINX, TS_MAXX, 0, 320);
+      //touch.y = map(touch.y, TS_MINY, TS_MAXY, 0, 240);
+      touchedX = touch.x;
+      touchedY = touch.y;
+      //pixelTouchX = touch.x;
+      //gridTouchY = touch.y / 16;
+      display_touched = true;
+
+      Serial.printf("touched @ x %d, y %d \n", touchedX, touchedY);
+
+    }
+
+    if (!ts.touched())
+    {
+      display_touched = false;
+       Serial.printf("not touched @ x %d, y %d \n", touchedX, touchedY);
+    }
+    */
+}
 void readEncoders()
 {
 
@@ -835,11 +894,46 @@ void buttons_SelectMixer()
 {
   if (buttonPressed[BUTTON_MIXER])
   {
-    change_plugin_row = true;
-    buttonPressed[BUTTON_MIXER] = false;
-    encoder_function = INPUT_FUNCTIONS_FOR_MIXER1;
-     clearWorkSpace();
-    draw_mixer();
+    if (buttonPressed[BUTTON_LEFT])
+    {
+      change_plugin_row = true;
+      buttonPressed[BUTTON_LEFT] = false;
+      encoder_function = INPUT_FUNCTIONS_FOR_MIXER1;
+      clearWorkSpace();
+      draw_mixer();
+    }
+    if (buttonPressed[BUTTON_RIGHT])
+    {
+      change_plugin_row = true;
+      buttonPressed[BUTTON_RIGHT] = false;
+      encoder_function = INPUT_FUNCTIONS_FOR_MIXER2;
+      clearWorkSpace();
+      draw_mixer_FX_page1();
+    }
+    if (buttonPressed[BUTTON_UP])
+    {
+      change_plugin_row = true;
+      buttonPressed[BUTTON_UP] = false;
+      encoder_function = INPUT_FUNCTIONS_FOR_MIXER3;
+      clearWorkSpace();
+      draw_mixer_FX_page2();
+    }
+    if (buttonPressed[BUTTON_DOWN])
+    {
+      change_plugin_row = true;
+      buttonPressed[BUTTON_DOWN] = false;
+      encoder_function = INPUT_FUNCTIONS_FOR_FX1;
+      clearWorkSpace();
+      MasterOut.fx_section.draw_freeverb();
+    }
+    if (buttonPressed[BUTTON_ROW])
+    {
+      change_plugin_row = true;
+      buttonPressed[BUTTON_ROW] = false;
+      encoder_function = INPUT_FUNCTIONS_FOR_FX2;
+      clearWorkSpace();
+      MasterOut.fx_section.draw_Bitcrusher();
+    }
   }
 }
 
@@ -950,6 +1044,7 @@ void drawPot(int XPos, byte YPos, int dvalue, const char *dname)
   static float circlePos[4];
   static float circlePos_old[4];
   static int dvalue_old[4];
+  static const char *dname_old[4];
   // byte fvalue = map(dvalue, 0, 127, min, max);
   int xPos;
   int color;
@@ -984,6 +1079,8 @@ void drawPot(int XPos, byte YPos, int dvalue, const char *dname)
   tft.setTextColor(ILI9341_DARKGREY);
   tft.setCursor(STEP_FRAME_W * xPos + 4, STEP_FRAME_H * yPos - 3);
   tft.print(dvalue_old[XPos]);
+  tft.setCursor(STEP_FRAME_W * xPos, STEP_FRAME_H * (yPos + 1) + 3);
+  tft.print(dname_old[XPos]);
   tft.setTextColor(ILI9341_WHITE);
   tft.setCursor(STEP_FRAME_W * xPos + 4, STEP_FRAME_H * yPos - 3);
   tft.print(dvalue);
@@ -995,6 +1092,36 @@ void drawPot(int XPos, byte YPos, int dvalue, const char *dname)
   tft.fillCircle(STEP_FRAME_W * (xPos + 1) + 16 * cos((2.5 * circlePos[XPos]) + 2.25), STEP_FRAME_H * yPos + 16 * sin((2.5 * circlePos[XPos]) + 2.25), 4, color);
   circlePos_old[XPos] = circlePos[XPos];
   dvalue_old[XPos] = dvalue;
+  dname_old[XPos] = dname;
+}
+void drawActiveRect(int xPos, byte yPos, byte xsize, byte ysize, bool state, const char *name, int color)
+{
+  if (state)
+  {
+    tft.fillRect(STEP_FRAME_W * xPos, STEP_FRAME_H * yPos, STEP_FRAME_W * xsize, STEP_FRAME_W * ysize, color);
+    tft.drawRect(STEP_FRAME_W * xPos, STEP_FRAME_H * yPos, STEP_FRAME_W * xsize, STEP_FRAME_W * ysize, color);
+    tft.setFont(Arial_8);
+    tft.setTextColor(ILI9341_BLACK);
+    tft.setCursor(STEP_FRAME_W * xPos + 4, STEP_FRAME_H * yPos + 3);
+    tft.print(name);
+  }
+  if (!state)
+  {
+    tft.fillRect(STEP_FRAME_W * xPos, STEP_FRAME_H * yPos, STEP_FRAME_W * xsize, STEP_FRAME_W * ysize, ILI9341_DARKGREY);
+    tft.drawRect(STEP_FRAME_W * xPos, STEP_FRAME_H * yPos, STEP_FRAME_W * xsize, STEP_FRAME_W * ysize, color);
+    tft.setFont(Arial_8);
+    tft.setTextColor(ILI9341_BLACK);
+    tft.setCursor(STEP_FRAME_W * xPos + 4, STEP_FRAME_H * yPos + 3);
+    tft.print(name);
+  }
+}
+void myDrawLine(int x0, int y0, int x1, int y1, uint16_t color)
+{
+  tft.drawLine(x0, y0, x1, y1, color);
+}
+void myDrawRect(int x, int y, int w, int h, uint16_t color)
+{
+  tft.drawRect(x, y, w, h, color);
 }
 void clearWorkSpace()
 {                                                                                                       // clear the whole grid from Display
@@ -1108,31 +1235,47 @@ void startUpScreen()
 }
 void myNoteOn(byte channel, byte note, byte velocity)
 {
-  if (channel < 9)
+  if (channel < 9 && !allTracks[channel - 1]->muted)
     MasterOut.noteOn(note, VELOCITY_NOTE_ON, allTracks[channel - 1]->MIDI_channel_out, 0);
 }
 void myNoteOff(byte channel, byte note, byte velocity)
 {
-  if (channel < 9)
+  if (channel < 9 && !allTracks[channel - 1]->muted)
     MasterOut.noteOff(note, 0, allTracks[channel - 1]->MIDI_channel_out, 0);
 }
 
 // Mixer
 void draw_mixer()
 {
- 
+
   if (change_plugin_row)
   {
     change_plugin_row = false;
-    drawPot(0, 0, allTracks[0]->mixGainPot, "Tr 1");
+    drawPot(0, 0, allTracks[0]->mixGainPot, "Tr D");
+    drawActiveRect(3, 5, 1, 1, allTracks[0]->muted, "M", ILI9341_RED);
+    drawActiveRect(4, 5, 1, 1, allTracks[0]->soloed, "S", ILI9341_WHITE);
     drawPot(1, 0, allTracks[1]->mixGainPot, "Tr 2");
+    drawActiveRect(7, 5, 1, 1, allTracks[1]->muted, "M", ILI9341_RED);
+    drawActiveRect(8, 5, 1, 1, allTracks[1]->soloed, "S", ILI9341_WHITE);
     drawPot(2, 0, allTracks[2]->mixGainPot, "Tr 3");
+    drawActiveRect(11, 5, 1, 1, allTracks[2]->muted, "M", ILI9341_RED);
+    drawActiveRect(12, 5, 1, 1, allTracks[2]->soloed, "S", ILI9341_WHITE);
     drawPot(3, 0, allTracks[3]->mixGainPot, "Tr 4");
+    drawActiveRect(15, 5, 1, 1, allTracks[3]->muted, "M", ILI9341_RED);
+    drawActiveRect(16, 5, 1, 1, allTracks[3]->soloed, "S", ILI9341_WHITE);
 
-    drawPot(0, 1, allTracks[4]->mixGainPot, "Tr 5");
-    drawPot(1, 1, allTracks[5]->mixGainPot, "Tr 6");
-    drawPot(2, 1, allTracks[6]->mixGainPot, "Tr 7");
-    drawPot(3, 1, allTracks[7]->mixGainPot, "Tr 8");
+    drawPot(0, 2, allTracks[4]->mixGainPot, "Tr 5");
+    drawActiveRect(3, 11, 1, 1, allTracks[4]->muted, "M", ILI9341_RED);
+    drawActiveRect(4, 11, 1, 1, allTracks[4]->soloed, "S", ILI9341_WHITE);
+    drawPot(1, 2, allTracks[5]->mixGainPot, "Tr 6");
+    drawActiveRect(7, 11, 1, 1, allTracks[5]->muted, "M", ILI9341_RED);
+    drawActiveRect(8, 11, 1, 1, allTracks[5]->soloed, "S", ILI9341_WHITE);
+    drawPot(2, 2, allTracks[6]->mixGainPot, "Tr 7");
+    drawActiveRect(11, 11, 1, 1, allTracks[6]->muted, "M", ILI9341_RED);
+    drawActiveRect(12, 11, 1, 1, allTracks[6]->soloed, "S", ILI9341_WHITE);
+    drawPot(3, 2, allTracks[7]->mixGainPot, "Tr 8");
+    drawActiveRect(15, 11, 1, 1, allTracks[7]->muted, "M", ILI9341_RED);
+    drawActiveRect(16, 11, 1, 1, allTracks[7]->soloed, "S", ILI9341_WHITE);
   }
 }
 void set_mixer(byte row)
@@ -1141,46 +1284,324 @@ void set_mixer(byte row)
   if (row == 0)
   {
 
-    set_mixer_gain(0, 0, "Tr 1", 0, 1);
-    set_mixer_gain(1, 0, "Tr 2", 0, 1);
-    set_mixer_gain(2, 0, "Tr 3", 0, 1);
-    set_mixer_gain(3, 0, "Tr 4", 0, 1);
+    set_mixer_gain(0, 0, "Tr D", 0);
+    set_mixer_mute(0, 0, "Tr D", 0, 1);
+    set_mixer_gain(1, 0, "Tr 2", 1);
+    set_mixer_mute(1, 0, "Tr 2", 0, 1);
+
+    set_mixer_gain(2, 0, "Tr 3", 2);
+    set_mixer_mute(2, 0, "Tr 3", 0, 1);
+    set_mixer_gain(3, 0, "Tr 4", 3);
+    set_mixer_mute(3, 0, "Tr 4", 0, 1);
   }
 
   if (row == 1)
   {
-    set_mixer_gain(0, 1, "Tr 5", 0, 1);
-    set_mixer_gain(1, 1, "Tr 6", 0, 1);
-    set_mixer_gain(2, 1, "Tr 7", 0, 1);
-    set_mixer_gain(3, 1, "Tr 8", 0, 1);
   }
 
   if (row == 2)
   {
+    set_mixer_gain(0, 2, "Tr 5", 4);
+    set_mixer_mute(0, 2, "Tr 5", 0, 1);
+    set_mixer_gain(1, 2, "Tr 6", 5);
+    set_mixer_mute(1, 2, "Tr 6", 0, 1);
+
+    set_mixer_gain(2, 2, "Tr 7", 6);
+    set_mixer_mute(2, 2, "Tr 7", 0, 1);
+    set_mixer_gain(3, 2, "Tr 8", 7);
+    set_mixer_mute(3, 2, "Tr 8", 0, 1);
   }
 
   if (row == 3)
   {
   }
 }
-void set_mixer_gain(byte XPos, byte YPos, const char *name, int min, int max)
+void set_mixer_gain(byte XPos, byte YPos, const char *name, byte trackn)
 {
-  if (enc_moved[XPos])
-  {
-    int n = XPos + (YPos * NUM_ENCODERS);
-    allTracks[n]->mixGainPot = constrain(allTracks[n]->mixGainPot + encoded[XPos], 0, MIDI_CC_RANGE);
-    allTracks[n]->mixGain = (float)(allTracks[n]->mixGainPot / MIDI_CC_RANGE_FLOAT);
-    if (allTracks[n]->MIDI_channel_out == 17)
-      MasterOut.plugin_1.MixGain.gain(allTracks[n]->mixGain);
-    if (allTracks[n]->MIDI_channel_out == 18)
-      MasterOut.plugin_2.MixGain.gain(allTracks[n]->mixGain);
-    if (allTracks[n]->MIDI_channel_out == 19)
-      MasterOut.plugin_3.MixGain.gain(allTracks[n]->mixGain);
-    if (allTracks[n]->MIDI_channel_out == 20)
-      MasterOut.plugin_4.MixGain.gain(allTracks[n]->mixGain);
-    if (allTracks[n]->MIDI_channel_out == 21)
-      MasterOut.plugin_5.MixGain.gain(allTracks[n]->mixGain);
 
-    drawPot(XPos, YPos, allTracks[n]->mixGainPot, name);
+  if (!buttonPressed[BUTTON_SHIFT])
+  {
+    if (enc_moved[XPos])
+    {
+
+      allTracks[trackn]->mixGainPot = constrain(allTracks[trackn]->mixGainPot + encoded[XPos], 0, MIDI_CC_RANGE);
+      allTracks[trackn]->mixGain = (float)(allTracks[trackn]->mixGainPot / MIDI_CC_RANGE_FLOAT);
+      if (allTracks[trackn]->MIDI_channel_out == 17)
+        MasterOut.fx_section.plugin_1.MixGain.gain(allTracks[trackn]->mixGain);
+      if (allTracks[trackn]->MIDI_channel_out == 18)
+        MasterOut.fx_section.plugin_2.MixGain.gain(allTracks[trackn]->mixGain);
+      if (allTracks[trackn]->MIDI_channel_out == 19)
+        MasterOut.fx_section.plugin_3.MixGain.gain(allTracks[trackn]->mixGain);
+      if (allTracks[trackn]->MIDI_channel_out == 20)
+        MasterOut.fx_section.plugin_4.MixGain.gain(allTracks[trackn]->mixGain);
+      if (allTracks[trackn]->MIDI_channel_out == 21)
+        MasterOut.fx_section.plugin_5.MixGain.gain(allTracks[trackn]->mixGain);
+
+      drawPot(XPos, YPos, allTracks[trackn]->mixGainPot, name);
+    }
+  }
+}
+void set_mixer_mute(byte XPos, byte YPos, const char *name, int min, int max)
+{
+  int nYPos;
+  if (YPos == 0)
+    nYPos = 0;
+
+  if (YPos == 2)
+    nYPos = 1;
+
+  if (buttonPressed[BUTTON_SHIFT])
+  {
+    if (enc_moved[XPos])
+    {
+      int n = XPos + (nYPos * NUM_ENCODERS);
+      allTracks[n]->mute_norm_solo_pot = constrain(allTracks[n]->mute_norm_solo_pot + encoded[XPos], 0, 2);
+      Serial.printf("track: %d, mute state: %d\n", n, allTracks[n]->mute_norm_solo_pot);
+      if (allTracks[n]->mute_norm_solo_pot == 0)
+      {
+        allTracks[n]->muted = true;
+      }
+
+      if (allTracks[n]->mute_norm_solo_pot == 1)
+      {
+        allTracks[n]->muted = false;
+        allTracks[n]->soloed = false;
+        for (int i = 0; i < NUM_TRACKS; i++) // play other tracks
+          allTracks[i]->muted = false;
+      }
+
+      if (allTracks[n]->mute_norm_solo_pot == 2) // solo state
+      {
+        for (int i = 0; i < NUM_TRACKS; i++) // mute other tracks
+          allTracks[i]->muted = true;
+        allTracks[n]->soloed = true;
+        allTracks[n]->muted = false;
+
+        // drawPot(XPos, YPos, allTracks[n]->mixGainPot, name);
+      }
+      change_plugin_row = true;
+      draw_mixer();
+    }
+  }
+}
+
+void draw_mixer_FX_page1()
+{
+  if (change_plugin_row)
+  {
+    change_plugin_row = false;
+    drawPot(0, 0, allTracks[0]->mixDryPot, "Dry D");
+    drawPot(1, 0, allTracks[1]->mixDryPot, "Dry 2");
+    drawPot(2, 0, allTracks[2]->mixDryPot, "Dry 3");
+    drawPot(3, 0, allTracks[3]->mixDryPot, "Dry 4");
+
+    drawPot(0, 1, allTracks[0]->mixFX1Pot, "FX1 D");
+    drawPot(1, 1, allTracks[1]->mixFX1Pot, "FX1 2");
+    drawPot(2, 1, allTracks[2]->mixFX1Pot, "FX1 3");
+    drawPot(3, 1, allTracks[3]->mixFX1Pot, "FX1 4");
+
+    drawPot(0, 2, allTracks[0]->mixFX2Pot, "FX2 D");
+    drawPot(1, 2, allTracks[1]->mixFX2Pot, "FX2 2");
+    drawPot(2, 2, allTracks[2]->mixFX2Pot, "FX2 3");
+    drawPot(3, 2, allTracks[3]->mixFX2Pot, "FX2 4");
+
+    drawPot(0, 3, allTracks[0]->mixFX3Pot, "FX3 D");
+    drawPot(1, 3, allTracks[1]->mixFX3Pot, "FX3 2");
+    drawPot(2, 3, allTracks[2]->mixFX3Pot, "FX3 3");
+    drawPot(3, 3, allTracks[3]->mixFX3Pot, "FX3 4");
+  }
+}
+void draw_mixer_FX_page2()
+{
+
+  if (change_plugin_row)
+  {
+    change_plugin_row = false;
+    drawPot(0, 0, allTracks[4]->mixDryPot, "Dry 5");
+    drawPot(1, 0, allTracks[5]->mixDryPot, "Dry 6");
+    drawPot(2, 0, allTracks[6]->mixDryPot, "Dry 7");
+    drawPot(3, 0, allTracks[7]->mixDryPot, "Dry 8");
+
+    drawPot(0, 1, allTracks[4]->mixFX1Pot, "FX1 5");
+    drawPot(1, 1, allTracks[5]->mixFX1Pot, "FX1 6");
+    drawPot(2, 1, allTracks[6]->mixFX1Pot, "FX1 7");
+    drawPot(3, 1, allTracks[7]->mixFX1Pot, "FX1 8");
+
+    drawPot(0, 2, allTracks[4]->mixFX2Pot, "FX1 5");
+    drawPot(1, 2, allTracks[5]->mixFX2Pot, "FX1 6");
+    drawPot(2, 2, allTracks[6]->mixFX2Pot, "FX1 7");
+    drawPot(3, 2, allTracks[7]->mixFX2Pot, "FX1 8");
+
+    drawPot(0, 3, allTracks[4]->mixFX3Pot, "FX1 5");
+    drawPot(1, 3, allTracks[5]->mixFX3Pot, "FX1 6");
+    drawPot(2, 3, allTracks[6]->mixFX3Pot, "FX1 7");
+    drawPot(3, 3, allTracks[7]->mixFX3Pot, "FX1 8");
+  }
+}
+void set_mixer_FX_page1(byte row)
+{
+  draw_mixer_FX_page1();
+  if (row == 0)
+  {
+
+    set_mixer_dry(0, 0, "Dry D", 0);
+    set_mixer_dry(1, 0, "Dry 2", 1);
+    set_mixer_dry(2, 0, "Dry 3", 2);
+    set_mixer_dry(3, 0, "Dry 4", 3);
+  }
+
+  if (row == 1)
+  {
+    set_mixer_FX1(0, 1, "FX1 D", 0);
+    set_mixer_FX1(1, 1, "FX1 2", 1);
+    set_mixer_FX1(2, 1, "FX1 3", 2);
+    set_mixer_FX1(3, 1, "FX1 4", 3);
+  }
+
+  if (row == 2)
+  {
+    set_mixer_FX2(0, 2, "FX2 D", 0);
+    set_mixer_FX2(1, 2, "FX2 2", 1);
+    set_mixer_FX2(2, 2, "FX2 3", 2);
+    set_mixer_FX2(3, 2, "FX2 4", 3);
+  }
+
+  if (row == 3)
+  {
+    set_mixer_FX3(0, 3, "FX2 D", 0);
+    set_mixer_FX3(1, 3, "FX2 2", 1);
+    set_mixer_FX3(2, 3, "FX2 3", 2);
+    set_mixer_FX3(3, 3, "FX2 4", 3);
+  }
+}
+void set_mixer_FX_page2(byte row)
+{
+  draw_mixer_FX_page1();
+  if (row == 0)
+  {
+
+    set_mixer_dry(0, 0, "Dry 5", 4);
+    set_mixer_dry(1, 0, "Dry 6", 5);
+    set_mixer_dry(2, 0, "Dry 7", 6);
+    set_mixer_dry(3, 0, "Dry 8", 7);
+  }
+
+  if (row == 1)
+  {
+    set_mixer_FX1(0, 1, "FX1 5", 4);
+    set_mixer_FX1(1, 1, "FX1 6", 5);
+    set_mixer_FX1(2, 1, "FX1 7", 6);
+    set_mixer_FX1(3, 1, "FX1 8", 7);
+  }
+
+  if (row == 2)
+  {
+    set_mixer_FX2(0, 2, "FX2 5", 4);
+    set_mixer_FX2(1, 2, "FX2 6", 5);
+    set_mixer_FX2(2, 2, "FX2 7", 6);
+    set_mixer_FX2(3, 2, "FX2 8", 7);
+  }
+
+  if (row == 3)
+  {
+    set_mixer_FX3(0, 3, "FX3 5", 4);
+    set_mixer_FX3(1, 3, "FX3 6", 5);
+    set_mixer_FX3(2, 3, "FX3 7", 6);
+    set_mixer_FX3(3, 3, "FX3 8", 7);
+  }
+}
+
+void set_mixer_dry(byte XPos, byte YPos, const char *name, byte trackn)
+{
+  if (!buttonPressed[BUTTON_SHIFT])
+  {
+    if (enc_moved[XPos])
+    {
+      allTracks[trackn]->mixDryPot = constrain(allTracks[trackn]->mixDryPot + encoded[XPos], 0, MIDI_CC_RANGE);
+      allTracks[trackn]->mixDry = (float)(allTracks[trackn]->mixDryPot / MIDI_CC_RANGE_FLOAT);
+      if (allTracks[trackn]->MIDI_channel_out == 17)
+        MasterOut.fx_section.dry_1.gain(allTracks[trackn]->mixDry);
+      if (allTracks[trackn]->MIDI_channel_out == 18)
+        MasterOut.fx_section.dry_2.gain(allTracks[trackn]->mixDry);
+      if (allTracks[trackn]->MIDI_channel_out == 19)
+        MasterOut.fx_section.dry_3.gain(allTracks[trackn]->mixDry);
+      if (allTracks[trackn]->MIDI_channel_out == 20)
+        MasterOut.fx_section.dry_4.gain(allTracks[trackn]->mixDry);
+      if (allTracks[trackn]->MIDI_channel_out == 21)
+        MasterOut.fx_section.dry_5.gain(allTracks[trackn]->mixDry);
+
+      drawPot(XPos, YPos, allTracks[trackn]->mixDryPot, name);
+    }
+  }
+}
+void set_mixer_FX1(byte XPos, byte YPos, const char *name, byte trackn)
+{
+  if (!buttonPressed[BUTTON_SHIFT])
+  {
+    if (enc_moved[XPos])
+    {
+      allTracks[trackn]->mixFX1Pot = constrain(allTracks[trackn]->mixFX1Pot + encoded[XPos], 0, MIDI_CC_RANGE);
+      allTracks[trackn]->mixFX1 = (float)(allTracks[trackn]->mixFX1Pot / MIDI_CC_RANGE_FLOAT);
+      if (allTracks[trackn]->MIDI_channel_out == 17)
+        MasterOut.fx_section.FX1_1.gain(allTracks[trackn]->mixFX1);
+      if (allTracks[trackn]->MIDI_channel_out == 18)
+        MasterOut.fx_section.FX1_2.gain(allTracks[trackn]->mixFX1);
+      if (allTracks[trackn]->MIDI_channel_out == 19)
+        MasterOut.fx_section.FX1_3.gain(allTracks[trackn]->mixFX1);
+      if (allTracks[trackn]->MIDI_channel_out == 20)
+        MasterOut.fx_section.FX1_4.gain(allTracks[trackn]->mixFX1);
+      if (allTracks[trackn]->MIDI_channel_out == 21)
+        MasterOut.fx_section.FX1_5.gain(allTracks[trackn]->mixFX1);
+
+      drawPot(XPos, YPos, allTracks[trackn]->mixFX1Pot, name);
+    }
+  }
+}
+void set_mixer_FX2(byte XPos, byte YPos, const char *name, byte trackn)
+{
+  if (!buttonPressed[BUTTON_SHIFT])
+  {
+    if (enc_moved[XPos])
+    {
+      allTracks[trackn]->mixFX2Pot = constrain(allTracks[trackn]->mixFX2Pot + encoded[XPos], 0, MIDI_CC_RANGE);
+      allTracks[trackn]->mixFX2 = (float)(allTracks[trackn]->mixFX2Pot / MIDI_CC_RANGE_FLOAT);
+      if (allTracks[trackn]->MIDI_channel_out == 17)
+        MasterOut.fx_section.FX2_1.gain(allTracks[trackn]->mixFX2);
+      if (allTracks[trackn]->MIDI_channel_out == 18)
+        MasterOut.fx_section.FX2_2.gain(allTracks[trackn]->mixFX2);
+      if (allTracks[trackn]->MIDI_channel_out == 19)
+        MasterOut.fx_section.FX2_3.gain(allTracks[trackn]->mixFX2);
+      if (allTracks[trackn]->MIDI_channel_out == 20)
+        MasterOut.fx_section.FX2_4.gain(allTracks[trackn]->mixFX2);
+      if (allTracks[trackn]->MIDI_channel_out == 21)
+        MasterOut.fx_section.FX2_5.gain(allTracks[trackn]->mixFX2);
+
+      drawPot(XPos, YPos, allTracks[trackn]->mixFX2Pot, name);
+    }
+  }
+}
+void set_mixer_FX3(byte XPos, byte YPos, const char *name, byte trackn)
+{
+
+  if (!buttonPressed[BUTTON_SHIFT])
+  {
+    if (enc_moved[XPos])
+    {
+
+      allTracks[trackn]->mixFX3Pot = constrain(allTracks[trackn]->mixFX3Pot + encoded[XPos], 0, MIDI_CC_RANGE);
+      allTracks[trackn]->mixFX3 = (float)(allTracks[trackn]->mixFX3Pot / MIDI_CC_RANGE_FLOAT);
+      if (allTracks[trackn]->MIDI_channel_out == 17)
+        MasterOut.fx_section.FX3_1.gain(allTracks[trackn]->mixFX3);
+      if (allTracks[trackn]->MIDI_channel_out == 18)
+        MasterOut.fx_section.FX3_2.gain(allTracks[trackn]->mixFX3);
+      if (allTracks[trackn]->MIDI_channel_out == 19)
+        MasterOut.fx_section.FX3_3.gain(allTracks[trackn]->mixFX3);
+      if (allTracks[trackn]->MIDI_channel_out == 20)
+        MasterOut.fx_section.FX3_4.gain(allTracks[trackn]->mixFX3);
+      if (allTracks[trackn]->MIDI_channel_out == 21)
+        MasterOut.fx_section.FX3_5.gain(allTracks[trackn]->mixFX3);
+
+      drawPot(XPos, YPos, allTracks[trackn]->mixFX3Pot, name);
+    }
   }
 }

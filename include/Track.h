@@ -1,13 +1,17 @@
 #include <Arduino.h>
-#include <Sequencer_Modes.h>
 
 class Track
 {
 public:
+     void play_SeqMode0(byte cloock);
 #define OCTAVE_CHANGE_TEXT 3
 #define NOTES_PER_OCTAVE 12
 #define SEQUENCER_OPTIONS_VERY_RIGHT 18
 #define BARS_PER_PAGE 16
+#define NO_NOTE 128
+#define MAX_TICKS 96
+#define MAX_CLIPS 9
+#define NUM_USER_CLIPS 7
     ILI9341_t3n *tft; // Pointer to the display object
 
     byte MIDI_channel_in;
@@ -33,7 +37,7 @@ public:
     byte active_voice = 0;
     byte search_free_voice = 0;
     const char *pluginNames[32] = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16",
-                                   "Strng", "1OSC", "2FM", "MDrm", "Drum", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"};
+                                   "Strng", "1OSC", "2FM", "MDrm", "Drum", "Draw", "23", "24", "25", "26", "27", "28", "29", "30", "31"};
     bool note_is_on[MAX_VOICES] = {true, true, true, true, true, true, true, true, true, true, true, true};
     bool ready_for_NoteOff[MAX_VOICES] = {false, false, false, false, false, false, false, false, false, false, false, false};
     int encoder_colour[NUM_ENCODERS] = {ILI9341_BLUE, ILI9341_RED, ILI9341_GREEN, ILI9341_WHITE};
@@ -43,6 +47,17 @@ public:
     byte maxVal;
     byte mixGainPot;
     float mixGain = 1;
+    byte mixDryPot;
+    float mixDry = 1;
+    byte mixFX1Pot;
+    float mixFX1 = 0;
+    byte mixFX2Pot;
+    float mixFX2 = 0;
+    byte mixFX3Pot;
+    float mixFX3 = 0;
+    byte mute_norm_solo_pot = 1;
+    bool muted;
+    bool soloed;
 
     Track(ILI9341_t3n *display, Output *OutPut, byte Y, byte cI, byte cO)
     {
@@ -90,21 +105,40 @@ public:
         //  Serial.println(internal_clock_bar);
         if (internal_clock_is_on)
         {
-            if (sequencer_mode == 0)
+            if (!muted || soloed)
             {
-                play_SeqMode0(internal_clock);
-            }
-            if (sequencer_mode == 1)
-            {
-                play_SeqMode1(internal_clock);
-            }
-            if (sequencer_mode == 2)
-            {
-                play_SeqMode2(internal_clock);
+                if (sequencer_mode == 0)
+                {
+                    play_SeqMode0(internal_clock);
+                }
+                if (sequencer_mode == 1)
+                {
+                    play_SeqMode1(internal_clock);
+                }
+                if (sequencer_mode == 2)
+                {
+                    play_SeqMode2(internal_clock);
+                }
             }
         }
     }
-    void play_SeqMode0(byte cloock)
+    void set_SeqMode_parameters(byte row)
+    {
+        if (sequencer_mode == 1)
+            set_SeqMode1_parameters(row);
+        if (sequencer_mode == 2)
+            set_SeqMode2_parameters(row);
+    }
+    void draw_sequencer_modes(byte mode)
+    {
+        clearWorkSpace();
+        change_plugin_row = true;
+        if (mode == 1)
+            draw_SeqMode1();
+        if (mode == 2)
+            draw_SeqMode2();
+    }
+    /*void play_SeqMode0(byte cloock)
     {
 
         for (int v = 0; v < MAX_VOICES; v++)
@@ -129,7 +163,8 @@ public:
                 }
             }
         }
-    }
+    }*/
+
     void play_SeqMode1(byte cloock)
     {
 
@@ -154,6 +189,34 @@ public:
             }
         }
     }
+    void set_SeqMode1_parameters(byte row)
+    {
+        draw_SeqMode1();
+        if (row == 0)
+        {
+            set_SeqMode1_value(0, 0, "Oct -", 0, 0);
+            set_SeqMode1_value(1, 0, "Oct +", 0, 0);
+        }
+    }
+    void set_SeqMode1_value(byte XPos, byte YPos, const char *name, int min, int max)
+    {
+        if (enc_moved[XPos])
+        {
+            int n = XPos + (YPos * NUM_ENCODERS);
+            SeqMod_1_Poti[n] = constrain(SeqMod_1_Poti[n] + encoded[XPos], 0, MIDI_CC_RANGE);
+            drawPot(XPos, YPos, SeqMod_1_Poti[n], name);
+        }
+    }
+    void draw_SeqMode1()
+    {
+        if (change_plugin_row)
+        {
+            change_plugin_row = false;
+            drawPot(0, 0, SeqMod_1_Poti[0], "Oct -");
+            drawPot(1, 0, SeqMod_1_Poti[1], "Oct +");
+        }
+    }
+
     void play_SeqMode2(byte cloock)
     {
         static byte maxValIndex;
@@ -225,32 +288,6 @@ public:
             }
         }
     }
-
-    void set_SeqMode_parameters(byte row)
-    {
-        if (sequencer_mode == 1)
-            set_SeqMode1_parameters(row);
-        if (sequencer_mode == 2)
-            set_SeqMode2_parameters(row);
-    }
-    void set_SeqMode1_parameters(byte row)
-    {
-        draw_SeqMode1();
-        if (row == 0)
-        {
-            set_SeqMode1_value(0, 0, "Oct -", 0, 0);
-            set_SeqMode1_value(1, 0, "Oct +", 0, 0);
-        }
-    }
-    void set_SeqMode1_value(byte XPos, byte YPos, const char *name, int min, int max)
-    {
-        if (enc_moved[XPos])
-        {
-            int n = XPos + (YPos * NUM_ENCODERS);
-            SeqMod_1_Poti[n] = constrain(SeqMod_1_Poti[n] + encoded[XPos], 0, MIDI_CC_RANGE);
-            drawPot(XPos, YPos, SeqMod_1_Poti[n], name);
-        }
-    }
     void set_SeqMode2_parameters(byte row)
     {
         draw_SeqMode2();
@@ -290,25 +327,6 @@ public:
             int n = XPos + (YPos * NUM_ENCODERS);
             SeqMod_2_Poti[n] = constrain(SeqMod_2_Poti[n] + encoded[XPos], 0, MIDI_CC_RANGE);
             drawPot(XPos, YPos, SeqMod_2_Poti[n], name);
-        }
-    }
-
-    void draw_sequencer_modes(byte mode)
-    {
-        clearWorkSpace();
-        change_plugin_row = true;
-        if (mode == 1)
-            draw_SeqMode1();
-        if (mode == 2)
-            draw_SeqMode2();
-    }
-    void draw_SeqMode1()
-    {
-        if (change_plugin_row)
-        {
-            change_plugin_row = false;
-            drawPot(0, 0, SeqMod_1_Poti[0], "Oct -");
-            drawPot(1, 0, SeqMod_1_Poti[1], "Oct +");
         }
     }
     void draw_SeqMode2()
