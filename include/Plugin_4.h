@@ -5,8 +5,12 @@
 #include <SD.h>
 #include <SerialFlash.h>
 #include "mixers.h"
+#include <AudioSamples.h>
 extern void drawPot(int XPos, byte YPos, int dvalue, const char *dname);
 extern int tuning;
+extern bool enc_moved[4];
+extern int encoded[4];
+extern bool change_plugin_row; 
 // TeensyDAW: begin automatically generated code
 
 class Plugin_4

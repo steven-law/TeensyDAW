@@ -1,8 +1,8 @@
 #include <Arduino.h>
-
+#include <XPT2046_Touchscreen.h>
 #include <ILI9341_t3n.h>
 #include <ili9341_t3n_font_Arial.h> // from ILI9341_t3
-#include <XPT2046_Touchscreen.h>
+
 #include <SPI.h>
 #include <Adafruit_Keypad.h>
 // #include <Key.h>
@@ -11,7 +11,7 @@
 #include <Wire.h>
 #include <Bounce2.h>
 #include <MIDI.h>
-#include <global_stuff.h>
+#include "global_stuff.h"
 #include <AudioSamples.h>
 #include <Output.h>
 #include <Track.h>
@@ -43,10 +43,17 @@ const char *playstate[3] = {"Mute", "Play", "Solo"};
 // notenumber to frequency chart
 
 #define SAMPLE_ROOT 69
+extern byte lastPotRow;
+extern int pixelTouchX;
+extern int gridTouchY;
+extern byte arrangerpage;
+extern byte active_track;
+extern bool buttonPressed[NUM_BUTTONS];
+bool otherCtrlButtons = true;
 
 // Teensy 4.1 PINOUT
 // Pinout for screen
-#define TIRQ_PIN 15                                                                  // alternate Pins: any digital pin
+// #define TIRQ_PIN 15                                                                  // alternate Pins: any digital pin
 #define CS_PIN 14                                                                    // alternate Pins: any digital pin
 #define TFT_DC 9                                                                     // alternate Pins 9, 10, 20, 21
 #define TFT_CS 10                                                                    // alternate Pins 9, 15, 20, 21
@@ -54,8 +61,9 @@ const char *playstate[3] = {"Mute", "Play", "Solo"};
 #define TFT_MOSI 11                                                                  // shareable
 #define TFT_SCK 13                                                                   // shareable
 #define TFT_MISO 12                                                                  // shareable
-ILI9341_t3n tft = ILI9341_t3n(TFT_CS, TFT_DC, TFT_RST, TFT_MOSI, TFT_SCK, TFT_MISO); // initiate TFT-Srceen
 XPT2046_Touchscreen ts(CS_PIN);                                                      // initiate Touchscreen
+ILI9341_t3n tft = ILI9341_t3n(TFT_CS, TFT_DC, TFT_RST, TFT_MOSI, TFT_SCK, TFT_MISO); // initiate TFT-Srceen
+
 // calibrate your Screen
 //  This is calibration data for the raw touch data to the screen coordinates
 #define TS_MINX 440
@@ -126,29 +134,32 @@ public:
   }
   void move()
   {
-    int arranger_offset = 0;
-    if (deltaY == ARRANGER_FRAME_H)
-      if (yPos >= 1)
-        arranger_offset = 4;
-    for (int pixel = 0; pixel < 16; pixel++)
+    if (xPos != last_xPos || yPos != last_yPos)
     {
-      tft->drawPixel(pixel + (last_xPos), (deltaY * last_yPos) + 1 + arranger_offset, tftRAM[0][pixel]);  // draw upper line X1
-      tft->drawPixel(pixel + (last_xPos), (deltaY * last_yPos) + 15 + arranger_offset, tftRAM[1][pixel]); // draw bottom line X2
-      tft->drawPixel((last_xPos) + 1, pixel + (deltaY * last_yPos) + arranger_offset, tftRAM[2][pixel]);  // draw left line Y1
-      tft->drawPixel((last_xPos) + 15, pixel + (deltaY * last_yPos) + arranger_offset, tftRAM[3][pixel]); // draw right line Y2
-    }
-    for (int pixel = 0; pixel < 16; pixel++)
-    {
-      tftRAM[0][pixel] = tft->readPixel(pixel + (xPos), (deltaY * yPos) + 1 + arranger_offset);  // save upper line
-      tftRAM[1][pixel] = tft->readPixel(pixel + (xPos), (deltaY * yPos) + 15 + arranger_offset); // save bottom line
-      tftRAM[2][pixel] = tft->readPixel((xPos) + 1, pixel + (deltaY * yPos) + arranger_offset);  // save left line
-      tftRAM[3][pixel] = tft->readPixel((xPos) + 15, pixel + (deltaY * yPos) + arranger_offset); // save right line
-    }
+      int arranger_offset = 0;
+      if (deltaY == ARRANGER_FRAME_H)
+        if (yPos >= 1)
+          arranger_offset = 4;
+      for (int pixel = 0; pixel < 16; pixel++)
+      {
+        tft->drawPixel(pixel + (last_xPos), (deltaY * last_yPos) + 1 + arranger_offset, tftRAM[0][pixel]);  // draw upper line X1
+        tft->drawPixel(pixel + (last_xPos), (deltaY * last_yPos) + 15 + arranger_offset, tftRAM[1][pixel]); // draw bottom line X2
+        tft->drawPixel((last_xPos) + 1, pixel + (deltaY * last_yPos) + arranger_offset, tftRAM[2][pixel]);  // draw left line Y1
+        tft->drawPixel((last_xPos) + 15, pixel + (deltaY * last_yPos) + arranger_offset, tftRAM[3][pixel]); // draw right line Y2
+      }
+      for (int pixel = 0; pixel < 16; pixel++)
+      {
+        tftRAM[0][pixel] = tft->readPixel(pixel + (xPos), (deltaY * yPos) + 1 + arranger_offset);  // save upper line
+        tftRAM[1][pixel] = tft->readPixel(pixel + (xPos), (deltaY * yPos) + 15 + arranger_offset); // save bottom line
+        tftRAM[2][pixel] = tft->readPixel((xPos) + 1, pixel + (deltaY * yPos) + arranger_offset);  // save left line
+        tftRAM[3][pixel] = tft->readPixel((xPos) + 15, pixel + (deltaY * yPos) + arranger_offset); // save right line
+      }
 
-    tft->drawRect((xPos) + 1, (deltaY * yPos) + 1 + arranger_offset, STEP_FRAME_W - 1, STEP_FRAME_H - 1, ILI9341_WHITE);
+      tft->drawRect((xPos) + 1, (deltaY * yPos) + 1 + arranger_offset, STEP_FRAME_W - 1, STEP_FRAME_H - 1, ILI9341_WHITE);
 
-    last_xPos = xPos;
-    last_yPos = yPos;
+      last_xPos = xPos;
+      last_yPos = yPos;
+    }
   }
   void showCoordinates()
   {
@@ -499,10 +510,10 @@ void setup()
   tft.begin();
   tft.setRotation(3);
   ts.begin();
-  ts.setRotation(2);
+  ts.setRotation(1);
   tft.fillScreen(ILI9341_BLACK);
   tft.setFrameBuffer(tft_frame_buffer);
-  tft.useFrameBuffer(true);
+  tft.useFrameBuffer(false);
   tft.initDMASettings();
   // tft.updateChangedAreasOnly(true);
   tft.setTextColor(ILI9341_WHITE);
@@ -546,6 +557,11 @@ void setup()
 
 void loop()
 {
+  // See if there's any  touch data for us
+  if (ts.bufferEmpty())
+  {
+    return;
+  }
   usbMIDI.read();
   Masterclock.process_MIDItick();
 
@@ -683,32 +699,29 @@ void clock_to_notes()
 
 void readTouchinput()
 {
-  
-  /*
+
+  tft.waitUpdateAsyncComplete();
   // Serial.println("would like to be touched");
-    if (ts.touched())
-    {
-      
+  if (ts.touched())
+  {
 
-      TS_Point touch = ts.getPoint();
-      //touch.x = map(touch.x, TS_MINX, TS_MAXX, 0, 320);
-      //touch.y = map(touch.y, TS_MINY, TS_MAXY, 0, 240);
-      touchedX = touch.x;
-      touchedY = touch.y;
-      //pixelTouchX = touch.x;
-      //gridTouchY = touch.y / 16;
-      display_touched = true;
-
+    TS_Point touch = ts.getPoint();
+    touch.x = map(touch.x, TS_MINX, TS_MAXX, 0, 320);
+    touch.y = map(touch.y, TS_MINY, TS_MAXY, 0, 240);
+    touchedX = touch.x;
+    touchedY = touch.y;
+    // pixelTouchX = touch.x;
+    // gridTouchY = touch.y / 16;
+    display_touched = true;
+    if (millis() % 50 == 0)
       Serial.printf("touched @ x %d, y %d \n", touchedX, touchedY);
+  }
 
-    }
-
-    if (!ts.touched())
-    {
-      display_touched = false;
-       Serial.printf("not touched @ x %d, y %d \n", touchedX, touchedY);
-    }
-    */
+  if (!ts.touched())
+  {
+    display_touched = false;
+    // Serial.printf("not touched @ x %d, y %d \n", touchedX, touchedY);
+  }
 }
 void readEncoders()
 {
@@ -759,13 +772,11 @@ void encoder_SetCursor(byte maxY)
   {
     pixelTouchX = constrain(pixelTouchX + encoded[0] * 2, 0, 320);
     enc_moved[0] = false;
-    cursor_moved = true;
   }
   if (enc_moved[1])
   {
     gridTouchY = constrain(gridTouchY + encoded[1], 0, maxY);
     enc_moved[1] = false;
-    cursor_moved = true;
   }
 }
 

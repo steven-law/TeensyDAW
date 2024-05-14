@@ -14,12 +14,18 @@ extern int tuning;
 extern bool display_touched;
 extern int touchedX;
 extern int touchedY;
+extern bool enc_moved[4];
+extern int encoded[4];
+extern bool change_plugin_row;
+extern float *note_frequency;
+extern int pixelTouchX;
+extern int gridTouchY;
+extern bool buttonPressed[NUM_BUTTONS];
 // TeensyDAW: begin automatically generated code
 
 class Plugin_6
 {
 public:
-
     byte myID;
     byte potentiometer[16];
     bool WaveformAssigned = false;
@@ -77,7 +83,6 @@ public:
     {
         myID = setID;
 
-
         for (int i = 0; i < MAX_VOICES; i++)
         {
             dc[i].amplitude(1);
@@ -133,23 +138,28 @@ public:
         if (WaveformAssigned)
             set_parameters_page_2(row);
 
-        if (buttonPressed[BUTTON_ENTER])
+        if (!WaveformAssigned && display_touched)
         {
-            if (pixelTouchX >= 18 * STEP_FRAME_W && gridTouchY == 12)
+
+            if (touchedX >= 18 * STEP_FRAME_W)
             {
-                WaveformAssigned = true;
-                Serial.println("drawing pl6 parameter page");
-                draw_plugin_page_2();
+                if (touchedY / STEP_FRAME_H == 12)
+                {
+                    WaveformAssigned = true;
+                    Serial.println("drawing pl6 parameter page");
+                    clearWorkSpace();
+                    change_plugin_row = true;
+                    draw_plugin_page_2();
+                }
+
+                if (touchedY >= 13 * STEP_FRAME_H)
+                {
+                    clearSingleCycleWaveform();
+                }
             }
 
-            if (pixelTouchX >= 18 * STEP_FRAME_W && gridTouchY >= 13)
-            {
-                clearSingleCycleWaveform();
-            }
-        }
-        // draw singleCycle Waveform BY HAND
-        if (display_touched)
-        {
+            // draw singleCycle Waveform BY HAND
+
             int SCdrawX = touchedX;
             int SCdrawY = touchedY;
 
@@ -174,6 +184,15 @@ public:
     }
     void set_parameters_page_2(byte row)
     {
+        if (display_touched)
+        {
+            if (touchedX >= 18 * STEP_FRAME_W&&touchedY >= 13 * STEP_FRAME_H)
+            {
+                clearSingleCycleWaveform();
+            }
+        }
+        draw_plugin_page_2();
+
         if (row == 0)
         {
             // set_voice_waveform(0, 0, "W~Form", 0, 12);
@@ -204,12 +223,13 @@ public:
     {
         if (WaveformAssigned)
         {
+
             draw_plugin_page_2();
         }
         if (change_plugin_row)
         {
             change_plugin_row = false;
-            myDrawLine(STEP_FRAME_W * 2, 120, 256+STEP_FRAME_W * 2, 120, ILI9341_WHITE);
+            myDrawLine(STEP_FRAME_W * 2, 120, 256 + STEP_FRAME_W * 2, 120, ILI9341_WHITE);
             drawActiveRect(18, 12, 2, 2, WaveformAssigned, "Enter", ILI9341_ORANGE);
             drawActiveRect(18, 13, 2, 2, true, "clear", ILI9341_RED);
             myDrawRect(STEP_FRAME_W * 2 - 1, STEP_FRAME_H * 1 - 1, 256 + 2, 208 + 2, ILI9341_BLACK);
@@ -229,7 +249,7 @@ public:
         {
             change_plugin_row = false;
             // Serial.println("drawing plugin 2");
-            drawPot(0, 0, potentiometer[0], "W~Form");
+            //drawPot(0, 0, potentiometer[0], "W~Form");
             drawPot(1, 0, potentiometer[1], "Volume");
 
             drawPot(0, 2, potentiometer[8], "Filt-Frq");
@@ -241,11 +261,14 @@ public:
             drawPot(1, 3, potentiometer[13], "Decay");
             drawPot(2, 3, potentiometer[14], "Sustain");
             drawPot(3, 3, potentiometer[15], "Release");
+
+            drawActiveRect(18, 13, 2, 2, true, "clear", ILI9341_RED);
         }
     }
 
     void clearSingleCycleWaveform()
     {
+        Serial.println("clearing waveform");
         WaveformAssigned = false;
         for (int i = 0; i < 256; i++)
         {
@@ -253,6 +276,8 @@ public:
         }
         old_singleCycleValue = 0;
         old_xPos_SingleCyclePixel = 32;
+        change_plugin_row = true;
+        clearWorkSpace();
         draw_plugin();
     }
 

@@ -6,13 +6,11 @@
 #include <SerialFlash.h>
 #include <Plugin_midi.h>
 #include "FX_Section.h"
+extern bool change_plugin_row;
 
-int tuning = 440;
 extern float *note_frequency;
-extern const byte PLUGIN1_PAGE1;
-extern const byte PLUGIN2_PAGE1;
-extern const byte PLUGIN3_PAGE1;
-extern const byte NUM_PLUGINS;
+
+
 // Encoder Pins
 extern bool enc_moved[4];
 extern int encoded[4];
@@ -54,6 +52,7 @@ public:
     }
     void noteOn(byte note, byte velo, byte channel, byte voice)
     {
+        //Serial.printf("NoteOn channel: %d, note: %d\n", channel, note);
         if (channel <= 16)
             Plugin_midi.noteOn(note, velo, channel);
         if (channel == 17)

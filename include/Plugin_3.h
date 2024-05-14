@@ -7,6 +7,10 @@
 #include "mixers.h"
 extern void drawPot(int XPos, byte YPos, int dvalue, const char *dname);
 extern int tuning;
+extern bool enc_moved[4];
+extern int encoded[4];
+extern bool change_plugin_row; 
+extern float *note_frequency;
 /*
 M WF    M Ratio   M Vol    C WF
 M Atk   M Dec     M St     M Rl

@@ -1,6 +1,7 @@
 #include <Arduino.h>
 
-extern void clearWorkSpace();
+void clearWorkSpace();
+extern bool change_plugin_row; 
 class Plugin_Midi
 {
 public:

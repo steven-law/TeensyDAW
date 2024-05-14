@@ -1,5 +1,6 @@
-// individual trackcolors
-int trackColor[9]{6150246, 8256638, 1095334, 12643941, 2583100, 9365295, 12943157, 5678954, ILI9341_WHITE};
+#include <Arduino.h>
+#include <ILI9341_t3n.h>
+
 //  sizes and positions
 
 #define GRID_LENGTH_HOR 256
@@ -104,28 +105,19 @@ int trackColor[9]{6150246, 8256638, 1095334, 12643941, 2583100, 9365295, 1294315
 #define SEQ_GRID_RIGHT (18 * STEP_FRAME_W) - 2
 #define SEQ_GRID_TOP 1
 #define SEQ_GRID_BOTTOM 12
-const byte PLUGIN1_PAGE1 = 100;
-const byte PLUGIN2_PAGE1 = 105;
-const byte PLUGIN3_PAGE1 = 110;
-const byte NUM_PLUGINS = 3;
+
+
 const byte VELOCITY_NOTE_ON = 127;
 const byte VELOCITY_NOTE_OFF = 0;
 const byte NUM_TRACKS =8;
 
-byte arrangerpage;
-bool buttonPressed[NUM_BUTTONS];
-bool cursor_moved;
-bool otherCtrlButtons = true;
-int pixelTouchX = 0;
-int gridTouchY = 0;
-byte active_track = ACTIVE_TRACK_1;
 
-byte lastPotRow = 0;
-byte encoder_function = 0;
-bool change_plugin_row;
-float *note_frequency;
 
-// Encoder Pins
-bool enc_moved[4]{0, 0, 0, 0};
-int encoded[4];
+
+
+
+
+
+
+
 
