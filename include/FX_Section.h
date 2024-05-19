@@ -10,6 +10,8 @@
 #include "Plugin_4.h"
 #include "Plugin_5.h"
 #include "Plugin_6.h"
+#include "Plugin_7.h"
+#include "Plugin_8.h"
 #include "mixers.h"
 
 // TeensyDAW: begin automatically generated code
@@ -19,7 +21,7 @@ extern bool change_plugin_row;
 class FX_Section
 {
 public:
-byte FX1_Potentiomer[2];
+    byte FX1_Potentiomer[2];
     byte FX2_Potentiomer[2];
     byte FX3_Potentiomer[2];
     Plugin_1 plugin_1;
@@ -28,6 +30,8 @@ byte FX1_Potentiomer[2];
     Plugin_4 plugin_4;
     Plugin_5 plugin_5;
     Plugin_6 plugin_6;
+    Plugin_7 plugin_7;
+    Plugin_8 plugin_8;
     AudioAmplifier dry_1;
     AudioAmplifier FX1_1;
     AudioAmplifier FX2_1;
@@ -48,10 +52,18 @@ byte FX1_Potentiomer[2];
     AudioAmplifier FX1_5;
     AudioAmplifier FX2_5;
     AudioAmplifier FX3_5;
-        AudioAmplifier dry_6;
+    AudioAmplifier dry_6;
     AudioAmplifier FX1_6;
     AudioAmplifier FX2_6;
     AudioAmplifier FX3_6;
+    AudioAmplifier dry_7;
+    AudioAmplifier FX1_7;
+    AudioAmplifier FX2_7;
+    AudioAmplifier FX3_7;
+    AudioAmplifier dry_8;
+    AudioAmplifier FX1_8;
+    AudioAmplifier FX2_8;
+    AudioAmplifier FX3_8;
     AudioMixer12 dry_mixer;
     AudioMixer12 FX1_mixer;
     AudioMixer12 FX2_mixer;
@@ -59,14 +71,14 @@ byte FX1_Potentiomer[2];
     AudioEffectFreeverb freeverb;
     AudioEffectBitcrusher bitcrusher;
     AudioMixer4 endmixer;
-    AudioConnection *patchCord[54]; // total patchCordCount:46 including array typed ones.
+    AudioConnection *patchCord[70]; // total patchCordCount:46 including array typed ones.
 
     // constructor (this is called when class-object is created)
     FX_Section()
     {
         int pci = 0; // used only for adding new patchcords
 
-         patchCord[pci++] = new AudioConnection(plugin_1.SongVol, 0, dry_1, 0);
+        patchCord[pci++] = new AudioConnection(plugin_1.SongVol, 0, dry_1, 0);
         patchCord[pci++] = new AudioConnection(plugin_1.SongVol, 0, FX1_1, 0);
         patchCord[pci++] = new AudioConnection(plugin_1.SongVol, 0, FX2_1, 0);
         patchCord[pci++] = new AudioConnection(plugin_1.SongVol, 0, FX3_1, 0);
@@ -90,6 +102,14 @@ byte FX1_Potentiomer[2];
         patchCord[pci++] = new AudioConnection(plugin_6.SongVol, 0, FX1_6, 0);
         patchCord[pci++] = new AudioConnection(plugin_6.SongVol, 0, FX2_6, 0);
         patchCord[pci++] = new AudioConnection(plugin_6.SongVol, 0, FX3_6, 0);
+        patchCord[pci++] = new AudioConnection(plugin_7.SongVol, 0, dry_7, 0);
+        patchCord[pci++] = new AudioConnection(plugin_7.SongVol, 0, FX1_7, 0);
+        patchCord[pci++] = new AudioConnection(plugin_7.SongVol, 0, FX2_7, 0);
+        patchCord[pci++] = new AudioConnection(plugin_7.SongVol, 0, FX3_7, 0);
+        patchCord[pci++] = new AudioConnection(plugin_8.SongVol, 0, dry_8, 0);
+        patchCord[pci++] = new AudioConnection(plugin_8.SongVol, 0, FX1_8, 0);
+        patchCord[pci++] = new AudioConnection(plugin_8.SongVol, 0, FX2_8, 0);
+        patchCord[pci++] = new AudioConnection(plugin_8.SongVol, 0, FX3_8, 0);
         patchCord[pci++] = new AudioConnection(dry_1, 0, dry_mixer, 0);
         patchCord[pci++] = new AudioConnection(FX1_1, 0, FX1_mixer, 0);
         patchCord[pci++] = new AudioConnection(FX2_1, 0, FX2_mixer, 0);
@@ -114,12 +134,22 @@ byte FX1_Potentiomer[2];
         patchCord[pci++] = new AudioConnection(FX1_6, 0, FX1_mixer, 5);
         patchCord[pci++] = new AudioConnection(FX2_6, 0, FX2_mixer, 5);
         patchCord[pci++] = new AudioConnection(FX3_6, 0, FX3_mixer, 5);
+        patchCord[pci++] = new AudioConnection(dry_7, 0, dry_mixer, 6);
+        patchCord[pci++] = new AudioConnection(FX1_7, 0, FX1_mixer, 6);
+        patchCord[pci++] = new AudioConnection(FX2_7, 0, FX2_mixer, 6);
+        patchCord[pci++] = new AudioConnection(FX3_7, 0, FX3_mixer, 6);
+        patchCord[pci++] = new AudioConnection(dry_8, 0, dry_mixer, 7);
+        patchCord[pci++] = new AudioConnection(FX1_8, 0, FX1_mixer, 7);
+        patchCord[pci++] = new AudioConnection(FX2_8, 0, FX2_mixer, 7);
+        patchCord[pci++] = new AudioConnection(FX3_8, 0, FX3_mixer, 7);
         patchCord[pci++] = new AudioConnection(dry_mixer, 0, endmixer, 0);
         patchCord[pci++] = new AudioConnection(FX1_mixer, 0, freeverb, 0);
         patchCord[pci++] = new AudioConnection(FX2_mixer, 0, bitcrusher, 0);
         patchCord[pci++] = new AudioConnection(FX3_mixer, 0, endmixer, 3);
         patchCord[pci++] = new AudioConnection(freeverb, 0, endmixer, 1);
         patchCord[pci++] = new AudioConnection(bitcrusher, 0, endmixer, 2);
+        
+    
     }
     void setup()
     {
@@ -229,5 +259,7 @@ byte FX1_Potentiomer[2];
             drawPot(XPos, YPos, FX1_Potentiomer[XPos], name);
         }
     }
+
+
 };
 // TeensyDAW: end automatically generated code

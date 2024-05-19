@@ -26,6 +26,11 @@ public:
     void set_SeqMode2_parameters(byte row);
     void set_SeqMode2_value(byte XPos, byte YPos, const char *name, int min, int max);
     void draw_SeqMode2();
+
+    void play_SeqMode3(byte cloock);
+    void set_SeqMode3_parameters(byte row);
+    void set_SeqMode3_value(byte XPos, byte YPos, const char *name, int min, int max);
+    void draw_SeqMode3();
 #define OCTAVE_CHANGE_TEXT 3
 #define NOTES_PER_OCTAVE 12
 #define SEQUENCER_OPTIONS_VERY_RIGHT 18
@@ -59,7 +64,7 @@ public:
     byte active_voice = 0;
     byte search_free_voice = 0;
     const char *pluginNames[32] = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16",
-                                   "Strng", "1OSC", "2FM", "MDrm", "Drum", "Draw", "23", "24", "25", "26", "27", "28", "29", "30", "31"};
+                                   "Strng", "1OSC", "2FM", "MDrm", "Drum", "Draw", "Boom", "Dtune", "25", "26", "27", "28", "29", "30", "31"};
     bool note_is_on[MAX_VOICES] = {true, true, true, true, true, true, true, true, true, true, true, true};
     bool ready_for_NoteOff[MAX_VOICES] = {false, false, false, false, false, false, false, false, false, false, false, false};
     int encoder_colour[NUM_ENCODERS] = {ILI9341_BLUE, ILI9341_RED, ILI9341_GREEN, ILI9341_WHITE};
@@ -142,6 +147,10 @@ public:
                 {
                     play_SeqMode2(internal_clock);
                 }
+                if (sequencer_mode == 3)
+                {
+                    play_SeqMode3(internal_clock);
+                }
             }
         }
     }
@@ -151,6 +160,8 @@ public:
             set_SeqMode1_parameters(row);
         if (sequencer_mode == 2)
             set_SeqMode2_parameters(row);
+        if (sequencer_mode == 3)
+            set_SeqMode3_parameters(row);
     }
     void draw_sequencer_modes(byte mode)
     {
@@ -160,6 +171,8 @@ public:
             draw_SeqMode1();
         if (mode == 2)
             draw_SeqMode2();
+        if (mode == 3)
+            draw_SeqMode3();
     }
     /*void play_SeqMode0(byte cloock)
     {

@@ -513,7 +513,7 @@ void setup()
   ts.setRotation(1);
   tft.fillScreen(ILI9341_BLACK);
   tft.setFrameBuffer(tft_frame_buffer);
-  tft.useFrameBuffer(false);
+  tft.useFrameBuffer(true);
   tft.initDMASettings();
   // tft.updateChangedAreasOnly(true);
   tft.setTextColor(ILI9341_WHITE);
@@ -558,29 +558,25 @@ void setup()
 void loop()
 {
   // See if there's any  touch data for us
-  if (ts.bufferEmpty())
-  {
-    return;
-  }
+
   usbMIDI.read();
   Masterclock.process_MIDItick();
-
+  clock_to_notes();
   readEncoders();
   readMainButtons();
   readTouchinput();
   input_behaviour();
 
-  clock_to_notes();
-
   // placeholder for debugging
-  if (millis() % 200 == 0)
+  /*if (millis() % 200 == 0)
   {
     // Serial.println(Masterclock.playing ? "True" : "False");
-  }
+  }*/
+
   // placeholder for debugging
   if (millis() % 50 == 0)
   {
-
+    tft.updateScreenAsync();
     if (encoder_function == INPUT_FUNCTIONS_FOR_ARRANGER)
       cursor.update(pixelTouchX, gridTouchY, ARRANGER_FRAME_H);
     else
@@ -588,7 +584,7 @@ void loop()
     tft.fillRect(70, lastPotRow * 4, 10, 3, ILI9341_RED);
   }
 
-  tft.updateScreenAsync();
+  // tft.updateScreen();
 }
 void input_behaviour()
 {
@@ -700,9 +696,9 @@ void clock_to_notes()
 void readTouchinput()
 {
 
-  tft.waitUpdateAsyncComplete();
-  // Serial.println("would like to be touched");
-  if (ts.touched())
+  // tft.waitUpdateAsyncComplete();
+  //  Serial.println("would like to be touched");
+  if (!tft.asyncUpdateActive() && ts.touched())
   {
 
     TS_Point touch = ts.getPoint();
@@ -713,15 +709,12 @@ void readTouchinput()
     // pixelTouchX = touch.x;
     // gridTouchY = touch.y / 16;
     display_touched = true;
-    if (millis() % 50 == 0)
-      Serial.printf("touched @ x %d, y %d \n", touchedX, touchedY);
+    // if (millis() % 50 == 0)
+    // Serial.printf("touched @ x %d, y %d \n", touchedX, touchedY);
   }
 
-  if (!ts.touched())
-  {
+  else
     display_touched = false;
-    // Serial.printf("not touched @ x %d, y %d \n", touchedX, touchedY);
-  }
 }
 void readEncoders()
 {
@@ -1347,6 +1340,12 @@ void set_mixer_gain(byte XPos, byte YPos, const char *name, byte trackn)
         MasterOut.fx_section.plugin_4.MixGain.gain(allTracks[trackn]->mixGain);
       if (allTracks[trackn]->MIDI_channel_out == 21)
         MasterOut.fx_section.plugin_5.MixGain.gain(allTracks[trackn]->mixGain);
+      if (allTracks[trackn]->MIDI_channel_out == 22)
+        MasterOut.fx_section.plugin_6.MixGain.gain(allTracks[trackn]->mixGain);
+      if (allTracks[trackn]->MIDI_channel_out == 23)
+        MasterOut.fx_section.plugin_7.MixGain.gain(allTracks[trackn]->mixGain);
+      if (allTracks[trackn]->MIDI_channel_out == 24)
+        MasterOut.fx_section.plugin_8.MixGain.gain(allTracks[trackn]->mixGain);
 
       drawPot(XPos, YPos, allTracks[trackn]->mixGainPot, name);
     }
@@ -1540,6 +1539,12 @@ void set_mixer_dry(byte XPos, byte YPos, const char *name, byte trackn)
         MasterOut.fx_section.dry_4.gain(allTracks[trackn]->mixDry);
       if (allTracks[trackn]->MIDI_channel_out == 21)
         MasterOut.fx_section.dry_5.gain(allTracks[trackn]->mixDry);
+      if (allTracks[trackn]->MIDI_channel_out == 22)
+        MasterOut.fx_section.dry_6.gain(allTracks[trackn]->mixDry);
+      if (allTracks[trackn]->MIDI_channel_out == 23)
+        MasterOut.fx_section.dry_7.gain(allTracks[trackn]->mixDry);
+      if (allTracks[trackn]->MIDI_channel_out == 24)
+        MasterOut.fx_section.dry_8.gain(allTracks[trackn]->mixDry);
 
       drawPot(XPos, YPos, allTracks[trackn]->mixDryPot, name);
     }
@@ -1563,6 +1568,12 @@ void set_mixer_FX1(byte XPos, byte YPos, const char *name, byte trackn)
         MasterOut.fx_section.FX1_4.gain(allTracks[trackn]->mixFX1);
       if (allTracks[trackn]->MIDI_channel_out == 21)
         MasterOut.fx_section.FX1_5.gain(allTracks[trackn]->mixFX1);
+      if (allTracks[trackn]->MIDI_channel_out == 22)
+        MasterOut.fx_section.FX1_6.gain(allTracks[trackn]->mixFX1);
+      if (allTracks[trackn]->MIDI_channel_out == 23)
+        MasterOut.fx_section.FX1_7.gain(allTracks[trackn]->mixFX1);
+      if (allTracks[trackn]->MIDI_channel_out == 24)
+        MasterOut.fx_section.FX1_8.gain(allTracks[trackn]->mixFX1);
 
       drawPot(XPos, YPos, allTracks[trackn]->mixFX1Pot, name);
     }
@@ -1586,6 +1597,12 @@ void set_mixer_FX2(byte XPos, byte YPos, const char *name, byte trackn)
         MasterOut.fx_section.FX2_4.gain(allTracks[trackn]->mixFX2);
       if (allTracks[trackn]->MIDI_channel_out == 21)
         MasterOut.fx_section.FX2_5.gain(allTracks[trackn]->mixFX2);
+      if (allTracks[trackn]->MIDI_channel_out == 22)
+        MasterOut.fx_section.FX2_6.gain(allTracks[trackn]->mixFX2);
+      if (allTracks[trackn]->MIDI_channel_out == 23)
+        MasterOut.fx_section.FX2_7.gain(allTracks[trackn]->mixFX2);
+      if (allTracks[trackn]->MIDI_channel_out == 24)
+        MasterOut.fx_section.FX2_8.gain(allTracks[trackn]->mixFX2);
 
       drawPot(XPos, YPos, allTracks[trackn]->mixFX2Pot, name);
     }
@@ -1611,6 +1628,12 @@ void set_mixer_FX3(byte XPos, byte YPos, const char *name, byte trackn)
         MasterOut.fx_section.FX3_4.gain(allTracks[trackn]->mixFX3);
       if (allTracks[trackn]->MIDI_channel_out == 21)
         MasterOut.fx_section.FX3_5.gain(allTracks[trackn]->mixFX3);
+      if (allTracks[trackn]->MIDI_channel_out == 22)
+        MasterOut.fx_section.FX3_6.gain(allTracks[trackn]->mixFX3);
+      if (allTracks[trackn]->MIDI_channel_out == 23)
+        MasterOut.fx_section.FX3_7.gain(allTracks[trackn]->mixFX3);
+      if (allTracks[trackn]->MIDI_channel_out == 24)
+        MasterOut.fx_section.FX3_8.gain(allTracks[trackn]->mixFX3);
 
       drawPot(XPos, YPos, allTracks[trackn]->mixFX3Pot, name);
     }

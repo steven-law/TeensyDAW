@@ -22,7 +22,32 @@ extern int pixelTouchX;
 extern int gridTouchY;
 extern bool buttonPressed[NUM_BUTTONS];
 // TeensyDAW: begin automatically generated code
+//Name: Draw
+//Description: Subtractive "Draw-your-own-Waveforms" Synthesizer
+//Voices: 12
 
+//VCO
+//Pot 1: 
+//Pot 2: Vol
+//Pot 3: 
+//Pot 4: 
+
+//Pot 5: 
+//Pot 6: 
+//Pot 7: 
+//Pot 8: 
+
+//Filter:
+//Pot 9: Frequency
+//Pot 10: Resonance
+//Pot 11: Sweep
+//Pot 12: Type
+
+//Envelope:
+//Pot 9: Attack
+//Pot 10: Decay
+//Pot 11: Sustain
+//Pot 12: Release
 class Plugin_6
 {
 public:
@@ -134,6 +159,11 @@ public:
 
     void set_parameters(byte row)
     {
+        if (buttonPressed[BUTTON_ENTER])
+        {
+            smooth_waveform();
+            change_plugin_row = true;
+        }
         draw_plugin();
         if (WaveformAssigned)
             set_parameters_page_2(row);
@@ -143,17 +173,18 @@ public:
 
             if (touchedX >= 18 * STEP_FRAME_W)
             {
-                if (touchedY / STEP_FRAME_H == 12)
+                if (touchedY >= 11 * STEP_FRAME_H && touchedY <= 12 * STEP_FRAME_H) // if we touch the enter button
                 {
                     WaveformAssigned = true;
-                    Serial.println("drawing pl6 parameter page");
-                    clearWorkSpace();
                     change_plugin_row = true;
-                    draw_plugin_page_2();
+                    clearWorkSpace();
+                    draw_plugin();
                 }
 
-                if (touchedY >= 13 * STEP_FRAME_H)
+                if (touchedY >= 13 * STEP_FRAME_H) // if we touch the clear button
                 {
+                    WaveformAssigned = true;
+                    change_plugin_row = true;
                     clearSingleCycleWaveform();
                 }
             }
@@ -175,6 +206,7 @@ public:
                 singleCycleWaveform[arrayPos] = singleCycleValue;
                 Serial.printf("ArrayPos=%d, sampleData=%i\n", arrayPos, singleCycleValue);
                 // tft.drawPixel(xPos_SingleCyclePixel, yPos_SingleCyclePixel, ILI9341_WHITE);
+
                 myDrawLine(old_xPos_SingleCyclePixel, old_yPos_SingleCyclePixel, xPos_SingleCyclePixel, yPos_SingleCyclePixel, ILI9341_WHITE);
                 old_singleCycleValue = singleCycleValue;
                 old_xPos_SingleCyclePixel = xPos_SingleCyclePixel;
@@ -186,12 +218,13 @@ public:
     {
         if (display_touched)
         {
-            if (touchedX >= 18 * STEP_FRAME_W&&touchedY >= 13 * STEP_FRAME_H)
+            if (touchedX >= 18 * STEP_FRAME_W && touchedY >= 13 * STEP_FRAME_H)
             {
+                // WaveformAssigned = true;
                 clearSingleCycleWaveform();
             }
         }
-        draw_plugin_page_2();
+        draw_plugin();
 
         if (row == 0)
         {
@@ -223,21 +256,22 @@ public:
     {
         if (WaveformAssigned)
         {
-
             draw_plugin_page_2();
         }
         if (change_plugin_row)
         {
+            smooth_waveform();
             change_plugin_row = false;
             myDrawLine(STEP_FRAME_W * 2, 120, 256 + STEP_FRAME_W * 2, 120, ILI9341_WHITE);
-            drawActiveRect(18, 12, 2, 2, WaveformAssigned, "Enter", ILI9341_ORANGE);
+            drawActiveRect(18, 11, 2, 2, WaveformAssigned, "Enter", ILI9341_ORANGE);
             drawActiveRect(18, 13, 2, 2, true, "clear", ILI9341_RED);
             myDrawRect(STEP_FRAME_W * 2 - 1, STEP_FRAME_H * 1 - 1, 256 + 2, 208 + 2, ILI9341_BLACK);
             for (int i = 0; i < 256; i++)
             {
                 int xpos = i + 32;
                 int ypos = map(singleCycleWaveform[i], 32768, -32768, 16, 224);
-                myDrawLine(xpos_old, ypos_old, xpos, ypos, ILI9341_WHITE);
+                if (i > 0)
+                    myDrawLine(xpos_old, ypos_old, xpos, ypos, ILI9341_WHITE);
                 xpos_old = xpos;
                 ypos_old = ypos;
             }
@@ -249,7 +283,7 @@ public:
         {
             change_plugin_row = false;
             // Serial.println("drawing plugin 2");
-            //drawPot(0, 0, potentiometer[0], "W~Form");
+            // drawPot(0, 0, potentiometer[0], "W~Form");
             drawPot(1, 0, potentiometer[1], "Volume");
 
             drawPot(0, 2, potentiometer[8], "Filt-Frq");
@@ -265,20 +299,43 @@ public:
             drawActiveRect(18, 13, 2, 2, true, "clear", ILI9341_RED);
         }
     }
-
-    void clearSingleCycleWaveform()
+    void smooth_waveform()
     {
-        Serial.println("clearing waveform");
-        WaveformAssigned = false;
         for (int i = 0; i < 256; i++)
         {
-            singleCycleWaveform[i] = 0;
+            if (singleCycleWaveform[i] == 0)
+            {
+                for (int b = i; b < 256; b++)
+                {
+                    if (singleCycleWaveform[b] != 0)
+                    {
+                        singleCycleWaveform[i] = singleCycleWaveform[i - 1] + ((singleCycleWaveform[b] - singleCycleWaveform[i - 1]) / b - (i - 1)) * (i - (i - 1));
+
+                        break;
+                    }
+                }
+                // singleCycleWaveform[i] = singleCycleWaveform[i - 1];
+            }
         }
-        old_singleCycleValue = 0;
-        old_xPos_SingleCyclePixel = 32;
-        change_plugin_row = true;
-        clearWorkSpace();
-        draw_plugin();
+    }
+    void clearSingleCycleWaveform()
+    {
+        if (display_touched)
+        {
+            change_plugin_row = false;
+            display_touched = false;
+            Serial.println("clearing waveform");
+            WaveformAssigned = false;
+            for (int i = 0; i < 256; i++)
+            {
+                singleCycleWaveform[i] = 0;
+            }
+            old_singleCycleValue = 0;
+            old_xPos_SingleCyclePixel = 32;
+            change_plugin_row = true;
+            clearWorkSpace();
+            draw_plugin();
+        }
     }
 
     void set_voice_waveform(byte XPos, byte YPos, const char *name, int min, int max)

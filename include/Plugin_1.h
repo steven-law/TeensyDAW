@@ -12,7 +12,24 @@ extern int encoded[4];
 extern bool change_plugin_row; 
 extern float *note_frequency;
 // TeensyDAW: begin automatically generated code
+//Name: Strng
+//Description: Synthesize 12 plucked string sounds, such as a guitar sound
+//Voices: 12
+//Strings
+//Pot 1: Vol1
+//Pot 2: Vol2
+//Pot 3: Vol3
+//Pot 4: Vol4
 
+//Pot 5: Vol5
+//Pot 6: Vol6
+//Pot 7: Vol7
+//Pot 8: Vol8
+
+//Pot 9: Vol9
+//Pot 10: Vol10
+//Pot 11: Vol11
+//Pot 12: Vol12
 class Plugin_1
 {
 public:

@@ -10,7 +10,6 @@ extern bool change_plugin_row;
 
 extern float *note_frequency;
 
-
 // Encoder Pins
 extern bool enc_moved[4];
 extern int encoded[4];
@@ -21,7 +20,6 @@ void clearWorkSpace();
 class Output
 {
 public:
-
     byte plugin_channel[NUM_TRACKS]; // this stores the track number that is related to the plugin number f.e plguin_channel[Plugin_0]= Track number 2
     Plugin_Midi Plugin_midi;
     FX_Section fx_section;
@@ -49,10 +47,12 @@ public:
         fx_section.plugin_4.setup(20);
         fx_section.plugin_5.setup(21);
         fx_section.plugin_6.setup(22);
+        fx_section.plugin_7.setup(23);
+        fx_section.plugin_8.setup(24);
     }
     void noteOn(byte note, byte velo, byte channel, byte voice)
     {
-        //Serial.printf("NoteOn channel: %d, note: %d\n", channel, note);
+        // Serial.printf("NoteOn channel: %d, note: %d\n", channel, note);
         if (channel <= 16)
             Plugin_midi.noteOn(note, velo, channel);
         if (channel == 17)
@@ -67,6 +67,10 @@ public:
             fx_section.plugin_5.noteOn(note, 1, voice);
         if (channel == 22)
             fx_section.plugin_6.noteOn(note, 1, voice);
+        if (channel == 23)
+            fx_section.plugin_7.noteOn(note, 1, voice);
+        if (channel == 24)
+            fx_section.plugin_8.noteOn(note, 1, voice);
     }
     void noteOff(byte note, byte velo, byte channel, byte voice)
     {
@@ -82,11 +86,15 @@ public:
             fx_section.plugin_5.noteOff(note, voice);
         if (channel == 22)
             fx_section.plugin_6.noteOff(voice);
+        if (channel == 23)
+            fx_section.plugin_7.noteOff(voice);
+        if (channel == 24)
+            fx_section.plugin_8.noteOff(voice);
     }
 
     void set_parameters(byte trackID, byte row)
     {
-        //Serial.printf("set parameters track: %d, channel: %d\n", trackID, plugin_channel[trackID]);
+        // Serial.printf("set parameters track: %d, channel: %d\n", trackID, plugin_channel[trackID]);
         if (plugin_channel[trackID] < 17)
             Plugin_midi.set_parameters(row);
         if (plugin_channel[trackID] == 17)
@@ -101,6 +109,10 @@ public:
             fx_section.plugin_5.set_parameters(row);
         if (plugin_channel[trackID] == 22)
             fx_section.plugin_6.set_parameters(row);
+        if (plugin_channel[trackID] == 23)
+            fx_section.plugin_7.set_parameters(row);
+        if (plugin_channel[trackID] == 24)
+            fx_section.plugin_8.set_parameters(row);
     }
     void draw_plugin(byte trackID, byte channel)
     {
@@ -121,6 +133,10 @@ public:
             fx_section.plugin_5.draw_plugin();
         if (plugin_channel[trackID] == 22)
             fx_section.plugin_6.draw_plugin();
+        if (plugin_channel[trackID] == 23)
+            fx_section.plugin_7.draw_plugin();
+        if (plugin_channel[trackID] == 24)
+            fx_section.plugin_8.draw_plugin();
     }
     void set_active_plugin_for_track(byte trackID, byte channel)
     {

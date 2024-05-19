@@ -17,7 +17,27 @@ M Atk   M Dec     M St     M Rl
 C At    C Dc      C St     C Rl
 */
 // TeensyDAW: begin automatically generated code
+//Name: 2FM
+//Description: Simple FM Snthesis Modulator -> Carrier
+//Voices: 12
 
+//Operator
+//Pot 1: mWaveform
+//Pot 2: mRatio
+//Pot 3: mVolume
+//Pot 4: cWaveform
+
+//Mod Envelope
+//Pot 5: mAttack
+//Pot 6: mDecay
+//Pot 7: mSustain
+//Pot 8: mRelease
+
+//Envelope:
+//Pot 9: Attack
+//Pot 10: Decay
+//Pot 11: Sustain
+//Pot 12: Release
 class Plugin_3
 {
 public:

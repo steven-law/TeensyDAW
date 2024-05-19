@@ -12,7 +12,33 @@ extern int encoded[4];
 extern bool change_plugin_row; 
 extern float *note_frequency;
 // TeensyDAW: begin automatically generated code
+//Name: Drum
+//Description: Synthesize 12 Drum sounds
+//Voices: 12
 
+//Kick
+//Pot 1: Freq
+//Pot 2: Sweep
+//Pot 3: O-Drive
+//Pot 4: Decay
+
+//Snare
+//Pot 5: Freq
+//Pot 6: Sweep
+//Pot 7: Noise
+//Pot 8: Decay
+
+//Hihat
+//Pot 9: Freq
+//Pot 10: Reso
+//Pot 11: Attack
+//Pot 12: Decay
+
+//Toms
+//Pot 13: TomL
+//Pot 14: TomM
+//Pot 15: TomH
+//Pot 16: Decay
 class Plugin_5
 {
 public:
