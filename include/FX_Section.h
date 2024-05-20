@@ -15,9 +15,12 @@
 #include "mixers.h"
 
 // TeensyDAW: begin automatically generated code
+void drawPot(int XPos, byte YPos, int dvalue, const char *dname);
+byte getEncodervalue(byte XPos, byte YPos, const char *name, byte oldValue);
 extern bool enc_moved[4];
 extern int encoded[4];
 extern bool change_plugin_row;
+
 class FX_Section
 {
 public:

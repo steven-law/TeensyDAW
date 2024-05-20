@@ -475,7 +475,10 @@ void buttons_SetNoteOnTick(int x, byte y);
 void buttons_Set_potRow();
 void input_behaviour();
 void clock_to_notes();
+
 void drawPot(int XPos, byte YPos, int dvalue, const char *dname);
+byte getEncodervalue(byte XPos, byte YPos, const char *name, byte oldValue);
+void draw_sequencer_option(byte x, const char *nameshort, int value, byte enc, const char *pluginName);
 void myDrawLine(int x0, int y0, int x1, int y1, uint16_t color);
 void myDrawRect(int x, int y, int w, int h, uint16_t color);
 void drawActiveRect(int xPos, byte yPos, byte xsize, byte ysize, bool state, const char *name, int color);
@@ -1084,11 +1087,13 @@ void drawPot(int XPos, byte YPos, int dvalue, const char *dname)
   tft.setCursor(STEP_FRAME_W * xPos + 4, STEP_FRAME_H * yPos - 3);
   tft.print(dvalue_old[XPos]);
   tft.setCursor(STEP_FRAME_W * xPos, STEP_FRAME_H * (yPos + 1) + 3);
-  tft.print(dname_old[XPos]);
+  if (dname_old[XPos] != dname)
+    tft.print(dname_old[XPos]);
   tft.setTextColor(ILI9341_WHITE);
   tft.setCursor(STEP_FRAME_W * xPos + 4, STEP_FRAME_H * yPos - 3);
   tft.print(dvalue);
   tft.setCursor(STEP_FRAME_W * xPos, STEP_FRAME_H * (yPos + 1) + 3);
+  if (dname_old[XPos] != dname)
   tft.print(dname);
 
   tft.fillCircle(STEP_FRAME_W * (xPos + 1) + 16 * cos((2.5 * circlePos_old[XPos]) + 2.25), STEP_FRAME_H * yPos + 16 * sin((2.5 * circlePos_old[XPos]) + 2.25), 4, ILI9341_DARKGREY);
@@ -1097,6 +1102,12 @@ void drawPot(int XPos, byte YPos, int dvalue, const char *dname)
   circlePos_old[XPos] = circlePos[XPos];
   dvalue_old[XPos] = dvalue;
   dname_old[XPos] = dname;
+}
+byte getEncodervalue(byte XPos, byte YPos, const char *name, byte oldValue)
+{
+  byte encByte = constrain(oldValue + encoded[XPos], 0, MIDI_CC_RANGE);
+  drawPot(XPos, YPos, encByte, name);
+  return encByte;
 }
 void drawActiveRect(int xPos, byte yPos, byte xsize, byte ysize, bool state, const char *name, int color)
 {
@@ -1119,6 +1130,38 @@ void drawActiveRect(int xPos, byte yPos, byte xsize, byte ysize, bool state, con
     tft.print(name);
   }
 }
+void draw_sequencer_option(byte x, const char *nameshort, int value, byte enc, const char *pluginName)
+    {
+
+        int color;
+        byte y = 6 + (enc * 2);
+        if (encoder_function == INPUT_FUNCTIONS_FOR_ARRANGER)
+            color = y - 1;
+        else
+            color = active_track;
+        
+        // show function
+        tft.setCursor(STEP_FRAME_W * x + 2, STEP_FRAME_H * (y - 1) + 6);
+        tft.setFont(Arial_8);
+        tft.setTextColor(trackColor[color]);
+        tft.setTextSize(1);
+        tft.print(nameshort);
+        // show value
+        tft.drawRect(STEP_FRAME_W * x, STEP_FRAME_H * y, STEP_FRAME_W * 2, STEP_FRAME_H, encoder_colour[enc]);
+        tft.fillRect(STEP_FRAME_W * x + 1, STEP_FRAME_H * y + 1, STEP_FRAME_W * 2 - 2, STEP_FRAME_H - 2, ILI9341_DARKGREY);
+        tft.setCursor(STEP_FRAME_W * x + 8, STEP_FRAME_H * y + 3);
+        tft.setFont(Arial_10);
+        tft.setTextColor(ILI9341_BLACK);
+        tft.setTextSize(1);
+        if (pluginName != 0)
+        {
+            tft.setCursor(STEP_FRAME_W * x + 2, STEP_FRAME_H * y + 4);
+            tft.setFont(Arial_8);
+            tft.print(pluginName);
+        }
+        else
+            tft.print(value);
+    }
 void myDrawLine(int x0, int y0, int x1, int y1, uint16_t color)
 {
   tft.drawLine(x0, y0, x1, y1, color);

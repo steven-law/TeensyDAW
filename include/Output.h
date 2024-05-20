@@ -14,6 +14,7 @@ extern float *note_frequency;
 extern bool enc_moved[4];
 extern int encoded[4];
 void drawPot(int XPos, byte YPos, int dvalue, const char *dname);
+byte getEncodervalue(byte XPos, byte YPos, const char *name, byte oldValue);
 void clearWorkSpace();
 
 // TeensyDAW: begin automatically generated code

@@ -1,12 +1,13 @@
 #include <Arduino.h>
 #include <ILI9341_t3n.h>
 #include <ili9341_t3n_font_Arial.h> // from ILI9341_t3
+void draw_sequencer_option(byte x, const char *nameshort, int value, byte enc, const char *pluginName);
 
-// #include "global_stuff.h"
 extern int trackColor[9];
 // Encoder Pins
 extern bool enc_moved[4];
 extern int encoded[4];
+extern int encoder_colour[4];
 extern bool change_plugin_row;
 extern byte encoder_function;
 extern int pixelTouchX;
@@ -33,7 +34,7 @@ public:
     void draw_SeqMode3();
 #define OCTAVE_CHANGE_TEXT 3
 #define NOTES_PER_OCTAVE 12
-#define SEQUENCER_OPTIONS_VERY_RIGHT 18
+
 #define BARS_PER_PAGE 16
 #define NO_NOTE 128
 #define MAX_TICKS 96
@@ -67,7 +68,7 @@ public:
                                    "Strng", "1OSC", "2FM", "MDrm", "Drum", "Draw", "Boom", "Dtune", "25", "26", "27", "28", "29", "30", "31"};
     bool note_is_on[MAX_VOICES] = {true, true, true, true, true, true, true, true, true, true, true, true};
     bool ready_for_NoteOff[MAX_VOICES] = {false, false, false, false, false, false, false, false, false, false, false, false};
-    int encoder_colour[NUM_ENCODERS] = {ILI9341_BLUE, ILI9341_RED, ILI9341_GREEN, ILI9341_WHITE};
+    
     const char *noteNames[12]{"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
     byte SeqMod_1_Poti[2];
     byte SeqMod_2_Poti[16];
@@ -241,7 +242,7 @@ public:
     }
     void draw_sequencer_mode(byte n)
     {
-        draw_sequencer_option(SEQUENCER_OPTIONS_VERY_RIGHT, "sMod", sequencer_mode, n);
+        draw_sequencer_option(SEQUENCER_OPTIONS_VERY_RIGHT, "sMod", sequencer_mode, n,0);
     }
     byte get_sequencer_mode()
     {
@@ -259,7 +260,7 @@ public:
     }
     void draw_step_division(byte n)
     {
-        draw_sequencer_option(SEQUENCER_OPTIONS_VERY_RIGHT, "sDiv", step_division, n);
+        draw_sequencer_option(SEQUENCER_OPTIONS_VERY_RIGHT, "sDiv", step_division, n,0);
     }
     byte get_step_division()
     {
@@ -298,7 +299,7 @@ public:
     }
     void draw_sequence_length(byte n)
     {
-        draw_sequencer_option(SEQUENCER_OPTIONS_VERY_RIGHT, "tiks", sequence_length, n);
+        draw_sequencer_option(SEQUENCER_OPTIONS_VERY_RIGHT, "tiks", sequence_length, n,0);
     }
     byte get_sequence_length()
     {
@@ -330,37 +331,7 @@ public:
     }
 
     // helpers
-    void draw_sequencer_option(byte x, const char *nameshort, int value, byte enc, const char *pluginName = 0)
-    {
-
-        int color;
-        if (encoder_function == INPUT_FUNCTIONS_FOR_ARRANGER)
-            color = my_Arranger_Y_axis - 1;
-        else
-            color = active_track;
-        byte y = 6 + (enc * 2);
-        // show function
-        tft->setCursor(STEP_FRAME_W * x + 2, STEP_FRAME_H * (y - 1) + 6);
-        tft->setFont(Arial_8);
-        tft->setTextColor(trackColor[color]);
-        tft->setTextSize(1);
-        tft->print(nameshort);
-        // show value
-        tft->drawRect(STEP_FRAME_W * x, STEP_FRAME_H * y, STEP_FRAME_W * 2, STEP_FRAME_H, encoder_colour[enc]);
-        tft->fillRect(STEP_FRAME_W * x + 1, STEP_FRAME_H * y + 1, STEP_FRAME_W * 2 - 2, STEP_FRAME_H - 2, ILI9341_DARKGREY);
-        tft->setCursor(STEP_FRAME_W * x + 8, STEP_FRAME_H * y + 3);
-        tft->setFont(Arial_10);
-        tft->setTextColor(ILI9341_BLACK);
-        tft->setTextSize(1);
-        if (pluginName != 0)
-        {
-            tft->setCursor(STEP_FRAME_W * x + 2, STEP_FRAME_H * y + 4);
-            tft->setFont(Arial_8);
-            tft->print(pluginName);
-        }
-        else
-            tft->print(value);
-    }
+    
     void draw_sequencer_screen()
     {
         drawOctaveNumber();
@@ -532,7 +503,7 @@ public:
     void draw_clip_to_play(byte n, byte b)
     {
 
-        draw_sequencer_option(SEQUENCER_OPTIONS_VERY_RIGHT, "clNr", clip_to_play[b], n);
+        draw_sequencer_option(SEQUENCER_OPTIONS_VERY_RIGHT, "clNr", clip_to_play[b], n,0);
         draw_arrangment_line(n, b);
     }
     void drawsongmodepageselector()
@@ -623,7 +594,7 @@ public:
     }
     void draw_noteOffset(byte n, int b)
     {
-        draw_sequencer_option(SEQUENCER_OPTIONS_VERY_RIGHT, "ofSet", noteOffset[b], n);
+        draw_sequencer_option(SEQUENCER_OPTIONS_VERY_RIGHT, "ofSet", noteOffset[b], n,0);
         draw_arrangment_line(n, b);
     }
     void draw_offset_arranger(byte n, byte b)

@@ -222,30 +222,33 @@ void Track::draw_SeqMode2()
 }
 
 void Track::play_SeqMode3(byte cloock)
-{byte seq3_clock = cloock/6;
-if (seq3_clock ==8)
-seq3_clock==0;
-for (int v=0;v<MAX_VOICES;v++){
-    if (bitRead(SeqMod_3_Poti[v], seq3_clock))
+{
+    byte seq3_clock = cloock / 6;
+    if (seq3_clock == 8)
+        seq3_clock = 0;
+    for (int v = 0; v < MAX_VOICES; v++)
     {
-        if (!note_is_on[v])
+        if (bitRead(SeqMod_3_Poti[v], seq3_clock))
         {
-            noteToPlay[v] = v + (octave * 12) + noteOffset[internal_clock_bar];
-            note_is_on[v] = true;
-            Masterout->noteOn(noteToPlay[v], VELOCITY_NOTE_ON, MIDI_channel_out, v); // Send a Note (pitch 42, velo 127 on channel 1)
-                                                                                     // Serial.printf("ON   tick: %d, voice: %d, note: %d\n", cloock, 0, noteToPlay[0]);
+            if (!note_is_on[v])
+            {
+                noteToPlay[v] = v + (octave * 12) + noteOffset[internal_clock_bar];
+                note_is_on[v] = true;
+                Masterout->noteOn(noteToPlay[v], VELOCITY_NOTE_ON, MIDI_channel_out, v); // Send a Note (pitch 42, velo 127 on channel 1)
+                                                                                         // Serial.printf("ON   tick: %d, voice: %d, note: %d\n", cloock, 0, noteToPlay[0]);
+            }
+        }
+
+        if (!bitRead(SeqMod_3_Poti[v], seq3_clock))
+        {
+            if (note_is_on[v])
+            {
+                note_is_on[v] = false;
+                Masterout->noteOff(noteToPlay[v], VELOCITY_NOTE_ON, MIDI_channel_out, v); // Send a Note (pitch 42, velo 127 on channel 1)
+                                                                                          // Serial.printf("OFF   tick: %d, voice: %d, note: %d\n", cloock, 0, noteToPlay[0]);
+            }
         }
     }
-
-    if (!bitRead(SeqMod_3_Poti[v], seq3_clock))
-    {
-        if (note_is_on[v])
-        {
-            note_is_on[v] = false;
-            Masterout->noteOff(noteToPlay[v], VELOCITY_NOTE_ON, MIDI_channel_out, v); // Send a Note (pitch 42, velo 127 on channel 1)
-                                                                                      // Serial.printf("OFF   tick: %d, voice: %d, note: %d\n", cloock, 0, noteToPlay[0]);
-        }
-    }}
 }
 void Track::set_SeqMode3_parameters(byte row)
 {

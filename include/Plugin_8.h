@@ -6,40 +6,43 @@
 #include <SerialFlash.h>
 
 #include "mixers.h"
-
+void drawPot(int XPos, byte YPos, int dvalue, const char *dname);
+byte getEncodervalue(byte XPos, byte YPos, const char *name, byte oldValue);
+void draw_sequencer_option(byte x, const char *nameshort, int value, byte enc, const char *pluginName);
 // TeensyDAW: begin automatically generated code
-//Name: dTune
-//Description: 2VCO Detuned Subtractive Synthesizer
-//Voices: 12
+// Name: dTune
+// Description: 2VCO Detuned Subtractive Synthesizer
+// Voices: 12
 
-//VCO 1
-//Pot 1: Waveform
-//Pot 2: Detune
-//Pot 3: Vol
-//Pot 4: 
+// VCO 1
+// Pot 1: Waveform
+// Pot 2: Detune
+// Pot 3: Vol
+// Pot 4:
 
-//VCO 2
-//Pot 5: Waveform
-//Pot 6: Detune
-//Pot 7: Vol
-//Pot 8: 
+// VCO 2
+// Pot 5: Waveform
+// Pot 6: Detune
+// Pot 7: Vol
+// Pot 8:
 
-//Filter:
-//Pot 9: Frequency
-//Pot 10: Resonance
-//Pot 11: Sweep
-//Pot 12: Type
+// Filter:
+// Pot 9: Frequency
+// Pot 10: Resonance
+// Pot 11: Sweep
+// Pot 12: Type
 
-//Envelope:
-//Pot 13: Attack
-//Pot 14: Decay
-//Pot 15: Sustain
-//Pot 16: Release 
+// Envelope:
+// Pot 13: Attack
+// Pot 14: Decay
+// Pot 15: Sustain
+// Pot 16: Release
 class Plugin_8
 {
 public:
     byte myID;
-    byte potentiometer[16];
+    byte presetNr = 0;
+    byte potentiometer[NUM_PRESETS][16];
     float detune1;
     float detune2;
     AudioSynthWaveform waveform[12];
@@ -166,6 +169,9 @@ public:
             set_envelope_sustain(2, 3, "Sustain", 0, 1);
             set_envelope_release(3, 3, "Release", 0, 2000);
         }
+        if (buttonPressed[BUTTON_SHIFT]){
+            set_presetNr();
+        }
     }
     void draw_plugin()
     {
@@ -173,23 +179,25 @@ public:
         {
             change_plugin_row = false;
             // Serial.println("drawing plugin 2");
-            drawPot(0, 0, potentiometer[0], "W~Form");
-            drawPot(1, 0, potentiometer[1], "Detune");
-            drawPot(2, 0, potentiometer[2], "Volume 1");
+            drawPot(0, 0, potentiometer[presetNr][0], "W~Form");
+            drawPot(1, 0, potentiometer[presetNr][1], "Detune");
+            drawPot(2, 0, potentiometer[presetNr][2], "Volume 1");
 
-            drawPot(0, 1, potentiometer[4], "W~Form");
-            drawPot(1, 1, potentiometer[5], "Detune");
-            drawPot(2, 1, potentiometer[6], "Volume 2");
+            drawPot(0, 1, potentiometer[presetNr][4], "W~Form");
+            drawPot(1, 1, potentiometer[presetNr][5], "Detune");
+            drawPot(2, 1, potentiometer[presetNr][6], "Volume 2");
 
-            drawPot(0, 2, potentiometer[8], "Filt-Frq");
-            drawPot(1, 2, potentiometer[9], "Resonance");
-            drawPot(2, 2, potentiometer[10], "Sweep");
-            drawPot(3, 2, potentiometer[11], "Type");
+            drawPot(0, 2, potentiometer[presetNr][8], "Filt-Frq");
+            drawPot(1, 2, potentiometer[presetNr][9], "Resonance");
+            drawPot(2, 2, potentiometer[presetNr][10], "Sweep");
+            drawPot(3, 2, potentiometer[presetNr][11], "Type");
 
-            drawPot(0, 3, potentiometer[12], "Attack");
-            drawPot(1, 3, potentiometer[13], "Decay");
-            drawPot(2, 3, potentiometer[14], "Sustain");
-            drawPot(3, 3, potentiometer[15], "Release");
+            drawPot(0, 3, potentiometer[presetNr][12], "Attack");
+            drawPot(1, 3, potentiometer[presetNr][13], "Decay");
+            drawPot(2, 3, potentiometer[presetNr][14], "Sustain");
+            drawPot(3, 3, potentiometer[presetNr][15], "Release");
+
+            draw_sequencer_option(SEQUENCER_OPTIONS_VERY_RIGHT, "Prset", presetNr, 3,0);
         }
     }
 
@@ -198,14 +206,13 @@ public:
         if (enc_moved[XPos])
         {
             int n = XPos + (YPos * NUM_ENCODERS);
-            potentiometer[n] = constrain(potentiometer[n] + encoded[XPos], 0, MIDI_CC_RANGE);
-            int walveform = map(potentiometer[n], 0, MIDI_CC_RANGE, min, max);
+            potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
+            int walveform = map(potentiometer[presetNr][n], 0, MIDI_CC_RANGE, min, max);
 
             for (int i = 0; i < MAX_VOICES; i++)
             {
                 waveform[i].begin(walveform);
             }
-            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
     void set_voice_amplitude(byte XPos, byte YPos, const char *name, int min, int max)
@@ -213,12 +220,11 @@ public:
         if (enc_moved[XPos])
         {
             int n = XPos + (YPos * NUM_ENCODERS);
-            potentiometer[n] = constrain(potentiometer[n] + encoded[XPos], 0, MIDI_CC_RANGE);
+            potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
             for (int i = 0; i < MAX_VOICES; i++)
             {
-                waveform[i].amplitude((float)(potentiometer[n] / MIDI_CC_RANGE_FLOAT));
+                waveform[i].amplitude((float)(potentiometer[presetNr][n] / MIDI_CC_RANGE_FLOAT));
             }
-            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
     void set_voice_detune(byte XPos, byte YPos, const char *name, int min, int max)
@@ -226,10 +232,8 @@ public:
         if (enc_moved[XPos])
         {
             int n = XPos + (YPos * NUM_ENCODERS);
-            potentiometer[n] = constrain(potentiometer[n] + encoded[XPos], 0, MIDI_CC_RANGE);
-            detune1 = (float)((note_frequency[potentiometer[n]] * 0.01));
-
-            drawPot(XPos, YPos, potentiometer[n], name);
+            potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
+            detune1 = (float)((note_frequency[potentiometer[presetNr][n]] * 0.01));
         }
     }
     void set_voice1_waveform(byte XPos, byte YPos, const char *name, int min, int max)
@@ -237,14 +241,13 @@ public:
         if (enc_moved[XPos])
         {
             int n = XPos + (YPos * NUM_ENCODERS);
-            potentiometer[n] = constrain(potentiometer[n] + encoded[XPos], 0, MIDI_CC_RANGE);
-            int walveform = map(potentiometer[n], 0, MIDI_CC_RANGE, min, max);
+            potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
+            int walveform = map(potentiometer[presetNr][n], 0, MIDI_CC_RANGE, min, max);
 
             for (int i = 0; i < MAX_VOICES; i++)
             {
                 waveform1[i].begin(walveform);
             }
-            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
     void set_voice1_amplitude(byte XPos, byte YPos, const char *name, int min, int max)
@@ -252,12 +255,11 @@ public:
         if (enc_moved[XPos])
         {
             int n = XPos + (YPos * NUM_ENCODERS);
-            potentiometer[n] = constrain(potentiometer[n] + encoded[XPos], 0, MIDI_CC_RANGE);
+            potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
             for (int i = 0; i < MAX_VOICES; i++)
             {
-                waveform1[i].amplitude((float)(potentiometer[n] / MIDI_CC_RANGE_FLOAT));
+                waveform1[i].amplitude((float)(potentiometer[presetNr][n] / MIDI_CC_RANGE_FLOAT));
             }
-            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
     void set_voice1_detune(byte XPos, byte YPos, const char *name, int min, int max)
@@ -265,9 +267,8 @@ public:
         if (enc_moved[XPos])
         {
             int n = XPos + (YPos * NUM_ENCODERS);
-            potentiometer[n] = constrain(potentiometer[n] + encoded[XPos], 0, MIDI_CC_RANGE);
-            detune2 = (float)((note_frequency[potentiometer[n]] * 0.01));
-            drawPot(XPos, YPos, potentiometer[n], name);
+            potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
+            detune2 = (float)((note_frequency[potentiometer[presetNr][n]] * 0.01));
         }
     }
 
@@ -276,13 +277,12 @@ public:
         if (enc_moved[XPos])
         {
             int n = XPos + (YPos * NUM_ENCODERS);
-            potentiometer[n] = constrain(potentiometer[n] + encoded[XPos], 0, MIDI_CC_RANGE);
-            int frequency = note_frequency[potentiometer[n]] * tuning;
+            potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
+            int frequency = note_frequency[potentiometer[presetNr][n]] * tuning;
             for (int i = 0; i < MAX_VOICES; i++)
             {
                 filter[i].frequency(frequency);
             }
-            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
     void set_filter_resonance(byte XPos, byte YPos, const char *name, float min, float max)
@@ -290,12 +290,11 @@ public:
         if (enc_moved[XPos])
         {
             int n = XPos + (YPos * NUM_ENCODERS);
-            potentiometer[n] = constrain(potentiometer[n] + encoded[XPos], 0, MIDI_CC_RANGE);
+            potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
             for (int i = 0; i < MAX_VOICES; i++)
             {
-                filter[i].resonance((float)(potentiometer[n] / (MIDI_CC_RANGE_FLOAT / max)) + min);
+                filter[i].resonance((float)(potentiometer[presetNr][n] / (MIDI_CC_RANGE_FLOAT / max)) + min);
             }
-            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
     void set_filter_sweep(byte XPos, byte YPos, const char *name, float min, float max)
@@ -303,12 +302,11 @@ public:
         if (enc_moved[XPos])
         {
             int n = XPos + (YPos * NUM_ENCODERS);
-            potentiometer[n] = constrain(potentiometer[n] + encoded[XPos], 0, MIDI_CC_RANGE);
+            potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
             for (int i = 0; i < MAX_VOICES; i++)
             {
-                filter[i].octaveControl((float)(potentiometer[n] / (MIDI_CC_RANGE_FLOAT / max)) + min);
+                filter[i].octaveControl((float)(potentiometer[presetNr][n] / (MIDI_CC_RANGE_FLOAT / max)) + min);
             }
-            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
     void set_filter_type(byte XPos, byte YPos, const char *name, int min, float max)
@@ -316,9 +314,8 @@ public:
         if (enc_moved[XPos])
         {
             int n = XPos + (YPos * NUM_ENCODERS);
-            potentiometer[n] = constrain(potentiometer[n] + encoded[XPos], 0, MIDI_CC_RANGE);
-            selectFilterType(map(potentiometer[n], 0, MIDI_CC_RANGE, 0, 3));
-            drawPot(XPos, YPos, potentiometer[n], name);
+            potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
+            selectFilterType(map(potentiometer[presetNr][n], 0, MIDI_CC_RANGE, 0, 3));
         }
     }
     void selectFilterType(byte mixerchannel)
@@ -337,14 +334,13 @@ public:
         if (enc_moved[XPos])
         {
             int n = XPos + (YPos * NUM_ENCODERS);
-            potentiometer[n] = constrain(potentiometer[n] + encoded[XPos], 0, MIDI_CC_RANGE);
-            int attack = map(potentiometer[n], 0, MIDI_CC_RANGE, min, max);
+            potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
+            int attack = map(potentiometer[presetNr][n], 0, MIDI_CC_RANGE, min, max);
             for (int i = 0; i < MAX_VOICES; i++)
             {
                 Fenv[i].attack(attack);
                 Aenv[i].attack(attack);
             }
-            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
     void set_envelope_decay(byte XPos, byte YPos, const char *name, int min, int max)
@@ -352,15 +348,13 @@ public:
         if (enc_moved[XPos])
         {
             int n = XPos + (YPos * NUM_ENCODERS);
-            potentiometer[n] = constrain(potentiometer[n] + encoded[XPos], 0, MIDI_CC_RANGE);
-            int decay = map(potentiometer[n], 0, MIDI_CC_RANGE, min, max);
+            potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
+            int decay = map(potentiometer[presetNr][n], 0, MIDI_CC_RANGE, min, max);
             for (int i = 0; i < MAX_VOICES; i++)
             {
                 Fenv[i].decay(decay);
                 Aenv[i].decay(decay);
             }
-
-            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
     void set_envelope_sustain(byte XPos, byte YPos, const char *name, int min, int max)
@@ -368,15 +362,13 @@ public:
         if (enc_moved[XPos])
         {
             int n = XPos + (YPos * NUM_ENCODERS);
-            potentiometer[n] = constrain(potentiometer[n] + encoded[XPos], 0, MIDI_CC_RANGE);
-            float sustain = (float)(potentiometer[n] / MIDI_CC_RANGE_FLOAT);
+            potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
+            float sustain = (float)(potentiometer[presetNr][n] / MIDI_CC_RANGE_FLOAT);
             for (int i = 0; i < MAX_VOICES; i++)
             {
                 Fenv[i].sustain(sustain);
                 Aenv[i].sustain(sustain);
             }
-
-            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
     void set_envelope_release(byte XPos, byte YPos, const char *name, int min, int max)
@@ -384,15 +376,22 @@ public:
         if (enc_moved[XPos])
         {
             int n = XPos + (YPos * NUM_ENCODERS);
-            potentiometer[n] = constrain(potentiometer[n] + encoded[XPos], 0, MIDI_CC_RANGE);
-            int release = map(potentiometer[n], 0, MIDI_CC_RANGE, min, max);
+            potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
+            int release = map(potentiometer[presetNr][n], 0, MIDI_CC_RANGE, min, max);
             for (int i = 0; i < MAX_VOICES; i++)
             {
                 Fenv[i].release(release);
                 Aenv[i].release(release);
             }
+        }
+    }
 
-            drawPot(XPos, YPos, potentiometer[n], name);
+    void set_presetNr()
+    {
+        if (enc_moved[PRESET_ENCODER])
+        {
+            presetNr = constrain(presetNr + encoded[PRESET_ENCODER], 0, NUM_PRESETS);
+            draw_plugin();
         }
     }
 };

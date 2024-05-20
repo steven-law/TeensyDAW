@@ -3,7 +3,7 @@
 
 // individual trackcolors
 int trackColor[9]{6150246, 8256638, 1095334, 12643941, 2583100, 9365295, 12943157, 5678954, ILI9341_WHITE};
-
+int encoder_colour[NUM_ENCODERS] = {ILI9341_BLUE, ILI9341_RED, ILI9341_GREEN, ILI9341_WHITE};
 int tuning = 440;
 float *note_frequency;
 

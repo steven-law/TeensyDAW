@@ -5,7 +5,9 @@
 #include <SD.h>
 #include <SerialFlash.h>
 #include "mixers.h"
-extern void drawPot(int XPos, byte YPos, int dvalue, const char *dname);
+void drawPot(int XPos, byte YPos, int dvalue, const char *dname);
+byte getEncodervalue(byte XPos, byte YPos, const char *name, byte oldValue);
+void draw_sequencer_option(byte x, const char *nameshort, int value, byte enc, const char *pluginName = 0);
 extern int tuning;
 extern bool enc_moved[4];
 extern int encoded[4];
@@ -35,6 +37,7 @@ class Plugin_1
 public:
     byte myID;
     byte potentiometer[16];
+    byte presetNr = 0;
     AudioSynthKarplusStrong string[12];
     AudioMixer12 mixer;
     AudioAmplifier MixGain;
@@ -129,6 +132,8 @@ public:
             drawPot(1, 2, potentiometer[9], "Vol");
             drawPot(2, 2, potentiometer[10], "Vol");
             drawPot(3, 2, potentiometer[11], "Vol");
+
+            draw_sequencer_option(SEQUENCER_OPTIONS_VERY_RIGHT, "Prset", presetNr, 3,0);
         }
     }
 
@@ -137,45 +142,11 @@ public:
         if (enc_moved[XPos])
         {
             int n = XPos + (YPos * NUM_ENCODERS);
-            potentiometer[n] = constrain(potentiometer[n] + encoded[XPos], 0, MIDI_CC_RANGE);
+            potentiometer[n] = getEncodervalue(XPos, YPos, name, potentiometer[n]);
             float sustain = (float)(potentiometer[n] / MIDI_CC_RANGE_FLOAT);
             mixer.gain(n, sustain);
-            drawPot(XPos, YPos, potentiometer[n], name);
         }
     }
 
-    void set_filter_frequency(byte XPos, byte YPos, const char *name, int min, int max)
-    {
-        if (enc_moved[XPos])
-        {
-            int n = XPos + (YPos * NUM_ENCODERS);
-            potentiometer[n] = constrain(potentiometer[n] + encoded[XPos], 0, MIDI_CC_RANGE);
-            int frequency = note_frequency[potentiometer[n]] * tuning;
-
-            // filter.frequency(frequency);
-            Serial.println(frequency);
-            drawPot(XPos, YPos, potentiometer[n], name);
-        }
-    }
-    void set_filter_resonance(byte XPos, byte YPos, const char *name, float min, float max)
-    {
-        if (enc_moved[XPos])
-        {
-            int n = XPos + (YPos * NUM_ENCODERS);
-            potentiometer[n] = constrain(potentiometer[n] + encoded[XPos], 0, MIDI_CC_RANGE);
-            // filter.resonance((float)(potentiometer[n] / (MIDI_CC_RANGE_FLOAT / max)) + min);
-            drawPot(XPos, YPos, potentiometer[n], name);
-        }
-    }
-    void set_filter_sweep(byte XPos, byte YPos, const char *name, float min, float max)
-    {
-        if (enc_moved[XPos])
-        {
-            int n = XPos + (YPos * NUM_ENCODERS);
-            potentiometer[n] = constrain(potentiometer[n] + encoded[XPos], 0, MIDI_CC_RANGE);
-            // filter.octaveControl((float)(potentiometer[n] / (MIDI_CC_RANGE_FLOAT / max)) + min);
-            drawPot(XPos, YPos, potentiometer[n], name);
-        }
-    }
 };
 // TeensyDAW: end automatically generated code

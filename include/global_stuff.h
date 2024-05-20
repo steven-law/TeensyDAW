@@ -11,12 +11,15 @@
 #define OCTAVE_CHANGE_UP_BOTTOMMOST 3
 #define OCTAVE_CHANGE_DOWN_TOPMOST 4
 #define OCTAVE_CHANGE_DOWN_BOTTOMMOST 5
+#define SEQUENCER_OPTIONS_VERY_RIGHT 18
 #define STEP_FRAME_W 16
 #define STEP_FRAME_H 16
 #define NUM_ENCODERS 4
 #define MIDI_CC_RANGE 127
 #define MIDI_CC_RANGE_FLOAT 127.00
 #define MAX_VOICES 12
+#define NUM_PRESETS 8
+#define PRESET_ENCODER 3
 #define phraseSegmentLength 16 // a variable for the zoomfactor in songmode
 
 // pages
