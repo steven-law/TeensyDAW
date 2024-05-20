@@ -9,6 +9,7 @@
 void drawPot(int XPos, byte YPos, int dvalue, const char *dname);
 byte getEncodervalue(byte XPos, byte YPos, const char *name, byte oldValue);
 void draw_sequencer_option(byte x, const char *nameshort, int value, byte enc, const char *pluginName);
+void clearWorkSpace();
 // TeensyDAW: begin automatically generated code
 // Name: dTune
 // Description: 2VCO Detuned Subtractive Synthesizer
@@ -140,36 +141,40 @@ public:
     void set_parameters(byte row)
     {
         draw_plugin();
-        if (row == 0)
+        if (!buttonPressed[BUTTON_SHIFT])
         {
-            set_voice_waveform(0, 0, "W~Form", 0, 12);
-            set_voice_detune(1, 0, "Detune", 0, 1);
-            set_voice_amplitude(2, 0, "Volume 1", 0, 1);
-        }
+            if (row == 0)
+            {
+                set_voice_waveform(0, 0, "W~Form", 0, 12);
+                set_voice_detune(1, 0, "Detune", 0, 1);
+                set_voice_amplitude(2, 0, "Volume 1", 0, 1);
+            }
 
-        if (row == 1)
-        {
-            set_voice1_waveform(0, 1, "W~Form", 0, 12);
-            set_voice1_detune(1, 1, "Detune", 0, 1);
-            set_voice1_amplitude(2, 1, "Volume 2", 0, 1);
-        }
+            if (row == 1)
+            {
+                set_voice1_waveform(0, 1, "W~Form", 0, 12);
+                set_voice1_detune(1, 1, "Detune", 0, 1);
+                set_voice1_amplitude(2, 1, "Volume 2", 0, 1);
+            }
 
-        if (row == 2)
-        {
-            set_filter_frequency(0, 2, "Filt-Frq", 60, 10000);
-            set_filter_resonance(1, 2, "Resonance", 0, 5.00);
-            set_filter_sweep(2, 2, "Sweep", 0, 7.00);
-            set_filter_type(3, 2, "Type", 0, 3);
-        }
+            if (row == 2)
+            {
+                set_filter_frequency(0, 2, "Filt-Frq", 60, 10000);
+                set_filter_resonance(1, 2, "Resonance", 0, 5.00);
+                set_filter_sweep(2, 2, "Sweep", 0, 7.00);
+                set_filter_type(3, 2, "Type", 0, 3);
+            }
 
-        if (row == 3)
-        {
-            set_envelope_attack(0, 3, "Attack", 0, 1000);
-            set_envelope_decay(1, 3, "Decay", 0, 500);
-            set_envelope_sustain(2, 3, "Sustain", 0, 1);
-            set_envelope_release(3, 3, "Release", 0, 2000);
+            if (row == 3)
+            {
+                set_envelope_attack(0, 3, "Attack", 0, 1000);
+                set_envelope_decay(1, 3, "Decay", 0, 500);
+                set_envelope_sustain(2, 3, "Sustain", 0, 1);
+                set_envelope_release(3, 3, "Release", 0, 2000);
+            }
         }
-        if (buttonPressed[BUTTON_SHIFT]){
+        if (buttonPressed[BUTTON_SHIFT])
+        {
             set_presetNr();
         }
     }
@@ -178,6 +183,7 @@ public:
         if (change_plugin_row)
         {
             change_plugin_row = false;
+            clearWorkSpace();
             // Serial.println("drawing plugin 2");
             drawPot(0, 0, potentiometer[presetNr][0], "W~Form");
             drawPot(1, 0, potentiometer[presetNr][1], "Detune");
@@ -197,7 +203,7 @@ public:
             drawPot(2, 3, potentiometer[presetNr][14], "Sustain");
             drawPot(3, 3, potentiometer[presetNr][15], "Release");
 
-            draw_sequencer_option(SEQUENCER_OPTIONS_VERY_RIGHT, "Prset", presetNr, 3,0);
+            draw_sequencer_option(SEQUENCER_OPTIONS_VERY_RIGHT, "Prset", presetNr, 3, 0);
         }
     }
 
@@ -390,7 +396,8 @@ public:
     {
         if (enc_moved[PRESET_ENCODER])
         {
-            presetNr = constrain(presetNr + encoded[PRESET_ENCODER], 0, NUM_PRESETS);
+            presetNr = constrain(presetNr + encoded[PRESET_ENCODER], 0, NUM_PRESETS - 1);
+            change_plugin_row = true;
             draw_plugin();
         }
     }

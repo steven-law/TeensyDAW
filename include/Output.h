@@ -119,7 +119,6 @@ public:
     {
         // Serial.printf("draw plugin track: %d, channel: %d\n", trackID, plugin_channel[trackID]);
         change_plugin_row = true;
-        clearWorkSpace();
         if (plugin_channel[trackID] < 17)
             Plugin_midi.draw_plugin();
         if (plugin_channel[trackID] == 17)

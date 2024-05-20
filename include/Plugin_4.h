@@ -12,31 +12,31 @@ void draw_sequencer_option(byte x, const char *nameshort, int value, byte enc, c
 extern int tuning;
 extern bool enc_moved[4];
 extern int encoded[4];
-extern bool change_plugin_row; 
+extern bool change_plugin_row;
 // TeensyDAW: begin automatically generated code
-//Name: mDrm
-//Description: Plays 12 Samplesounds stored on Flash (PROGMEM)
-//Voices: 12
+// Name: mDrm
+// Description: Plays 12 Samplesounds stored on Flash (PROGMEM)
+// Voices: 12
 
-//Pot 1: Vol1
-//Pot 2: Vol2
-//Pot 3: Vol3
-//Pot 4: Vol4
+// Pot 1: Vol1
+// Pot 2: Vol2
+// Pot 3: Vol3
+// Pot 4: Vol4
 
-//Pot 5: Vol5
-//Pot 6: Vol6
-//Pot 7: Vol7
-//Pot 8: Vol8
+// Pot 5: Vol5
+// Pot 6: Vol6
+// Pot 7: Vol7
+// Pot 8: Vol8
 
-//Pot 9: Vol9
-//Pot 10: Vol10
-//Pot 11: Vol11
-//Pot 12: Vol12
+// Pot 9: Vol9
+// Pot 10: Vol10
+// Pot 11: Vol11
+// Pot 12: Vol12
 class Plugin_4
 {
 public:
     byte myID;
-    byte potentiometer[16];
+    byte potentiometer[NUM_PRESETS][16];
     byte presetNr = 0;
     AudioPlayMemory playMem[12];
     AudioMixer12 mixer;
@@ -93,32 +93,39 @@ public:
     void set_parameters(byte row)
     {
         draw_plugin();
-        if (row == 0)
+        if (!buttonPressed[BUTTON_SHIFT])
         {
-            set_mixer_gain(0, 0, "Kick", 0, 1);
-            set_mixer_gain(1, 0, "Clap", 0, 1);
-            set_mixer_gain(2, 0, "HHat", 0, 1);
-            set_mixer_gain(3, 0, "Snare", 0, 1);
-        }
+            if (row == 0)
+            {
+                set_mixer_gain(0, 0, "Kick", 0, 1);
+                set_mixer_gain(1, 0, "Clap", 0, 1);
+                set_mixer_gain(2, 0, "HHat", 0, 1);
+                set_mixer_gain(3, 0, "Snare", 0, 1);
+            }
 
-        if (row == 1)
-        {
-            set_mixer_gain(0, 1, "Tick", 0, 1);
-            set_mixer_gain(1, 1, "Pong", 0, 1);
-            set_mixer_gain(2, 1, "Tom", 0, 1);
-            set_mixer_gain(3, 1, "Cash", 0, 1);
-        }
+            if (row == 1)
+            {
+                set_mixer_gain(0, 1, "Tick", 0, 1);
+                set_mixer_gain(1, 1, "Pong", 0, 1);
+                set_mixer_gain(2, 1, "Tom", 0, 1);
+                set_mixer_gain(3, 1, "Cash", 0, 1);
+            }
 
-        if (row == 2)
-        {
-            set_mixer_gain(0, 2, "Vol", 0, 1);
-            set_mixer_gain(1, 2, "Vol", 0, 1);
-            set_mixer_gain(2, 2, "Vol", 0, 1);
-            set_mixer_gain(3, 2, "Vol", 0, 1);
-        }
+            if (row == 2)
+            {
+                set_mixer_gain(0, 2, "Vol", 0, 1);
+                set_mixer_gain(1, 2, "Vol", 0, 1);
+                set_mixer_gain(2, 2, "Vol", 0, 1);
+                set_mixer_gain(3, 2, "Vol", 0, 1);
+            }
 
-        if (row == 3)
+            if (row == 3)
+            {
+            }
+        }
+        if (buttonPressed[BUTTON_SHIFT])
         {
+            set_presetNr();
         }
     }
     void draw_plugin()
@@ -126,22 +133,24 @@ public:
         if (change_plugin_row)
         {
             change_plugin_row = false;
-            drawPot(0, 0, potentiometer[0], "Kick");
-            drawPot(1, 0, potentiometer[1], "Clap");
-            drawPot(2, 0, potentiometer[2], "HHat");
-            drawPot(3, 0, potentiometer[3], "Snare");
+            clearWorkSpace();
 
-            drawPot(0, 1, potentiometer[4], "Tick");
-            drawPot(1, 1, potentiometer[5], "Pong");
-            drawPot(2, 1, potentiometer[6], "Tom");
-            drawPot(3, 1, potentiometer[7], "Cash");
+            drawPot(0, 0, potentiometer[presetNr][0], "Kick");
+            drawPot(1, 0, potentiometer[presetNr][1], "Clap");
+            drawPot(2, 0, potentiometer[presetNr][2], "HHat");
+            drawPot(3, 0, potentiometer[presetNr][3], "Snare");
 
-            drawPot(0, 2, potentiometer[8], "Vol");
-            drawPot(1, 2, potentiometer[9], "Vol");
-            drawPot(2, 2, potentiometer[10], "Vol");
-            drawPot(3, 2, potentiometer[11], "Vol");
+            drawPot(0, 1, potentiometer[presetNr][4], "Tick");
+            drawPot(1, 1, potentiometer[presetNr][5], "Pong");
+            drawPot(2, 1, potentiometer[presetNr][6], "Tom");
+            drawPot(3, 1, potentiometer[presetNr][7], "Cash");
 
-            draw_sequencer_option(SEQUENCER_OPTIONS_VERY_RIGHT, "Prset", presetNr, 3,0);
+            drawPot(0, 2, potentiometer[presetNr][8], "Vol");
+            drawPot(1, 2, potentiometer[presetNr][9], "Vol");
+            drawPot(2, 2, potentiometer[presetNr][10], "Vol");
+            drawPot(3, 2, potentiometer[presetNr][11], "Vol");
+
+            draw_sequencer_option(SEQUENCER_OPTIONS_VERY_RIGHT, "Prset", presetNr, 3, 0);
         }
     }
 
@@ -150,9 +159,19 @@ public:
         if (enc_moved[XPos])
         {
             int n = XPos + (YPos * NUM_ENCODERS);
-            potentiometer[n] = getEncodervalue(XPos, YPos, name, potentiometer[n]);
-            float sustain = (float)(potentiometer[n] / MIDI_CC_RANGE_FLOAT);
+            potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
+            float sustain = (float)(potentiometer[presetNr][n] / MIDI_CC_RANGE_FLOAT);
             mixer.gain(n, sustain);
+        }
+    }
+
+    void set_presetNr()
+    {
+        if (enc_moved[PRESET_ENCODER])
+        {
+            presetNr = constrain(presetNr + encoded[PRESET_ENCODER], 0, NUM_PRESETS - 1);
+            change_plugin_row = true;
+            draw_plugin();
         }
     }
 };
