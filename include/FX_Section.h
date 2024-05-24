@@ -24,6 +24,11 @@ extern bool change_plugin_row;
 class FX_Section
 {
 public:
+    byte myID;                           // this is the midi channel it should listen to
+    byte Potentiometer[NUM_PRESETS][16]; // these are the 16 "Potentiometer"Values you can ahve per plugin
+    byte presetNr = 0;                   // the actual presetNumber
+
+    // and other stuff that is only related to the FX section, private should be used here
     byte FX1_Potentiomer[2];
     byte FX2_Potentiomer[2];
     byte FX3_Potentiomer[2];
@@ -151,40 +156,93 @@ public:
         patchCord[pci++] = new AudioConnection(FX3_mixer, 0, endmixer, 3);
         patchCord[pci++] = new AudioConnection(freeverb, 0, endmixer, 1);
         patchCord[pci++] = new AudioConnection(bitcrusher, 0, endmixer, 2);
-        
-    
     }
-    void setup()
+    virtual void setup(byte setID)
     {
+        // setting up some audioMember things (Mixer Gain, initial envelope settings etc.)
+        // every plugin has its own function for this
+        // FX_Section also uses it for its own stuff
         dry_mixer.gain(0, 1);
         dry_mixer.gain(1, 1);
         dry_mixer.gain(2, 1);
         dry_mixer.gain(3, 1);
         dry_mixer.gain(4, 1);
 
-        FX1_mixer.gain(0, 1);
-        FX1_mixer.gain(1, 1);
-        FX1_mixer.gain(2, 1);
-        FX1_mixer.gain(3, 1);
-        FX1_mixer.gain(4, 1);
+        FX1_mixer.gain(0, 0);
+        FX1_mixer.gain(1, 0);
+        FX1_mixer.gain(2, 0);
+        FX1_mixer.gain(3, 0);
+        FX1_mixer.gain(4, 0);
 
-        FX2_mixer.gain(0, 1);
-        FX2_mixer.gain(1, 1);
-        FX2_mixer.gain(2, 1);
-        FX2_mixer.gain(3, 1);
-        FX2_mixer.gain(4, 1);
+        FX2_mixer.gain(0, 0);
+        FX2_mixer.gain(1, 0);
+        FX2_mixer.gain(2, 0);
+        FX2_mixer.gain(3, 0);
+        FX2_mixer.gain(4, 0);
 
-        FX3_mixer.gain(0, 1);
-        FX3_mixer.gain(1, 1);
-        FX3_mixer.gain(2, 1);
-        FX3_mixer.gain(3, 1);
-        FX3_mixer.gain(4, 1);
+        FX3_mixer.gain(0, 0);
+        FX3_mixer.gain(1, 0);
+        FX3_mixer.gain(2, 0);
+        FX3_mixer.gain(3, 0);
+        FX3_mixer.gain(4, 0);
 
         endmixer.gain(0, 1);
         endmixer.gain(1, 1);
         endmixer.gain(2, 1);
         endmixer.gain(3, 1);
     }
+
+    virtual void noteOn(byte notePlayed, float velocity, byte voice)
+    {
+        // this is a noteOn function to start the envelopes/samples/..}
+        // every plugin has its own function for this
+        // FX_Section also uses it for its own stuff (assinging the NoteValues to the desired PluginChannel)
+    }
+
+    virtual void noteOff(byte voice)
+    {
+        // this is a noteOff function to stop the envelopes/samples/..}
+        // every plugin has its own function for this
+        // FX_Section also uses it for its own stuff (assinging the NoteValues to the desired PluginChannel)
+    }
+
+    virtual void draw_plugin()
+    {
+        // draws the desired plugin "Potentiometers"
+        // every plugin has its own function for this
+        // FX_Section also uses it for its own stuff (telling the desired PluginChannel to draw its potentiometers)
+    }
+
+    virtual void set_parameters(byte row)
+    {
+        // sets the desired plugin "Potentiometers"
+        // every plugin has its own function for this
+        // FX_Section also uses it for its own stuff (telling the desired PluginChannel to set its potentiometers)
+    }
+
+    virtual void set_presetNr()
+    {
+        // sets the desired presetNr for a Plugin
+        // this function has the same "content" for all plugins
+        if (enc_moved[PRESET_ENCODER])
+        {
+            presetNr = constrain(presetNr + encoded[PRESET_ENCODER], 0, NUM_PRESETS - 1);
+            change_plugin_row = true;
+            draw_plugin();
+        }
+    }
+
+    virtual byte get_Potentiometer(byte XPos, byte YPos, const char *name, byte oldValue)
+    {
+        // sets the desired Potentiometervalue for a Plugin and returns it
+        // this function has the same "content" for all plugins
+
+        int n = XPos + (YPos * NUM_ENCODERS);
+        Potentiometer[presetNr][n] = constrain(Potentiometer[presetNr][n] + encoded[XPos], 0, MIDI_CC_RANGE);
+        drawPot(XPos, YPos, Potentiometer[presetNr][n], name);
+        return Potentiometer[presetNr][n];
+    }
+
     void draw_Bitcrusher()
     {
         if (change_plugin_row)
@@ -262,7 +320,5 @@ public:
             drawPot(XPos, YPos, FX1_Potentiomer[XPos], name);
         }
     }
-
-
 };
 // TeensyDAW: end automatically generated code

@@ -15,7 +15,7 @@
 #include <AudioSamples.h>
 #include <Output.h>
 #include <Track.h>
-Output MasterOut(3);
+
 
 #define POSITION_ARR_BUTTON 18
 #define POSITION_BPM_BUTTON 11
@@ -92,17 +92,20 @@ byte colPins[COLS] = {41, 38, 39, 40}; // connect to the column pinouts of the k
 Adafruit_Keypad kpd = Adafruit_Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
 //  Encoder Pins
-
 RotaryEncoder Enc1(31, 32);
 RotaryEncoder Enc2(27, 28);
 RotaryEncoder Enc3(24, 25);
 RotaryEncoder Enc4(2, 3);
 RotaryEncoder *allEncoders[NUM_ENCODERS]{&Enc1, &Enc2, &Enc3, &Enc4};
-
 long oldEnc[4] = {-999, -999, -999, -999};
 // Encoder Buttons
 const uint8_t BUTTON_PINS[NUM_ENCODERS] = {30, 29, 26, 4};
 Bounce *encButtons = new Bounce[NUM_ENCODERS];
+
+// pinout for SD CARD
+const int chipSelect = BUILTIN_SDCARD;
+File myFile; // initiate SDCard Reader
+
 // micros object for midiclock
 elapsedMicros msecsclock;
 
@@ -445,7 +448,7 @@ public:
   // display stuff
 };
 Clock Masterclock(&tft);
-
+Output MasterOut(&tft, &myFile);
 Track track1(&tft, &MasterOut, 1, 10, 10);
 Track track2(&tft, &MasterOut, 2, 1, 1);
 Track track3(&tft, &MasterOut, 3, 2, 2);
@@ -457,6 +460,7 @@ Track track7(&tft, &MasterOut, 7, 6, 6);
 Track track8(&tft, &MasterOut, 8, 7, 7);
 
 Track *allTracks[8]{&track1, &track2, &track3, &track4, &track5, &track6, &track7, &track8};
+
 
 // put function declarations here:
 void readEncoders();
@@ -502,6 +506,7 @@ void set_mixer_FX3(byte XPos, byte YPos, const char *name, byte trackn);
 void myNoteOn(byte channel, byte note, byte velocity);
 void myNoteOff(byte channel, byte note, byte velocity);
 
+
 void setup()
 {
   // put your setup code here, to run once:
@@ -542,7 +547,22 @@ void setup()
   tft.println("Initializing Keypad");
   // kpd.begin();
   tft.updateScreenAsync();
-  delay(1000);
+  delay(100);
+
+  // initialize SD Card
+  Serial.print("Initializing SD card");
+  tft.println("Initializing SD card");
+  tft.updateScreenAsync();
+  delay(100);
+  if (!SD.begin(chipSelect))
+  {
+    Serial.println("initialization failed!");
+    tft.println("initialization failed!");
+    tft.updateScreenAsync();
+    return;
+  }
+  tft.updateScreenAsync();
+  delay(100);
 
   usbMIDI.setHandleNoteOff(myNoteOff);
   usbMIDI.setHandleNoteOn(myNoteOn);
@@ -1082,14 +1102,14 @@ void drawPot(int XPos, byte YPos, int dvalue, const char *dname)
   tft.setCursor(STEP_FRAME_W * xPos + 4, STEP_FRAME_H * yPos - 3);
   tft.print(dvalue_old[XPos]);
   tft.setCursor(STEP_FRAME_W * xPos, STEP_FRAME_H * (yPos + 1) + 3);
-  //if (dname_old[XPos] != dname)
-    tft.print(dname_old[XPos]);
+  // if (dname_old[XPos] != dname)
+  tft.print(dname_old[XPos]);
   tft.setTextColor(ILI9341_WHITE);
   tft.setCursor(STEP_FRAME_W * xPos + 4, STEP_FRAME_H * yPos - 3);
   tft.print(dvalue);
   tft.setCursor(STEP_FRAME_W * xPos, STEP_FRAME_H * (yPos + 1) + 3);
-  //if (dname_old[XPos] != dname)
-    tft.print(dname);
+  // if (dname_old[XPos] != dname)
+  tft.print(dname);
 
   tft.fillCircle(STEP_FRAME_W * (xPos + 1) + 16 * cos((2.5 * circlePos_old[XPos]) + 2.25), STEP_FRAME_H * yPos + 16 * sin((2.5 * circlePos_old[XPos]) + 2.25), 4, ILI9341_DARKGREY);
   tft.drawCircle(STEP_FRAME_W * (xPos + 1), STEP_FRAME_H * yPos, 16, ILI9341_LIGHTGREY);

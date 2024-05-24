@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <ili9341_t3n_font_Arial.h> // from ILI9341_t3
 #include <Audio.h>
 #include <Wire.h>
 #include <SPI.h>
@@ -6,21 +7,25 @@
 #include <SerialFlash.h>
 #include <Plugin_midi.h>
 #include "FX_Section.h"
-extern bool change_plugin_row;
 
-extern float *note_frequency;
-
-// Encoder Pins
 extern bool enc_moved[4];
 extern int encoded[4];
+extern bool change_plugin_row;
+extern float *note_frequency;
+// Encoder Pins
+
 void drawPot(int XPos, byte YPos, int dvalue, const char *dname);
 byte getEncodervalue(byte XPos, byte YPos, const char *name, byte oldValue);
 void clearWorkSpace();
+void startUpScreen();
+extern char *_filename;
 
 // TeensyDAW: begin automatically generated code
 class Output
 {
 public:
+    ILI9341_t3n *tft;
+    File *myFile;
     byte plugin_channel[NUM_TRACKS]; // this stores the track number that is related to the plugin number f.e plguin_channel[Plugin_0]= Track number 2
     Plugin_Midi Plugin_midi;
     FX_Section fx_section;
@@ -29,8 +34,10 @@ public:
     AudioConnection *patchCord[2]; // total patchCordCount:2 including array typed ones.
 
     // constructor (this is called when class-object is created)
-    Output(byte i)
+    Output(ILI9341_t3n *display, File *sdread)
     {
+        tft = display;
+        myFile = sdread;
         int pci = 0; // used only for adding new patchcords
 
         patchCord[pci++] = new AudioConnection(fx_section.endmixer, 0, i2s, 0);
@@ -41,7 +48,7 @@ public:
 
         sgtl5000.enable();
         sgtl5000.volume(1);
-        fx_section.setup();
+        fx_section.setup(0);
         fx_section.plugin_1.setup(17);
         fx_section.plugin_2.setup(18);
         fx_section.plugin_3.setup(19);
@@ -143,5 +150,45 @@ public:
         plugin_channel[trackID] = channel;
     }
 
-    // TeensyDAW: end automatically generated code
+    void savePlugin1(const char *pluginTextFileName, byte PluginChannel)
+    {
+        sprintf(_filename, "%s.txt\0", pluginTextFileName);
+        tft->fillScreen(ILI9341_DARKGREY);
+        tft->setTextColor(ILI9341_WHITE);
+        tft->setFont(Arial_8);
+        tft->setCursor(0, 0);
+
+        // delete the file:
+        tft->print("Saving:");
+        tft->print(_filename);
+        SD.remove(_filename);
+
+        // open the file.
+        *myFile = SD.open(_filename, FILE_WRITE);
+        // if the file opened okay, write to it:
+        if (myFile)
+        {
+            // save plugin potentiometer values
+            for (int maxpreset = 0; maxpreset < NUM_PRESETS; maxpreset++)
+            {
+                for (int pots = 0; pots < 16; pots++)
+                {
+                    myFile->print((char)fx_section.plugin_1.potentiometer[maxpreset][pots]);
+                }
+            }
+            // close the file:
+            myFile->close();
+            tft->println("..Done");
+        }
+        else
+        {
+            // if the file didn't open, print an error:
+            tft->println("error opening:");
+            tft->print(_filename);
+        }
+
+        tft->println("Saving done.");
+        delay(1000);
+        startUpScreen();
+    }
 };
