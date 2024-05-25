@@ -5,24 +5,23 @@
 #include <SD.h>
 #include <SerialFlash.h>
 #include "mixers.h"
+#include <ILI9341_t3n.h>
+#include <ili9341_t3n_font_Arial.h> // from ILI9341_t3
 
-void drawPot(int XPos, byte YPos, int dvalue, const char *dname);
-byte getEncodervalue(byte XPos, byte YPos, const char *name, byte oldValue);
-void draw_sequencer_option(byte x, const char *nameshort, int value, byte enc, const char *pluginName);
+
+
 void drawActiveRect(int xPos, byte yPos, byte xsize, byte ysize, bool state, const char *name, int color);
 void myDrawLine(int x0, int y0, int x1, int y1, uint16_t color);
 void myDrawRect(int x, int y, int w, int h, uint16_t color);
-extern int tuning;
 extern bool display_touched;
 extern int touchedX;
 extern int touchedY;
-extern bool enc_moved[4];
-extern int encoded[4];
-extern bool change_plugin_row;
-extern float *note_frequency;
+
+extern bool buttonPressed[NUM_BUTTONS];
+
 extern int pixelTouchX;
 extern int gridTouchY;
-extern bool buttonPressed[NUM_BUTTONS];
+//extern bool buttonPressed[NUM_BUTTONS];
 // TeensyDAW: begin automatically generated code
 // Name: Draw
 // Description: Subtractive "Draw-your-own-Waveforms" Synthesizer

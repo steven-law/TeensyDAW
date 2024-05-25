@@ -1,8 +1,11 @@
 #include <Arduino.h>
-#include <ILI9341_t3n.h>
+
+
+
+
+
 
 //  sizes and positions
-
 #define GRID_LENGTH_HOR 256
 #define GRID_LENGTH_VERT 192
 #define OCTAVE_CHANGE_LEFTMOST 18
@@ -109,15 +112,15 @@
 #define SEQ_GRID_TOP 1
 #define SEQ_GRID_BOTTOM 12
 
-
-const byte VELOCITY_NOTE_ON = 127;
-const byte VELOCITY_NOTE_OFF = 0;
-const byte NUM_TRACKS =8;
-
+#define VELOCITY_NOTE_ON 127
+#define VELOCITY_NOTE_OFF 0
+#define NUM_TRACKS 8
 
 
 
-
+void drawPot(int XPos, byte YPos, int dvalue, const char *dname);
+byte getEncodervalue(byte XPos, byte YPos, const char *name, byte oldValue);
+void draw_sequencer_option(byte x, const char *nameshort, int value, byte enc, const char *pluginName);
 
 
 

@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <ILI9341_t3n.h>
 #include <ili9341_t3n_font_Arial.h> // from ILI9341_t3
-void draw_sequencer_option(byte x, const char *nameshort, int value, byte enc, const char *pluginName);
+//void draw_sequencer_option(byte x, const char *nameshort, int value, byte enc, const char *pluginName);
 
 extern int trackColor[9];
 // Encoder Pins

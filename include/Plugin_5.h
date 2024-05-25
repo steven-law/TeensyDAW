@@ -6,13 +6,9 @@
 #include <SerialFlash.h>
 #include <synth_fm_drum.h>
 #include "mixers.h"
-void drawPot(int XPos, byte YPos, int dvalue, const char *dname);
-byte getEncodervalue(byte XPos, byte YPos, const char *name, byte oldValue);
-void draw_sequencer_option(byte x, const char *nameshort, int value, byte enc, const char *pluginName);
-extern bool enc_moved[4];
-extern int encoded[4];
-extern bool change_plugin_row;
-extern float *note_frequency;
+
+extern bool buttonPressed[NUM_BUTTONS];
+
 // TeensyDAW: begin automatically generated code
 // Name: Drum
 // Description: Synthesize 12 Drum sounds

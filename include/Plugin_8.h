@@ -6,9 +6,8 @@
 #include <SerialFlash.h>
 
 #include "mixers.h"
-void drawPot(int XPos, byte YPos, int dvalue, const char *dname);
-byte getEncodervalue(byte XPos, byte YPos, const char *name, byte oldValue);
-void draw_sequencer_option(byte x, const char *nameshort, int value, byte enc, const char *pluginName);
+extern bool buttonPressed[NUM_BUTTONS];
+
 void clearWorkSpace();
 // TeensyDAW: begin automatically generated code
 // Name: dTune
