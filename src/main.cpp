@@ -24,10 +24,11 @@ ILI9341_t3n tft = ILI9341_t3n(TFT_CS, TFT_DC, TFT_RST, TFT_MOSI, TFT_SCK, TFT_MI
 #include <Bounce2.h>
 #include <MIDI.h>
 #include "global_stuff.h"
+
 #include <AudioSamples.h>
-#include <Output.h>
-#include <Track.h>
-Output MasterOut(3);
+
+
+
 
 #define POSITION_ARR_BUTTON 18
 #define POSITION_BPM_BUTTON 11
@@ -104,7 +105,8 @@ const uint8_t BUTTON_PINS[NUM_ENCODERS] = {30, 29, 26, 4};
 Bounce *encButtons = new Bounce[NUM_ENCODERS];
 // micros object for midiclock
 elapsedMicros msecsclock;
-
+extern bool enc_moved[4];
+extern int encoded[4];
 class Cursor
 {
 public:
@@ -187,6 +189,7 @@ public:
   byte bar_tick_display = -1;
   byte start_of_loop = 0;
   byte end_of_loop = 255;
+  bool clock_is_on_tick=false;
   bool seq_run = false;
   bool seq_rec = false;
   bool playing = false;
@@ -306,14 +309,17 @@ public:
         msecsclock = 0;
         update_step_tick();
         update_bar_tick();
+clock_is_on_tick=true;
         stop_once = true;
         return true;
       }
+       else clock_is_on_tick=false;
       if (MIDItick == 96)
       {
         MIDItick = 0;
       }
     }
+     
 
     if (!playing)
     {
@@ -328,6 +334,7 @@ public:
         tft->fillRect(STEP_FRAME_W * 2, GRID_POSITION_POINTER_Y, STEP_FRAME_W * 16, 4, ILI9341_DARKGREY);
         tft->fillRect(STEP_FRAME_W * 2, STEP_POSITION_POINTER_Y, STEP_FRAME_W * 16, 4, ILI9341_DARKGREY);
         tft->asyncUpdateActive();
+        clock_is_on_tick=false;
       }
     }
     return false;
@@ -342,7 +349,7 @@ public:
     // int miditick;
     return MIDItick % 6;
   }
-  bool clock_is_on_tick()
+  bool Clock_is_on_tick()
   {
     return MIDItick % 1 == 0;
   }
@@ -445,17 +452,8 @@ public:
 };
 Clock Masterclock(&tft);
 
-Track track1(&tft, &MasterOut, 1, 10, 10);
-Track track2(&tft, &MasterOut, 2, 1, 1);
-Track track3(&tft, &MasterOut, 3, 2, 2);
-Track track4(&tft, &MasterOut, 4, 3, 3);
 
-Track track5(&tft, &MasterOut, 5, 4, 4);
-Track track6(&tft, &MasterOut, 6, 5, 5);
-Track track7(&tft, &MasterOut, 7, 6, 6);
-Track track8(&tft, &MasterOut, 8, 7, 7);
 
-Track *allTracks[8]{&track1, &track2, &track3, &track4, &track5, &track6, &track7, &track8};
 
 // put function declarations here:
 void readEncoders();
@@ -474,9 +472,6 @@ void buttons_SetNoteOnTick(int x, byte y);
 void buttons_Set_potRow();
 void input_behaviour();
 void clock_to_notes();
-
-
-
 
 void myDrawLine(int x0, int y0, int x1, int y1, uint16_t color);
 void myDrawRect(int x, int y, int w, int h, uint16_t color);
@@ -500,6 +495,20 @@ void set_mixer_FX2(byte XPos, byte YPos, const char *name, byte trackn);
 void set_mixer_FX3(byte XPos, byte YPos, const char *name, byte trackn);
 void myNoteOn(byte channel, byte note, byte velocity);
 void myNoteOff(byte channel, byte note, byte velocity);
+#include <pluginClass.h>
+#include <Output.h>
+#include <Track.h>
+Output MasterOut(3);
+Track track1(&tft, &MasterOut, 1, 10, 10);
+Track track2(&tft, &MasterOut, 2, 1, 1);
+Track track3(&tft, &MasterOut, 3, 2, 2);
+Track track4(&tft, &MasterOut, 4, 3, 3);
+
+Track track5(&tft, &MasterOut, 5, 4, 4);
+Track track6(&tft, &MasterOut, 6, 5, 5);
+Track track7(&tft, &MasterOut, 7, 6, 6);
+Track track8(&tft, &MasterOut, 8, 7, 7);
+Track *allTracks[8]{&track1, &track2, &track3, &track4, &track5, &track6, &track7, &track8};
 
 void setup()
 {
@@ -679,9 +688,10 @@ void clock_to_notes()
 {
   if (Masterclock.is_playing())
   {
-    if (Masterclock.process_MIDItick())
+    //Serial.println(Masterclock.clock_is_on_tick);
+    if (Masterclock.clock_is_on_tick)
     {
-      // Serial.println(Masterclock.MIDItick);
+      
       for (int t = 0; t < NUM_TRACKS; t++)
       {
         allTracks[t]->play_sequencer_mode(Masterclock.MIDItick, Masterclock.start_of_loop, Masterclock.end_of_loop);
@@ -1038,9 +1048,6 @@ void buttons_Set_potRow()
 }
 // void drawPot(int XPos, byte YPos, int dvalue, int min, int max, const char *dname, int color)
 
-
-
-
 void drawActiveRect(int xPos, byte yPos, byte xsize, byte ysize, bool state, const char *name, int color)
 {
   if (state)
@@ -1278,7 +1285,7 @@ void set_mixer_gain(byte XPos, byte YPos, const char *name, byte trackn)
       if (allTracks[trackn]->MIDI_channel_out == 18)
         MasterOut.fx_section.plugin_2.MixGain.gain(allTracks[trackn]->mixGain);
       if (allTracks[trackn]->MIDI_channel_out == 19)
-        MasterOut.fx_section.plugin_3.MixGain.gain(allTracks[trackn]->mixGain);
+        MasterOut.plugin_3.MixGain.gain(allTracks[trackn]->mixGain);
       if (allTracks[trackn]->MIDI_channel_out == 20)
         MasterOut.fx_section.plugin_4.MixGain.gain(allTracks[trackn]->mixGain);
       if (allTracks[trackn]->MIDI_channel_out == 21)

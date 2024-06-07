@@ -44,7 +44,7 @@ public:
         fx_section.setup();
         fx_section.plugin_1.setup(17);
         fx_section.plugin_2.setup(18);
-        fx_section.plugin_3.setup(19);
+        plugin_3.setup(19);
         fx_section.plugin_4.setup(20);
         fx_section.plugin_5.setup(21);
         fx_section.plugin_6.setup(22);
@@ -61,7 +61,7 @@ public:
         if (channel == 18)
             fx_section.plugin_2.noteOn(note, 1, voice);
         if (channel == 19)
-            fx_section.plugin_3.noteOn(note, 1, voice);
+            plugin_3.noteOn(note, 1, voice);
         if (channel == 20)
             fx_section.plugin_4.noteOn(note, 1, voice);
         if (channel == 21)
@@ -82,7 +82,7 @@ public:
         if (channel == 18)
             fx_section.plugin_2.noteOff(voice);
         if (channel == 19)
-            fx_section.plugin_3.noteOff(voice);
+            plugin_3.noteOff(voice);
         if (channel == 21)
             fx_section.plugin_5.noteOff(note, voice);
         if (channel == 22)
@@ -103,7 +103,7 @@ public:
         if (plugin_channel[trackID] == 18)
             fx_section.plugin_2.set_parameters(row);
         if (plugin_channel[trackID] == 19)
-            fx_section.plugin_3.set_parameters(row);
+            plugin_3.set_parameters(row);
         if (plugin_channel[trackID] == 20)
             fx_section.plugin_4.set_parameters(row);
         if (plugin_channel[trackID] == 21)
@@ -126,7 +126,7 @@ public:
         if (plugin_channel[trackID] == 18)
             fx_section.plugin_2.draw_plugin();
         if (plugin_channel[trackID] == 19)
-            fx_section.plugin_3.draw_plugin();
+            plugin_3.draw_plugin();
         if (plugin_channel[trackID] == 20)
             fx_section.plugin_4.draw_plugin();
         if (plugin_channel[trackID] == 21)

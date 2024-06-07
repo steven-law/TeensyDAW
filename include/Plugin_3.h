@@ -5,8 +5,8 @@
 #include <SD.h>
 #include <SerialFlash.h>
 #include "mixers.h"
-
-extern bool buttonPressed[NUM_BUTTONS];
+// #include <pluginClass.h>
+// extern bool buttonPressed[NUM_BUTTONS];
 
 /*
 M WF    M Ratio   M Vol    C WF
@@ -35,15 +35,20 @@ C At    C Dc      C St     C Rl
 // Pot 10: Decay
 // Pot 11: Sustain
 // Pot 12: Release
-class Plugin_3
+extern bool enc_moved[4];
+extern int encoded[4];
+extern bool change_plugin_row;
+extern bool buttonPressed[NUM_BUTTONS];
+class Plugin_3 : public PluginControll
 {
 public:
+    byte get_Potentiometer(byte XPos, byte YPos, const char *name);
 #define NUM_RATIOS 10
     const float ratios[NUM_RATIOS] = {0.125, 0.25, 0.5, 0.75, 1, 2, 3, 4, 6, 8};
     float modulator_ratio = 1;
-    byte myID;
-    byte potentiometer[NUM_PRESETS][16];
-    byte presetNr = 0;
+    // byte myID;
+    // byte potentiometer[NUM_PRESETS][16];
+    // byte presetNr = 0;
     AudioSynthWaveformModulated modulator[12];
     AudioEffectEnvelope modEnv[12];
     AudioSynthWaveformModulated carrier[12];
@@ -54,7 +59,7 @@ public:
     AudioConnection *patchCord[50]; // total patchCordCount:50 including array typed ones.
 
     // constructor (this is called when class-object is created)
-    Plugin_3()
+    Plugin_3(const char *Name, byte ID) : PluginControll(Name, ID)
     {
         int pci = 0; // used only for adding new patchcords
 
@@ -187,10 +192,7 @@ public:
     {
         if (enc_moved[XPos])
         {
-            int n = XPos + (YPos * NUM_ENCODERS);
-            potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
-            int walveform = map(potentiometer[presetNr][n], 0, MIDI_CC_RANGE, min, max);
-
+            int walveform = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, min, max);
             for (int i = 0; i < MAX_VOICES; i++)
             {
                 modulator[i].begin(walveform);
@@ -354,4 +356,6 @@ public:
         }
     }
 };
+
+Plugin_3 plugin_3("2FM", 3);
 // TeensyDAW: end automatically generated code

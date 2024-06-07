@@ -26,7 +26,7 @@ public:
     byte FX3_Potentiomer[2];
     Plugin_1 plugin_1;
     Plugin_2 plugin_2;
-    Plugin_3 plugin_3;
+    
     Plugin_4 plugin_4;
     Plugin_5 plugin_5;
     Plugin_6 plugin_6;
