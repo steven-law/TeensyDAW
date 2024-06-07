@@ -495,7 +495,7 @@ void set_mixer_FX2(byte XPos, byte YPos, const char *name, byte trackn);
 void set_mixer_FX3(byte XPos, byte YPos, const char *name, byte trackn);
 void myNoteOn(byte channel, byte note, byte velocity);
 void myNoteOff(byte channel, byte note, byte velocity);
-#include <pluginClass.h>
+//#include <pluginClass.h>
 #include <Output.h>
 #include <Track.h>
 Output MasterOut(3);
@@ -1285,7 +1285,7 @@ void set_mixer_gain(byte XPos, byte YPos, const char *name, byte trackn)
       if (allTracks[trackn]->MIDI_channel_out == 18)
         MasterOut.fx_section.plugin_2.MixGain.gain(allTracks[trackn]->mixGain);
       if (allTracks[trackn]->MIDI_channel_out == 19)
-        MasterOut.plugin_3.MixGain.gain(allTracks[trackn]->mixGain);
+        plugin_3.MixGain.gain(allTracks[trackn]->mixGain);
       if (allTracks[trackn]->MIDI_channel_out == 20)
         MasterOut.fx_section.plugin_4.MixGain.gain(allTracks[trackn]->mixGain);
       if (allTracks[trackn]->MIDI_channel_out == 21)

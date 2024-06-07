@@ -1,6 +1,5 @@
 #include <Arduino.h>
-#include <global_stuff.h>
-#include <Plugin_3.h>
+//#include <global_stuff.h>
 extern bool enc_moved[4];
 extern int encoded[4];
 extern bool change_plugin_row;

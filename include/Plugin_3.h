@@ -1,3 +1,4 @@
+
 #include <Arduino.h>
 #include <Audio.h>
 #include <Wire.h>
@@ -5,7 +6,7 @@
 #include <SD.h>
 #include <SerialFlash.h>
 #include "mixers.h"
-// #include <pluginClass.h>
+ #include <pluginClass.h>
 // extern bool buttonPressed[NUM_BUTTONS];
 
 /*
