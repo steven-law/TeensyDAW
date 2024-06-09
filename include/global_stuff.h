@@ -116,7 +116,7 @@
 #define VELOCITY_NOTE_OFF 0
 #define NUM_TRACKS 8
 
-
+#define NUM_PLUGINS 8
 
 void drawPot(int XPos, byte YPos, int dvalue, const char *dname);
 byte getEncodervalue(byte XPos, byte YPos, const char *name, byte oldValue);

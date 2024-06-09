@@ -4,19 +4,13 @@
 #include <SPI.h>
 #include <SD.h>
 #include <SerialFlash.h>
-#include "Plugin_1.h"
-#include "Plugin_2.h"
-#include "Plugin_3.h"
-#include "Plugin_4.h"
-#include "Plugin_5.h"
-#include "Plugin_6.h"
-#include "Plugin_7.h"
-#include "Plugin_8.h"
+#include "global_stuff.h"
+
+#include <plugin_List.h>
 #include "mixers.h"
 
 // TeensyDAW: begin automatically generated code
-//void drawPot(int XPos, byte YPos, int dvalue, const char *dname);
-
+// void drawPot(int XPos, byte YPos, int dvalue, const char *dname);
 
 class FX_Section
 {
@@ -24,14 +18,6 @@ public:
     byte FX1_Potentiomer[2];
     byte FX2_Potentiomer[2];
     byte FX3_Potentiomer[2];
-    Plugin_1 plugin_1;
-    Plugin_2 plugin_2;
-    
-    Plugin_4 plugin_4;
-    Plugin_5 plugin_5;
-    Plugin_6 plugin_6;
-    Plugin_7 plugin_7;
-    Plugin_8 plugin_8;
     AudioAmplifier dry_1;
     AudioAmplifier FX1_1;
     AudioAmplifier FX2_1;
@@ -77,7 +63,14 @@ public:
     FX_Section()
     {
         int pci = 0; // used only for adding new patchcords
-
+        /*
+        for (int i=0;i<NUM_PLUGINS;i++){
+            patchCord[pci++] = new AudioConnection(allPlugins[i]->SongVol, 0, dry_1, 0);
+            patchCord[pci++] = new AudioConnection(plugin_1.SongVol, 0, FX1_1, 0);
+            patchCord[pci++] = new AudioConnection(plugin_1.SongVol, 0, FX2_1, 0);
+            patchCord[pci++] = new AudioConnection(plugin_1.SongVol, 0, FX3_1, 0);
+}
+*/
         patchCord[pci++] = new AudioConnection(plugin_1.SongVol, 0, dry_1, 0);
         patchCord[pci++] = new AudioConnection(plugin_1.SongVol, 0, FX1_1, 0);
         patchCord[pci++] = new AudioConnection(plugin_1.SongVol, 0, FX2_1, 0);
@@ -148,8 +141,6 @@ public:
         patchCord[pci++] = new AudioConnection(FX3_mixer, 0, endmixer, 3);
         patchCord[pci++] = new AudioConnection(freeverb, 0, endmixer, 1);
         patchCord[pci++] = new AudioConnection(bitcrusher, 0, endmixer, 2);
-        
-    
     }
     void setup()
     {
@@ -259,7 +250,5 @@ public:
             drawPot(XPos, YPos, FX1_Potentiomer[XPos], name);
         }
     }
-
-
 };
 // TeensyDAW: end automatically generated code

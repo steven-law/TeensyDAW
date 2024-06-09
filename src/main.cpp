@@ -27,9 +27,6 @@ ILI9341_t3n tft = ILI9341_t3n(TFT_CS, TFT_DC, TFT_RST, TFT_MOSI, TFT_SCK, TFT_MI
 
 #include <AudioSamples.h>
 
-
-
-
 #define POSITION_ARR_BUTTON 18
 #define POSITION_BPM_BUTTON 11
 #define POSITION_SCALE_BUTTON 16
@@ -189,7 +186,7 @@ public:
   byte bar_tick_display = -1;
   byte start_of_loop = 0;
   byte end_of_loop = 255;
-  bool clock_is_on_tick=false;
+  bool clock_is_on_tick = false;
   bool seq_run = false;
   bool seq_rec = false;
   bool playing = false;
@@ -309,17 +306,17 @@ public:
         msecsclock = 0;
         update_step_tick();
         update_bar_tick();
-clock_is_on_tick=true;
+        clock_is_on_tick = true;
         stop_once = true;
         return true;
       }
-       else clock_is_on_tick=false;
+      else
+        clock_is_on_tick = false;
       if (MIDItick == 96)
       {
         MIDItick = 0;
       }
     }
-     
 
     if (!playing)
     {
@@ -334,7 +331,7 @@ clock_is_on_tick=true;
         tft->fillRect(STEP_FRAME_W * 2, GRID_POSITION_POINTER_Y, STEP_FRAME_W * 16, 4, ILI9341_DARKGREY);
         tft->fillRect(STEP_FRAME_W * 2, STEP_POSITION_POINTER_Y, STEP_FRAME_W * 16, 4, ILI9341_DARKGREY);
         tft->asyncUpdateActive();
-        clock_is_on_tick=false;
+        clock_is_on_tick = false;
       }
     }
     return false;
@@ -452,9 +449,6 @@ clock_is_on_tick=true;
 };
 Clock Masterclock(&tft);
 
-
-
-
 // put function declarations here:
 void readEncoders();
 void encoder_SetCursor(byte maxY);
@@ -495,9 +489,13 @@ void set_mixer_FX2(byte XPos, byte YPos, const char *name, byte trackn);
 void set_mixer_FX3(byte XPos, byte YPos, const char *name, byte trackn);
 void myNoteOn(byte channel, byte note, byte velocity);
 void myNoteOff(byte channel, byte note, byte velocity);
-//#include <pluginClass.h>
+// #include <pluginClass.h>
+
+#include <plugin_List.h>
+
 #include <Output.h>
 #include <Track.h>
+
 Output MasterOut(3);
 Track track1(&tft, &MasterOut, 1, 10, 10);
 Track track2(&tft, &MasterOut, 2, 1, 1);
@@ -688,10 +686,10 @@ void clock_to_notes()
 {
   if (Masterclock.is_playing())
   {
-    //Serial.println(Masterclock.clock_is_on_tick);
+    // Serial.println(Masterclock.clock_is_on_tick);
     if (Masterclock.clock_is_on_tick)
     {
-      
+
       for (int t = 0; t < NUM_TRACKS; t++)
       {
         allTracks[t]->play_sequencer_mode(Masterclock.MIDItick, Masterclock.start_of_loop, Masterclock.end_of_loop);
@@ -1280,22 +1278,34 @@ void set_mixer_gain(byte XPos, byte YPos, const char *name, byte trackn)
 
       allTracks[trackn]->mixGainPot = constrain(allTracks[trackn]->mixGainPot + encoded[XPos], 0, MIDI_CC_RANGE);
       allTracks[trackn]->mixGain = (float)(allTracks[trackn]->mixGainPot / MIDI_CC_RANGE_FLOAT);
+      /*
+            for (int i = 0; i < NUM_PLUGINS; i++)
+              {
+                  allPlugins[i]->MixGain.gain(allTracks[trackn]->mixGain);
+              }
+              */
       if (allTracks[trackn]->MIDI_channel_out == 17)
-        MasterOut.fx_section.plugin_1.MixGain.gain(allTracks[trackn]->mixGain);
+        plugin_1.MixGain.gain(allTracks[trackn]->mixGain);
+
       if (allTracks[trackn]->MIDI_channel_out == 18)
-        MasterOut.fx_section.plugin_2.MixGain.gain(allTracks[trackn]->mixGain);
+        plugin_2.MixGain.gain(allTracks[trackn]->mixGain);
+        
       if (allTracks[trackn]->MIDI_channel_out == 19)
+      {
         plugin_3.MixGain.gain(allTracks[trackn]->mixGain);
+        Serial.println(allTracks[trackn]->mixGain, DEC);
+      }
+      
       if (allTracks[trackn]->MIDI_channel_out == 20)
-        MasterOut.fx_section.plugin_4.MixGain.gain(allTracks[trackn]->mixGain);
+        plugin_4.MixGain.gain(allTracks[trackn]->mixGain);
       if (allTracks[trackn]->MIDI_channel_out == 21)
-        MasterOut.fx_section.plugin_5.MixGain.gain(allTracks[trackn]->mixGain);
+        plugin_5.MixGain.gain(allTracks[trackn]->mixGain);
       if (allTracks[trackn]->MIDI_channel_out == 22)
-        MasterOut.fx_section.plugin_6.MixGain.gain(allTracks[trackn]->mixGain);
+        plugin_6.MixGain.gain(allTracks[trackn]->mixGain);
       if (allTracks[trackn]->MIDI_channel_out == 23)
-        MasterOut.fx_section.plugin_7.MixGain.gain(allTracks[trackn]->mixGain);
+        plugin_7.MixGain.gain(allTracks[trackn]->mixGain);
       if (allTracks[trackn]->MIDI_channel_out == 24)
-        MasterOut.fx_section.plugin_8.MixGain.gain(allTracks[trackn]->mixGain);
+        plugin_8.MixGain.gain(allTracks[trackn]->mixGain);
 
       drawPot(XPos, YPos, allTracks[trackn]->mixGainPot, name);
     }

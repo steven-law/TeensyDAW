@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <ILI9341_t3n.h>
 #include <ili9341_t3n_font_Arial.h> // from ILI9341_t3
+
 // void draw_sequencer_option(byte x, const char *nameshort, int value, byte enc, const char *pluginName);
 void clearWorkSpace();
 extern int trackColor[9];
@@ -17,7 +18,6 @@ extern byte arrangerpage;
 class Track
 {
 public:
-    
     void play_SeqMode0(byte cloock);
     void play_SeqMode1(byte cloock);
     void set_SeqMode1_parameters(byte row);
@@ -75,15 +75,16 @@ public:
     byte SeqMod_2_Poti[16];
     byte SeqMod_3_Poti[12];
     byte maxVal;
-    byte mixGainPot;
+    byte mixGainPot = 127;
+
     float mixGain = 1;
-    byte mixDryPot;
+    byte mixDryPot = 127;
     float mixDry = 1;
-    byte mixFX1Pot;
+    byte mixFX1Pot = 0;
     float mixFX1 = 0;
-    byte mixFX2Pot;
+    byte mixFX2Pot = 0;
     float mixFX2 = 0;
-    byte mixFX3Pot;
+    byte mixFX3Pot = 0;
     float mixFX3 = 0;
     byte mute_norm_solo_pot = 1;
     bool muted;
@@ -216,6 +217,11 @@ public:
             clear_notes_in_grid();
             draw_notes_in_grid();
             enc_moved[n] = false;
+            Serial.println(mixGainPot);
+            Serial.println(mixDryPot);
+            Serial.println(mixFX1Pot);
+            Serial.println(mixFX2Pot);
+            Serial.println(mixFX3Pot);
         }
     }
     void drawOctaveNumber()

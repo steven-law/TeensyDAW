@@ -1,5 +1,14 @@
+#ifndef PLUGIN_CLASS
+#define PLUGIN_CLASS
+
 #include <Arduino.h>
-//#include <global_stuff.h>
+#include <Audio.h>
+#include <Wire.h>
+#include <SPI.h>
+#include <SD.h>
+#include <SerialFlash.h>
+#include "mixers.h"
+#include <global_stuff.h>
 extern bool enc_moved[4];
 extern int encoded[4];
 extern bool change_plugin_row;
@@ -12,33 +21,26 @@ public:
     byte myID;
     byte potentiometer[NUM_PRESETS][16];
     byte presetNr = 0;
+
     const char *name;
     PluginControll(const char *Name, byte ID)
     {
         name = Name;
         myID = ID;
+
     }
+    virtual ~PluginControll() = default;
     virtual const char *get_Name() { return name; }
     virtual byte get_ID() { return myID; }
-    virtual void noteOn(byte notePlayed, float velocity, byte voice) {}
-    virtual void noteOff(byte voice) {}
-    virtual void set_parameters(byte row) {}
-    virtual void draw_plugin() {}
-    virtual void set_presetNr()
-    {
-        if (enc_moved[PRESET_ENCODER])
-        {
-            presetNr = constrain(presetNr + encoded[PRESET_ENCODER], 0, NUM_PRESETS - 1);
-            change_plugin_row = true;
-            draw_plugin();
-        }
-    }
 
-    virtual byte get_Potentiometer(byte XPos, byte YPos, const char *name)
-    {
-        int n = XPos + (YPos * NUM_ENCODERS);
-        potentiometer[presetNr][n] = constrain(potentiometer[presetNr][n] + encoded[XPos], 0, MIDI_CC_RANGE);
-        drawPot(XPos, YPos, potentiometer[presetNr][n], name);
-        return potentiometer[presetNr][n];
-    }
+    virtual void setup(byte setID) = 0;
+    virtual void noteOn(byte notePlayed, float velocity, byte voice) = 0;
+    virtual void noteOff(byte notePlayed, byte voice) = 0;
+
+    virtual void set_parameters(byte row) = 0;
+    virtual void draw_plugin() = 0;
+
+    virtual void set_presetNr();
+    virtual byte get_Potentiometer(byte XPos, byte YPos, const char *name);
 };
+#endif // PLUGIN_CLASS
