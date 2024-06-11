@@ -505,8 +505,9 @@ void setup()
 {
   // put your setup code here, to run once:
 
-  Serial.begin(15200); // set MIDI baud
-
+  Serial.begin(115200); // set MIDI baud
+   // while the serial stream is not open, do nothing:
+  // while (!Serial) ;
   // initialize the TFT- and Touchscreen
 
   tft.begin();
@@ -584,6 +585,7 @@ void loop()
     else
       cursor.update(pixelTouchX, gridTouchY, STEP_FRAME_H);
     tft.fillRect(70, lastPotRow * 4, 10, 3, ILI9341_RED);
+    Serial.printf("pl2: %f, fx2: %f, pl3: %f, fx3: %f\n", MasterOut.fx_section.plugin_2.peak.read(),MasterOut.fx_section.peak2.read(), plugin_3.peak.read(), MasterOut.fx_section.peak3.read());
   }
 
   // tft.updateScreen();
@@ -1278,7 +1280,7 @@ void set_mixer_gain(byte XPos, byte YPos, const char *name, byte trackn)
       if (allTracks[trackn]->MIDI_channel_out == 18)
         MasterOut.fx_section.plugin_2.MixGain.gain(allTracks[trackn]->mixGain);
       if (allTracks[trackn]->MIDI_channel_out == 19)
-        MasterOut.fx_section.plugin_3.MixGain.gain(allTracks[trackn]->mixGain);
+        plugin_3.MixGain.gain(allTracks[trackn]->mixGain);
       if (allTracks[trackn]->MIDI_channel_out == 20)
         MasterOut.fx_section.plugin_4.MixGain.gain(allTracks[trackn]->mixGain);
       if (allTracks[trackn]->MIDI_channel_out == 21)

@@ -4,9 +4,11 @@
 #include <SPI.h>
 #include <SD.h>
 #include <SerialFlash.h>
+#include "global_stuff.h"
+#include <plugin_List.h>
 #include "Plugin_1.h"
 #include "Plugin_2.h"
-#include "Plugin_3.h"
+//#include "Plugin_3.h"
 #include "Plugin_4.h"
 #include "Plugin_5.h"
 #include "Plugin_6.h"
@@ -26,7 +28,8 @@ public:
     byte FX3_Potentiomer[2];
     Plugin_1 plugin_1;
     Plugin_2 plugin_2;
-    Plugin_3 plugin_3;
+   AudioAnalyzePeak peak3;
+   AudioAnalyzePeak peak2;
     Plugin_4 plugin_4;
     Plugin_5 plugin_5;
     Plugin_6 plugin_6;
@@ -71,13 +74,16 @@ public:
     AudioEffectFreeverb freeverb;
     AudioEffectBitcrusher bitcrusher;
     AudioMixer4 endmixer;
-    AudioConnection *patchCord[70]; // total patchCordCount:46 including array typed ones.
+    AudioConnection *patchCord[72]; // total patchCordCount:46 including array typed ones.
 
     // constructor (this is called when class-object is created)
     FX_Section()
     {
         int pci = 0; // used only for adding new patchcords
 
+
+patchCord[pci++] = new AudioConnection(plugin_3.modulator[0], 0, peak3, 0);
+patchCord[pci++] = new AudioConnection(plugin_2.waveform[0], 0, peak2, 0);
         patchCord[pci++] = new AudioConnection(plugin_1.SongVol, 0, dry_1, 0);
         patchCord[pci++] = new AudioConnection(plugin_1.SongVol, 0, FX1_1, 0);
         patchCord[pci++] = new AudioConnection(plugin_1.SongVol, 0, FX2_1, 0);

@@ -50,8 +50,8 @@ public:
     AudioMixer12 mixer;
     AudioAmplifier MixGain;
     AudioAmplifier SongVol;
-    AudioConnection *patchCord[98]; // total patchCordCount:98 including array typed ones.
-
+    AudioConnection *patchCord[99]; // total patchCordCount:98 including array typed ones.
+AudioAnalyzePeak peak;
     // constructor (this is called when class-object is created)
     Plugin_2()
     {
@@ -59,6 +59,7 @@ public:
 
         patchCord[pci++] = new AudioConnection(mixer, 0, MixGain, 0);
         patchCord[pci++] = new AudioConnection(MixGain, 0, SongVol, 0);
+        patchCord[pci++] = new AudioConnection(waveform[0], 0, peak, 0);
         for (int i = 0; i < 12; i++)
         {
             patchCord[pci++] = new AudioConnection(dc[i], 0, Fenv[i], 0);

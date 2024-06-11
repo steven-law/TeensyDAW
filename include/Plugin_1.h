@@ -64,6 +64,7 @@ public:
         }
         MixGain.gain(1);
         SongVol.gain(1);
+        Serial.println("Setup Pl1 Done");
     }
     void noteOn(byte notePlayed, float velocity, byte voice)
     {
