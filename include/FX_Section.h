@@ -6,19 +6,7 @@
 #include <SerialFlash.h>
 #include "global_stuff.h"
 #include <plugin_List.h>
-//#include "Plugin_1.h"
-//#include "Plugin_2.h"
-//#include "Plugin_3.h"
-//#include "Plugin_4.h"
-//#include "Plugin_5.h"
-//#include "Plugin_6.h"
-//#include "Plugin_7.h"
-//#include "Plugin_8.h"
 #include "mixers.h"
-
-// TeensyDAW: begin automatically generated code
-//void drawPot(int XPos, byte YPos, int dvalue, const char *dname);
-//extern Plugin_3 plugin_3;
 
 class FX_Section
 {
@@ -26,15 +14,8 @@ public:
     byte FX1_Potentiomer[2];
     byte FX2_Potentiomer[2];
     byte FX3_Potentiomer[2];
-    //Plugin_1 plugin_1;
-    //Plugin_2 plugin_2;
-   AudioAnalyzePeak peak3;
-   AudioAnalyzePeak peak2;
-    //Plugin_4 plugin_4;
-    //Plugin_5 plugin_5;
-    //Plugin_6 plugin_6;
-    //Plugin_7 plugin_7;
-    //Plugin_8 plugin_8;
+    AudioAnalyzePeak peak3;
+    AudioAnalyzePeak peak2;
     AudioAmplifier dry_1;
     AudioAmplifier FX1_1;
     AudioAmplifier FX2_1;
@@ -81,9 +62,8 @@ public:
     {
         int pci = 0; // used only for adding new patchcords
 
-
-patchCord[pci++] = new AudioConnection(plugin_3.modulator[0], 0, peak3, 0);
-patchCord[pci++] = new AudioConnection(plugin_2.waveform[0], 0, peak2, 0);
+        patchCord[pci++] = new AudioConnection(plugin_3.modulator[0], 0, peak3, 0);
+        patchCord[pci++] = new AudioConnection(plugin_2.waveform[0], 0, peak2, 0);
         patchCord[pci++] = new AudioConnection(plugin_1.SongVol, 0, dry_1, 0);
         patchCord[pci++] = new AudioConnection(plugin_1.SongVol, 0, FX1_1, 0);
         patchCord[pci++] = new AudioConnection(plugin_1.SongVol, 0, FX2_1, 0);
@@ -154,8 +134,6 @@ patchCord[pci++] = new AudioConnection(plugin_2.waveform[0], 0, peak2, 0);
         patchCord[pci++] = new AudioConnection(FX3_mixer, 0, endmixer, 3);
         patchCord[pci++] = new AudioConnection(freeverb, 0, endmixer, 1);
         patchCord[pci++] = new AudioConnection(bitcrusher, 0, endmixer, 2);
-        
-    
     }
     void setup()
     {
@@ -266,8 +244,9 @@ patchCord[pci++] = new AudioConnection(plugin_2.waveform[0], 0, peak2, 0);
         }
     }
 
-void get_peak(){
-    Serial.printf("FX2: %f , FX3: %f \n", peak2.read(), peak3.read());
-}
+    void get_peak()
+    {
+        Serial.printf("FX2: %f , FX3: %f \n", peak2.read(), peak3.read());
+    }
 };
 // TeensyDAW: end automatically generated code
