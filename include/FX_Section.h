@@ -6,14 +6,14 @@
 #include <SerialFlash.h>
 #include "global_stuff.h"
 #include <plugin_List.h>
-#include "Plugin_1.h"
-#include "Plugin_2.h"
+//#include "Plugin_1.h"
+//#include "Plugin_2.h"
 //#include "Plugin_3.h"
-#include "Plugin_4.h"
-#include "Plugin_5.h"
-#include "Plugin_6.h"
-#include "Plugin_7.h"
-#include "Plugin_8.h"
+//#include "Plugin_4.h"
+//#include "Plugin_5.h"
+//#include "Plugin_6.h"
+//#include "Plugin_7.h"
+//#include "Plugin_8.h"
 #include "mixers.h"
 
 // TeensyDAW: begin automatically generated code
@@ -26,15 +26,15 @@ public:
     byte FX1_Potentiomer[2];
     byte FX2_Potentiomer[2];
     byte FX3_Potentiomer[2];
-    Plugin_1 plugin_1;
-    Plugin_2 plugin_2;
+    //Plugin_1 plugin_1;
+    //Plugin_2 plugin_2;
    AudioAnalyzePeak peak3;
    AudioAnalyzePeak peak2;
-    Plugin_4 plugin_4;
-    Plugin_5 plugin_5;
-    Plugin_6 plugin_6;
-    Plugin_7 plugin_7;
-    Plugin_8 plugin_8;
+    //Plugin_4 plugin_4;
+    //Plugin_5 plugin_5;
+    //Plugin_6 plugin_6;
+    //Plugin_7 plugin_7;
+    //Plugin_8 plugin_8;
     AudioAmplifier dry_1;
     AudioAmplifier FX1_1;
     AudioAmplifier FX2_1;
