@@ -23,7 +23,7 @@ extern Plugin_5 plugin_5;
 extern Plugin_6 plugin_6;
 extern Plugin_7 plugin_7;
 extern Plugin_8 plugin_8;
-//extern PluginControll *allPlugins[NUM_PLUGINS];
+extern PluginControll *allPlugins[NUM_PLUGINS];
 
 
 

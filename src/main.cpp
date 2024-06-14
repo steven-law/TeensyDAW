@@ -36,6 +36,7 @@ Plugin_5 plugin_5("Drum", 21);
 Plugin_6 plugin_6("Draw", 22);
 Plugin_7 plugin_7("Boom", 23);
 Plugin_8 plugin_8("Dtune", 24);
+PluginControll *allPlugins[NUM_PLUGINS] = {&plugin_1, &plugin_2, &plugin_3, &plugin_4, &plugin_5, &plugin_6, &plugin_7, &plugin_8};
 Output MasterOut(3);
 
 #define POSITION_ARR_BUTTON 18
@@ -1283,6 +1284,11 @@ void set_mixer_gain(byte XPos, byte YPos, const char *name, byte trackn)
 
       allTracks[trackn]->mixGainPot = constrain(allTracks[trackn]->mixGainPot + encoded[XPos], 0, MIDI_CC_RANGE);
       allTracks[trackn]->mixGain = (float)(allTracks[trackn]->mixGainPot / MIDI_CC_RANGE_FLOAT);
+      /*for (int i = 0; i < NUM_PLUGINS; i++)
+     {
+       if (allTracks[trackn]->MIDI_channel_out == i+17)
+         allPlugins[i]->MixGain.gain(allTracks[trackn]->mixGain);
+     }*/
       if (allTracks[trackn]->MIDI_channel_out == 17)
         plugin_1.MixGain.gain(allTracks[trackn]->mixGain);
       if (allTracks[trackn]->MIDI_channel_out == 18)
