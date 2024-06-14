@@ -491,7 +491,7 @@ void myNoteOn(byte channel, byte note, byte velocity);
 void myNoteOff(byte channel, byte note, byte velocity);
 // #include <pluginClass.h>
 
-#include <plugin_List.h>
+//#include <plugin_List.h>
 
 #include <Output.h>
 #include <Track.h>
@@ -507,6 +507,15 @@ Track track6(&tft, &MasterOut, 6, 5, 5);
 Track track7(&tft, &MasterOut, 7, 6, 6);
 Track track8(&tft, &MasterOut, 8, 7, 7);
 Track *allTracks[8]{&track1, &track2, &track3, &track4, &track5, &track6, &track7, &track8};
+Plugin_1 plugin_1("Strng", 17);
+Plugin_2 plugin_2("1OSC", 18);
+Plugin_3 plugin_3("2FM", 19);
+Plugin_4 plugin_4("MDrm", 20);
+Plugin_5 plugin_5("Drum", 21);
+Plugin_6 plugin_6("Draw", 22);
+Plugin_7 plugin_7("Boom", 23);
+Plugin_8 plugin_8("Dtune", 24);
+//PluginControll *allPlugins[NUM_PLUGINS] = {&plugin_1, &plugin_2, &plugin_3, &plugin_4, &plugin_5, &plugin_6, &plugin_7, &plugin_8};
 
 void setup()
 {
