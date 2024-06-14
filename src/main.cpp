@@ -197,6 +197,7 @@ public:
   byte bar_tick_display = -1;
   byte start_of_loop = 0;
   byte end_of_loop = 255;
+  bool clock_is_on_tick = false;
   bool seq_run = false;
   bool seq_rec = false;
   bool playing = false;
@@ -316,9 +317,12 @@ public:
         msecsclock = 0;
         update_step_tick();
         update_bar_tick();
+        clock_is_on_tick = true;
         stop_once = true;
         return true;
       }
+      else
+        clock_is_on_tick = false;
       if (MIDItick == 96)
       {
         MIDItick = 0;
@@ -338,6 +342,7 @@ public:
         tft->fillRect(STEP_FRAME_W * 2, GRID_POSITION_POINTER_Y, STEP_FRAME_W * 16, 4, ILI9341_DARKGREY);
         tft->fillRect(STEP_FRAME_W * 2, STEP_POSITION_POINTER_Y, STEP_FRAME_W * 16, 4, ILI9341_DARKGREY);
         tft->asyncUpdateActive();
+        clock_is_on_tick = false;
       }
     }
     return false;
@@ -352,7 +357,7 @@ public:
     // int miditick;
     return MIDItick % 6;
   }
-  bool clock_is_on_tick()
+  bool Clock_is_on_tick()
   {
     return MIDItick % 1 == 0;
   }
@@ -693,7 +698,7 @@ void clock_to_notes()
 {
   if (Masterclock.is_playing())
   {
-    if (Masterclock.process_MIDItick())
+    if (Masterclock.clock_is_on_tick )
     {
       // Serial.println(Masterclock.MIDItick);
       for (int t = 0; t < NUM_TRACKS; t++)

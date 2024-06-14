@@ -12,6 +12,7 @@ void Track::play_SeqMode0(byte cloock)
         {
             if (!note_is_on[v])
             {
+                Serial.println("send Note");
                 noteToPlay[v] = array[clip_to_play[internal_clock_bar]][cloock][v] + noteOffset[internal_clock_bar];
                 note_is_on[v] = true;
                 Masterout->noteOn(noteToPlay[v], VELOCITY_NOTE_ON, MIDI_channel_out, v);

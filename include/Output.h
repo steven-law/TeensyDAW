@@ -57,6 +57,7 @@ public:
             Plugin_midi.noteOn(note, velo, channel);
         for (byte i = 0; i < NUM_PLUGINS; i++)
         {
+            Serial.println("recieve Note");
             if (channel == i + 17)
                 allPlugins[i]->noteOn(note, 1, voice);
         }
