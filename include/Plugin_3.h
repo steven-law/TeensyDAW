@@ -83,7 +83,7 @@ AudioAnalyzePeak peak;
     virtual void set_parameters(byte row) override;
     virtual void draw_plugin() override;
 
-float get_Peak();
+void get_peak();
     void set_mod_waveform(byte XPos, byte YPos, const char *name, int min, int max);
     void set_mod_amplitude(byte XPos, byte YPos, const char *name, int min, int max);
     void set_mod_ratio(byte XPos, byte YPos, const char *name, int min, int max);

@@ -184,6 +184,11 @@ AudioAnalyzePeak peak;
         }
     }
 
+void get_peak()
+{
+    Serial.printf("Pl2: %f  ", peak.read());
+}
+
     void set_voice_waveform(byte XPos, byte YPos, const char *name, int min, int max)
     {
         if (enc_moved[XPos])

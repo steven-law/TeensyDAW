@@ -2,7 +2,7 @@
 #include "global_stuff.h"
 #include <Output.h>
 #include "Track.h"
-
+#include <plugin_List.h>
 void Track::play_SeqMode0(byte cloock)
 {
 

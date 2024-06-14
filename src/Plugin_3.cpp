@@ -1,6 +1,6 @@
 
 #include <Arduino.h>
-//#include <Audio.h>
+// #include <Audio.h>
 #include <Wire.h>
 #include <SPI.h>
 #include <SD.h>
@@ -16,7 +16,7 @@ extern bool buttonPressed[NUM_BUTTONS];
 extern float *note_frequency;
 extern int tuning;
 void clearWorkSpace();
- 
+
 void Plugin_3::setup(byte setID)
 {
     myID = setID;
@@ -25,6 +25,7 @@ void Plugin_3::setup(byte setID)
     {
 
         modulator[i].begin(WAVEFORM_SINE);
+        modulator[i].frequency(440);
         modulator[i].amplitude(1);
 
         modEnv[i].delay(0);
@@ -133,7 +134,10 @@ void Plugin_3::draw_plugin()
     }
 }
 
-
+void Plugin_3::get_peak()
+{
+    Serial.printf("Pl3: %f  ", peak.read());
+}
 
 void Plugin_3::set_mod_waveform(byte XPos, byte YPos, const char *name, int min, int max)
 {
@@ -292,7 +296,5 @@ void Plugin_3::set_envelope_mrelease(byte XPos, byte YPos, const char *name, int
         }
     }
 }
-
-
 
 // TeensyDAW: end automatically generated code
