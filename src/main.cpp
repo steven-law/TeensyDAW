@@ -27,6 +27,16 @@ ILI9341_t3n tft = ILI9341_t3n(TFT_CS, TFT_DC, TFT_RST, TFT_MOSI, TFT_SCK, TFT_MI
 #include <AudioSamples.h>
 #include <Output.h>
 #include <Track.h>
+#include <plugin_List.h>
+Plugin_1 plugin_1("Strng", 17);
+Plugin_2 plugin_2("1OSC", 18);
+Plugin_3 plugin_3("2FM", 19);
+Plugin_4 plugin_4("MDrm", 20);
+Plugin_5 plugin_5("Drum", 21);
+Plugin_6 plugin_6("Draw", 22);
+Plugin_7 plugin_7("Boom", 23);
+Plugin_8 plugin_8("Dtune", 24);
+PluginControll *allPlugins[NUM_PLUGINS] = {&plugin_1, &plugin_2, &plugin_3, &plugin_4, &plugin_5, &plugin_6, &plugin_7, &plugin_8};
 Output MasterOut(3);
 
 #define POSITION_ARR_BUTTON 18
@@ -475,9 +485,6 @@ void buttons_Set_potRow();
 void input_behaviour();
 void clock_to_notes();
 
-
-
-
 void myDrawLine(int x0, int y0, int x1, int y1, uint16_t color);
 void myDrawRect(int x, int y, int w, int h, uint16_t color);
 void drawActiveRect(int xPos, byte yPos, byte xsize, byte ysize, bool state, const char *name, int color);
@@ -505,8 +512,9 @@ void setup()
 {
   // put your setup code here, to run once:
 
-  Serial.begin(15200); // set MIDI baud
-
+  Serial.begin(115200); // set MIDI baud
+                        // while the serial stream is not open, do nothing:
+  // while (!Serial) ;
   // initialize the TFT- and Touchscreen
 
   tft.begin();
@@ -584,8 +592,14 @@ void loop()
     else
       cursor.update(pixelTouchX, gridTouchY, STEP_FRAME_H);
     tft.fillRect(70, lastPotRow * 4, 10, 3, ILI9341_RED);
+    // Serial.printf("pl2: %f, fx2: %f, pl3: %f, fx3: %f\n", MasterOut.fx_section.plugin_2.peak.read(),MasterOut.fx_section.peak2.read(), plugin_3.peak.read(), MasterOut.fx_section.peak3.read());
   }
-
+  if (buttonPressed[BUTTON_ENTER])
+  {
+    // MasterOut.fx_section.plugin_2.get_peak();
+    plugin_3.get_peak();
+    MasterOut.fx_section.get_peak();
+  }
   // tft.updateScreen();
 }
 void input_behaviour()
@@ -1038,9 +1052,6 @@ void buttons_Set_potRow()
 }
 // void drawPot(int XPos, byte YPos, int dvalue, int min, int max, const char *dname, int color)
 
-
-
-
 void drawActiveRect(int xPos, byte yPos, byte xsize, byte ysize, bool state, const char *name, int color)
 {
   if (state)
@@ -1273,22 +1284,27 @@ void set_mixer_gain(byte XPos, byte YPos, const char *name, byte trackn)
 
       allTracks[trackn]->mixGainPot = constrain(allTracks[trackn]->mixGainPot + encoded[XPos], 0, MIDI_CC_RANGE);
       allTracks[trackn]->mixGain = (float)(allTracks[trackn]->mixGainPot / MIDI_CC_RANGE_FLOAT);
+      /*for (int i = 0; i < NUM_PLUGINS; i++)
+     {
+       if (allTracks[trackn]->MIDI_channel_out == i+17)
+         allPlugins[i]->MixGain.gain(allTracks[trackn]->mixGain);
+     }*/
       if (allTracks[trackn]->MIDI_channel_out == 17)
-        MasterOut.fx_section.plugin_1.MixGain.gain(allTracks[trackn]->mixGain);
+        plugin_1.MixGain.gain(allTracks[trackn]->mixGain);
       if (allTracks[trackn]->MIDI_channel_out == 18)
-        MasterOut.fx_section.plugin_2.MixGain.gain(allTracks[trackn]->mixGain);
+        plugin_2.MixGain.gain(allTracks[trackn]->mixGain);
       if (allTracks[trackn]->MIDI_channel_out == 19)
-        MasterOut.fx_section.plugin_3.MixGain.gain(allTracks[trackn]->mixGain);
+        plugin_3.MixGain.gain(allTracks[trackn]->mixGain);
       if (allTracks[trackn]->MIDI_channel_out == 20)
-        MasterOut.fx_section.plugin_4.MixGain.gain(allTracks[trackn]->mixGain);
+        plugin_4.MixGain.gain(allTracks[trackn]->mixGain);
       if (allTracks[trackn]->MIDI_channel_out == 21)
-        MasterOut.fx_section.plugin_5.MixGain.gain(allTracks[trackn]->mixGain);
+        plugin_5.MixGain.gain(allTracks[trackn]->mixGain);
       if (allTracks[trackn]->MIDI_channel_out == 22)
-        MasterOut.fx_section.plugin_6.MixGain.gain(allTracks[trackn]->mixGain);
+        plugin_6.MixGain.gain(allTracks[trackn]->mixGain);
       if (allTracks[trackn]->MIDI_channel_out == 23)
-        MasterOut.fx_section.plugin_7.MixGain.gain(allTracks[trackn]->mixGain);
+        plugin_7.MixGain.gain(allTracks[trackn]->mixGain);
       if (allTracks[trackn]->MIDI_channel_out == 24)
-        MasterOut.fx_section.plugin_8.MixGain.gain(allTracks[trackn]->mixGain);
+        plugin_8.MixGain.gain(allTracks[trackn]->mixGain);
 
       drawPot(XPos, YPos, allTracks[trackn]->mixGainPot, name);
     }
