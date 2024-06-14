@@ -584,7 +584,7 @@ void loop()
     else
       cursor.update(pixelTouchX, gridTouchY, STEP_FRAME_H);
     tft.fillRect(70, lastPotRow * 4, 10, 3, ILI9341_RED);
-     Serial.printf("pl2: %f, fx2: %f, pl3: %f, fx3: %f\n", MasterOut.fx_section.plugin_2.peak.read(),MasterOut.fx_section.peak2.read(), plugin_3.peak.read(), MasterOut.fx_section.peak3.read());
+     //Serial.printf("pl2: %f, fx2: %f, pl3: %f, fx3: %f\n", MasterOut.fx_section.plugin_2.peak.read(),MasterOut.fx_section.peak2.read(), plugin_3.peak.read(), MasterOut.fx_section.peak3.read());
   }
   if (buttonPressed[BUTTON_ENTER])
   {

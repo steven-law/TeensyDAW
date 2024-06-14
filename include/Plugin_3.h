@@ -58,7 +58,7 @@ public:
     AudioAmplifier MixGain;
     AudioAmplifier SongVol;
     AudioConnection *patchCord[51]; // total patchCordCount:50 including array typed ones.
-AudioAnalyzePeak peak;
+    AudioAnalyzePeak peak;
     // constructor (this is called when class-object is created)
     Plugin_3(const char *Name, byte ID) : PluginControll(Name, ID)
     {
@@ -77,20 +77,13 @@ AudioAnalyzePeak peak;
     }
     virtual ~Plugin_3() = default;
 
-/*
     virtual void setup(byte setID) override;
     virtual void noteOn(byte notePlayed, float velocity, byte voice) override;
     virtual void noteOff(byte notePlayed, byte voice) override;
     virtual void set_parameters(byte row) override;
     virtual void draw_plugin() override;
-*/
-    void setup(byte setID);
-    void noteOn(byte notePlayed, float velocity, byte voice);
-    void noteOff(byte notePlayed, byte voice);
-    void set_parameters(byte row);
-    void draw_plugin();
 
-void get_peak();
+    void get_peak();
     void set_mod_waveform(byte XPos, byte YPos, const char *name, int min, int max);
     void set_mod_amplitude(byte XPos, byte YPos, const char *name, int min, int max);
     void set_mod_ratio(byte XPos, byte YPos, const char *name, int min, int max);

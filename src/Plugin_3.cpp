@@ -101,7 +101,7 @@ void Plugin_3::set_parameters(byte row)
     }
     if (buttonPressed[BUTTON_SHIFT])
     {
-        //set_presetNr();
+        set_presetNr();
     }
 }
 void Plugin_3::draw_plugin()
