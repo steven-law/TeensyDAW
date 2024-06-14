@@ -4,7 +4,7 @@
 
 //Plugin_1 plugin_1("Strng", 17);
 //Plugin_2 plugin_2("1OSC", 18);
-Plugin_3 plugin_3("2FM", 19); //Definition der ...
+//////////Plugin_3 plugin_3("2FM", 19); //Definition der ...
 //Plugin_4 plugin_4("MDrm", 20);
 //Plugin_5 plugin_5("Drum", 21);
 //Plugin_6 plugin_6("Draw", 22);

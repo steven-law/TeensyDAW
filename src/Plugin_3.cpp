@@ -1,6 +1,6 @@
 
 #include <Arduino.h>
-// #include <Audio.h>
+ #include <Audio.h>
 #include <Wire.h>
 #include <SPI.h>
 #include <SD.h>
@@ -101,7 +101,7 @@ void Plugin_3::set_parameters(byte row)
     }
     if (buttonPressed[BUTTON_SHIFT])
     {
-        set_presetNr();
+        //set_presetNr();
     }
 }
 void Plugin_3::draw_plugin()
@@ -143,7 +143,9 @@ void Plugin_3::set_mod_waveform(byte XPos, byte YPos, const char *name, int min,
 {
     if (enc_moved[XPos])
     {
-        int walveform = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, min, max);
+        int n = XPos + (YPos * NUM_ENCODERS);
+        potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
+        int walveform = map(potentiometer[presetNr][n], 0, MIDI_CC_RANGE, min, max);
         for (int i = 0; i < MAX_VOICES; i++)
         {
             modulator[i].begin(walveform);

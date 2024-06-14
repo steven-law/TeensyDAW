@@ -77,11 +77,18 @@ AudioAnalyzePeak peak;
     }
     virtual ~Plugin_3() = default;
 
+/*
     virtual void setup(byte setID) override;
     virtual void noteOn(byte notePlayed, float velocity, byte voice) override;
     virtual void noteOff(byte notePlayed, byte voice) override;
     virtual void set_parameters(byte row) override;
     virtual void draw_plugin() override;
+*/
+    void setup(byte setID);
+    void noteOn(byte notePlayed, float velocity, byte voice);
+    void noteOff(byte notePlayed, byte voice);
+    void set_parameters(byte row);
+    void draw_plugin();
 
 void get_peak();
     void set_mod_waveform(byte XPos, byte YPos, const char *name, int min, int max);

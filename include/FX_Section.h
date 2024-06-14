@@ -18,7 +18,7 @@
 
 // TeensyDAW: begin automatically generated code
 //void drawPot(int XPos, byte YPos, int dvalue, const char *dname);
-
+//extern Plugin_3 plugin_3;
 
 class FX_Section
 {
@@ -92,10 +92,10 @@ patchCord[pci++] = new AudioConnection(plugin_2.waveform[0], 0, peak2, 0);
         patchCord[pci++] = new AudioConnection(plugin_2.SongVol, 0, FX1_2, 0);
         patchCord[pci++] = new AudioConnection(plugin_2.SongVol, 0, FX2_2, 0);
         patchCord[pci++] = new AudioConnection(plugin_2.SongVol, 0, FX3_2, 0);
-        patchCord[pci++] = new AudioConnection(plugin_3.modulator[0], 0, dry_3, 0);
-        patchCord[pci++] = new AudioConnection(plugin_3.modulator[0], 0, FX1_3, 0);
-        patchCord[pci++] = new AudioConnection(plugin_3.modulator[0], 0, FX2_3, 0);
-        patchCord[pci++] = new AudioConnection(plugin_3.modulator[0], 0, FX3_3, 0);
+        patchCord[pci++] = new AudioConnection(plugin_3.SongVol, 0, dry_3, 0);
+        patchCord[pci++] = new AudioConnection(plugin_3.SongVol, 0, FX1_3, 0);
+        patchCord[pci++] = new AudioConnection(plugin_3.SongVol, 0, FX2_3, 0);
+        patchCord[pci++] = new AudioConnection(plugin_3.SongVol, 0, FX3_3, 0);
         patchCord[pci++] = new AudioConnection(plugin_4.SongVol, 0, dry_4, 0);
         patchCord[pci++] = new AudioConnection(plugin_4.SongVol, 0, FX1_4, 0);
         patchCord[pci++] = new AudioConnection(plugin_4.SongVol, 0, FX2_4, 0);

@@ -27,6 +27,8 @@ ILI9341_t3n tft = ILI9341_t3n(TFT_CS, TFT_DC, TFT_RST, TFT_MOSI, TFT_SCK, TFT_MI
 #include <AudioSamples.h>
 #include <Output.h>
 #include <Track.h>
+#include <plugin_List.h>
+Plugin_3 plugin_3("2FM", 19);
 Output MasterOut(3);
 
 #define POSITION_ARR_BUTTON 18
@@ -582,7 +584,7 @@ void loop()
     else
       cursor.update(pixelTouchX, gridTouchY, STEP_FRAME_H);
     tft.fillRect(70, lastPotRow * 4, 10, 3, ILI9341_RED);
-    // Serial.printf("pl2: %f, fx2: %f, pl3: %f, fx3: %f\n", MasterOut.fx_section.plugin_2.peak.read(),MasterOut.fx_section.peak2.read(), plugin_3.peak.read(), MasterOut.fx_section.peak3.read());
+     Serial.printf("pl2: %f, fx2: %f, pl3: %f, fx3: %f\n", MasterOut.fx_section.plugin_2.peak.read(),MasterOut.fx_section.peak2.read(), plugin_3.peak.read(), MasterOut.fx_section.peak3.read());
   }
   if (buttonPressed[BUTTON_ENTER])
   {

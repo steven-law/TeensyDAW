@@ -23,16 +23,17 @@ public:
 
     }
     virtual ~PluginControll() = default;
+    //virtual ~PluginControll();
     virtual const char *get_Name() { return name; }
     virtual byte get_ID() { return myID; }
 
-    virtual void setup(byte setID) = 0;
-    virtual void noteOn(byte notePlayed, float velocity, byte voice) = 0;
-    virtual void noteOff(byte notePlayed, byte voice) = 0;
-    virtual void set_parameters(byte row) = 0;
-    virtual void draw_plugin() = 0;
+   // virtual void setup(byte setID) = 0;
+   // virtual void noteOn(byte notePlayed, float velocity, byte voice) = 0;
+   // virtual void noteOff(byte notePlayed, byte voice) = 0;
+   // virtual void set_parameters(byte row) = 0;
+   // virtual void draw_plugin() = 0;
 
-    virtual void set_presetNr();
-    virtual byte get_Potentiometer(byte XPos, byte YPos, const char *name);
+   // virtual void set_presetNr();
+   // virtual byte get_Potentiometer(byte XPos, byte YPos, const char *name);
 };
 #endif // PLUGIN_CLASS
