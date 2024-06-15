@@ -17,9 +17,9 @@ extern float *note_frequency;
 extern int tuning;
 void clearWorkSpace();
 
-void Plugin_3::setup(byte setID)
+void Plugin_3::setup()
 {
-    myID = setID;
+
 
     for (int i = 0; i < MAX_VOICES; i++)
     {
@@ -73,10 +73,10 @@ void Plugin_3::set_parameters(byte row)
     {
         if (row == 0)
         {
-            set_mod_waveform(0, 0, "mW~Form", 0, 12);
-            set_mod_ratio(1, 0, "mRatio", 0, 1);
-            set_mod_amplitude(2, 0, "mVolume", 0, 1);
-            set_car_waveform(3, 0, "cW~Form", 0, 12);
+            set_mod_waveform(0, 0, "mW~Form");
+            set_mod_ratio(1, 0, "mRatio");
+            set_mod_amplitude(2, 0, "mVolume");
+            set_car_waveform(3, 0, "cW~Form");
         }
 
         if (row == 1)
@@ -91,7 +91,7 @@ void Plugin_3::set_parameters(byte row)
         {
             set_envelope_attack(0, 2, "Attack", 0, 1000);
             set_envelope_decay(1, 2, "Decay", 0, 500);
-            set_envelope_sustain(2, 2, "Sustain", 0, 1);
+            set_envelope_sustain(2, 2, "Sustain");
             set_envelope_release(3, 2, "Release", 0, 2000);
         }
 
@@ -139,38 +139,33 @@ void Plugin_3::get_peak()
     Serial.printf("Pl3: %f  ", peak.read());
 }
 
-void Plugin_3::set_mod_waveform(byte XPos, byte YPos, const char *name, int min, int max)
+void Plugin_3::set_mod_waveform(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
-        int n = XPos + (YPos * NUM_ENCODERS);
-        potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
-        int walveform = map(potentiometer[presetNr][n], 0, MIDI_CC_RANGE, min, max);
+        int walveform = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, 0, 12);
         for (int i = 0; i < MAX_VOICES; i++)
         {
             modulator[i].begin(walveform);
         }
     }
 }
-void Plugin_3::set_mod_amplitude(byte XPos, byte YPos, const char *name, int min, int max)
+void Plugin_3::set_mod_amplitude(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
-        int n = XPos + (YPos * NUM_ENCODERS);
-        potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
+        float ampl = (float)(get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT);
         for (int i = 0; i < MAX_VOICES; i++)
         {
-            modulator[i].amplitude((float)(potentiometer[presetNr][n] / MIDI_CC_RANGE_FLOAT));
+            modulator[i].amplitude(ampl);
         }
     }
 }
-void Plugin_3::set_mod_ratio(byte XPos, byte YPos, const char *name, int min, int max)
+void Plugin_3::set_mod_ratio(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
-        int n = XPos + (YPos * NUM_ENCODERS);
-        potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
-        int rationem = map(potentiometer[presetNr][n], 0, MIDI_CC_RANGE, 0, NUM_RATIOS);
+        int rationem = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, 0, NUM_RATIOS);
         for (int i = 0; i < MAX_VOICES; i++)
         {
             modulator_ratio = ratios[rationem];
@@ -178,14 +173,11 @@ void Plugin_3::set_mod_ratio(byte XPos, byte YPos, const char *name, int min, in
     }
 }
 
-void Plugin_3::set_car_waveform(byte XPos, byte YPos, const char *name, int min, int max)
+void Plugin_3::set_car_waveform(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
-        int n = XPos + (YPos * NUM_ENCODERS);
-        potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
-        int walveform = map(potentiometer[presetNr][n], 0, MIDI_CC_RANGE, min, max);
-
+        int walveform = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, 0, 12);
         for (int i = 0; i < MAX_VOICES; i++)
         {
             carrier[i].begin(walveform);
@@ -197,9 +189,7 @@ void Plugin_3::set_envelope_attack(byte XPos, byte YPos, const char *name, int m
 {
     if (enc_moved[XPos])
     {
-        int n = XPos + (YPos * NUM_ENCODERS);
-        potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
-        int attack = map(potentiometer[presetNr][n], 0, MIDI_CC_RANGE, min, max);
+        int attack = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, min, max);
         for (int i = 0; i < MAX_VOICES; i++)
         {
             outEnv[i].attack(attack);
@@ -210,22 +200,18 @@ void Plugin_3::set_envelope_decay(byte XPos, byte YPos, const char *name, int mi
 {
     if (enc_moved[XPos])
     {
-        int n = XPos + (YPos * NUM_ENCODERS);
-        potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
-        int decay = map(potentiometer[presetNr][n], 0, MIDI_CC_RANGE, min, max);
+        int decay = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, min, max);
         for (int i = 0; i < MAX_VOICES; i++)
         {
             outEnv[i].decay(decay);
         }
     }
 }
-void Plugin_3::set_envelope_sustain(byte XPos, byte YPos, const char *name, int min, int max)
+void Plugin_3::set_envelope_sustain(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
-        int n = XPos + (YPos * NUM_ENCODERS);
-        potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
-        float sustain = (float)(potentiometer[presetNr][n] / MIDI_CC_RANGE_FLOAT);
+        float sustain = (float)(get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT);
         for (int i = 0; i < MAX_VOICES; i++)
         {
             outEnv[i].sustain(sustain);
@@ -236,9 +222,7 @@ void Plugin_3::set_envelope_release(byte XPos, byte YPos, const char *name, int 
 {
     if (enc_moved[XPos])
     {
-        int n = XPos + (YPos * NUM_ENCODERS);
-        potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
-        int release = map(potentiometer[presetNr][n], 0, MIDI_CC_RANGE, min, max);
+        int release = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, min, max);
         for (int i = 0; i < MAX_VOICES; i++)
         {
             outEnv[i].release(release);

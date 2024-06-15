@@ -60,13 +60,13 @@ public:
     }
     virtual ~Plugin_1() = default;
     
-    virtual void setup(byte setID) override;
+    virtual void setup() override;
     virtual void noteOn(byte notePlayed, float velocity, byte voice) override;
     virtual void noteOff(byte notePlayed, byte voice) override;
     virtual void set_parameters(byte row) override;
     virtual void draw_plugin() override;
 
-    void set_mixer_gain(byte XPos, byte YPos, const char *name, int min, int max);
+    void set_mixer_gain(byte XPos, byte YPos, const char *name);
 };
 #endif // PLUGIN_1_H
 // TeensyDAW: end automatically generated code

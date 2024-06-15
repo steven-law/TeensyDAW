@@ -26,7 +26,7 @@ public:
     virtual const char *get_Name() { return name; }
     virtual byte get_ID() { return myID; }
 
-    virtual void setup(byte setID) = 0;
+    virtual void setup() = 0;
     virtual void noteOn(byte notePlayed, float velocity, byte voice) = 0;
     virtual void noteOff(byte notePlayed, byte voice) = 0;
     virtual void set_parameters(byte row) = 0;

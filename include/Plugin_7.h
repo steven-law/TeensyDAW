@@ -81,7 +81,7 @@ public:
     }
     virtual ~Plugin_7() = default;
 
-    virtual void setup(byte setID) override;
+    virtual void setup() override;
     virtual void noteOn(byte notePlayed, float velocity, byte voice) override;
     virtual void noteOff(byte notePlayed, byte voice) override;
     virtual void set_parameters(byte row) override;

@@ -78,9 +78,9 @@ public:
     }
     void setup()
     {
-        fx_1.setup(1);
-        fx_2.setup(2);
-        fx_3.setup(3);
+        fx_1.setup();
+        fx_2.setup();
+        fx_3.setup();
         dry_mixer.gain(0, 1);
         dry_mixer.gain(1, 1);
         dry_mixer.gain(2, 1);

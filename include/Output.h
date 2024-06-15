@@ -47,7 +47,7 @@ public:
 
         for (int i = 0; i < NUM_PLUGINS; i++)
         {
-            allPlugins[i]->setup(17 + i);
+            allPlugins[i]->setup();
         }
     }
     void noteOn(byte note, byte velo, byte channel, byte voice)

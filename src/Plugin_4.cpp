@@ -16,9 +16,8 @@ extern float *note_frequency;
 extern int tuning;
 void clearWorkSpace();
 
-void Plugin_4::setup(byte setID)
+void Plugin_4::setup()
 {
-    myID = setID;
 
     for (int i = 0; i < MAX_VOICES; i++)
     {
@@ -56,26 +55,26 @@ void Plugin_4::set_parameters(byte row)
     {
         if (row == 0)
         {
-            set_mixer_gain(0, 0, "Kick", 0, 1);
-            set_mixer_gain(1, 0, "Clap", 0, 1);
-            set_mixer_gain(2, 0, "HHat", 0, 1);
-            set_mixer_gain(3, 0, "Snare", 0, 1);
+            set_mixer_gain(0, 0, "Kick");
+            set_mixer_gain(1, 0, "Clap");
+            set_mixer_gain(2, 0, "HHat");
+            set_mixer_gain(3, 0, "Snare");
         }
 
         if (row == 1)
         {
-            set_mixer_gain(0, 1, "Tick", 0, 1);
-            set_mixer_gain(1, 1, "Pong", 0, 1);
-            set_mixer_gain(2, 1, "Tom", 0, 1);
-            set_mixer_gain(3, 1, "Cash", 0, 1);
+            set_mixer_gain(0, 1, "Tick");
+            set_mixer_gain(1, 1, "Pong");
+            set_mixer_gain(2, 1, "Tom");
+            set_mixer_gain(3, 1, "Cash");
         }
 
         if (row == 2)
         {
-            set_mixer_gain(0, 2, "Vol", 0, 1);
-            set_mixer_gain(1, 2, "Vol", 0, 1);
-            set_mixer_gain(2, 2, "Vol", 0, 1);
-            set_mixer_gain(3, 2, "Vol", 0, 1);
+            set_mixer_gain(0, 2, "Vol");
+            set_mixer_gain(1, 2, "Vol");
+            set_mixer_gain(2, 2, "Vol");
+            set_mixer_gain(3, 2, "Vol");
         }
 
         if (row == 3)
@@ -113,14 +112,12 @@ void Plugin_4::draw_plugin()
     }
 }
 
-
-void Plugin_4::set_mixer_gain(byte XPos, byte YPos, const char *name, int min, int max)
+void Plugin_4::set_mixer_gain(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
         int n = XPos + (YPos * NUM_ENCODERS);
-        potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
-        float sustain = (float)(potentiometer[presetNr][n] / MIDI_CC_RANGE_FLOAT);
+        float sustain = (float)(get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT);
         mixer.gain(n, sustain);
     }
 }

@@ -77,21 +77,21 @@ public:
     }
     virtual ~Plugin_3() = default;
 
-    virtual void setup(byte setID) override;
+    virtual void setup() override;
     virtual void noteOn(byte notePlayed, float velocity, byte voice) override;
     virtual void noteOff(byte notePlayed, byte voice) override;
     virtual void set_parameters(byte row) override;
     virtual void draw_plugin() override;
 
     void get_peak();
-    void set_mod_waveform(byte XPos, byte YPos, const char *name, int min, int max);
-    void set_mod_amplitude(byte XPos, byte YPos, const char *name, int min, int max);
-    void set_mod_ratio(byte XPos, byte YPos, const char *name, int min, int max);
-    void set_car_waveform(byte XPos, byte YPos, const char *name, int min, int max);
+    void set_mod_waveform(byte XPos, byte YPos, const char *name);
+    void set_mod_amplitude(byte XPos, byte YPos, const char *name);
+    void set_mod_ratio(byte XPos, byte YPos, const char *name);
+    void set_car_waveform(byte XPos, byte YPos, const char *name);
 
     void set_envelope_attack(byte XPos, byte YPos, const char *name, int min, int max);
     void set_envelope_decay(byte XPos, byte YPos, const char *name, int min, int max);
-    void set_envelope_sustain(byte XPos, byte YPos, const char *name, int min, int max);
+    void set_envelope_sustain(byte XPos, byte YPos, const char *name);
     void set_envelope_release(byte XPos, byte YPos, const char *name, int min, int max);
 
     void set_envelope_mattack(byte XPos, byte YPos, const char *name, int min, int max);

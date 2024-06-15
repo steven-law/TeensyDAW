@@ -16,9 +16,9 @@ extern float *note_frequency;
 extern int tuning;
 void clearWorkSpace();
 
-void Plugin_5::setup(byte setID)
+void Plugin_5::setup()
 {
-    myID = setID;
+
     for (int i = 0; i < MAX_VOICES; i++)
     {
         mixer.gain(i, 1);

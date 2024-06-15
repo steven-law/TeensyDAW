@@ -9,7 +9,7 @@
 #include "global_stuff.h"
 #include <FX_1.h>
 
-void FX_1::setup(byte setID)
+void FX_1::setup()
 {
     FX_mixer.gain(0, 1);
     FX_mixer.gain(1, 1);

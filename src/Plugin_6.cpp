@@ -55,9 +55,9 @@ extern int gridTouchY;
 // Pot 11: Sustain
 // Pot 12: Release
 
-    void Plugin_6::setup(byte setID)
+    void Plugin_6::setup()
     {
-        myID = setID;
+   
 
         for (int i = 0; i < MAX_VOICES; i++)
         {

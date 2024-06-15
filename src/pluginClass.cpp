@@ -8,7 +8,7 @@ extern bool change_plugin_row;
 extern bool buttonPressed[NUM_BUTTONS];
 void drawPot(int XPos, byte YPos, int dvalue, const char *dname);
 
-void PluginControll::setup(byte setID) {}
+void PluginControll::setup() {}
 void PluginControll::noteOn(byte notePlayed, float velocity, byte voice) {}
 void PluginControll::noteOff(byte notePlayed, byte voice) {}
 void PluginControll::set_parameters(byte row) {}
@@ -30,3 +30,5 @@ byte PluginControll::get_Potentiometer(byte XPos, byte YPos, const char *name)
     drawPot(XPos, YPos, potentiometer[presetNr][n], name);
     return potentiometer[presetNr][n];
 }
+
+
