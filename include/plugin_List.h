@@ -15,6 +15,7 @@
 #include <Plugin_7.h>
 #include <Plugin_8.h>
 
+
 extern Plugin_1 plugin_1;
 extern Plugin_2 plugin_2;
 extern Plugin_3 plugin_3;  // Deklaration der Variable

@@ -28,6 +28,7 @@ ILI9341_t3n tft = ILI9341_t3n(TFT_CS, TFT_DC, TFT_RST, TFT_MOSI, TFT_SCK, TFT_MI
 #include <Output.h>
 #include <Track.h>
 #include <plugin_List.h>
+#include <fx_List.h>
 Plugin_1 plugin_1("Strng", 17);
 Plugin_2 plugin_2("1OSC", 18);
 Plugin_3 plugin_3("2FM", 19);
@@ -37,6 +38,10 @@ Plugin_6 plugin_6("Draw", 22);
 Plugin_7 plugin_7("Boom", 23);
 Plugin_8 plugin_8("Dtune", 24);
 PluginControll *allPlugins[NUM_PLUGINS] = {&plugin_1, &plugin_2, &plugin_3, &plugin_4, &plugin_5, &plugin_6, &plugin_7, &plugin_8};
+FX_1 fx_1("Rev", 1);
+FX_2 fx_2("Bit", 2);
+FX_3 fx_3("Nix", 3);
+
 Output MasterOut(3);
 
 #define POSITION_ARR_BUTTON 18
@@ -690,15 +695,15 @@ void input_behaviour()
   if (encoder_function == INPUT_FUNCTIONS_FOR_MIXER3)
     set_mixer_FX_page2(lastPotRow);
   if (encoder_function == INPUT_FUNCTIONS_FOR_FX1)
-    MasterOut.fx_section.set_freeverb(lastPotRow);
+    fx_1.set_parameters(lastPotRow);
   if (encoder_function == INPUT_FUNCTIONS_FOR_FX2)
-    MasterOut.fx_section.set_Bitcrusher(lastPotRow);
+    fx_2.set_parameters(lastPotRow);
 }
 void clock_to_notes()
 {
   if (Masterclock.is_playing())
   {
-    if (Masterclock.clock_is_on_tick )
+    if (Masterclock.clock_is_on_tick)
     {
       // Serial.println(Masterclock.MIDItick);
       for (int t = 0; t < NUM_TRACKS; t++)
@@ -944,7 +949,7 @@ void buttons_SelectMixer()
       buttonPressed[BUTTON_DOWN] = false;
       encoder_function = INPUT_FUNCTIONS_FOR_FX1;
       clearWorkSpace();
-      MasterOut.fx_section.draw_freeverb();
+      fx_1.draw_plugin();
     }
     if (buttonPressed[BUTTON_ROW])
     {
@@ -952,7 +957,7 @@ void buttons_SelectMixer()
       buttonPressed[BUTTON_ROW] = false;
       encoder_function = INPUT_FUNCTIONS_FOR_FX2;
       clearWorkSpace();
-      MasterOut.fx_section.draw_Bitcrusher();
+      fx_2.draw_plugin();
     }
   }
 }
@@ -1523,21 +1528,21 @@ void set_mixer_FX1(byte XPos, byte YPos, const char *name, byte trackn)
       allTracks[trackn]->mixFX1Pot = constrain(allTracks[trackn]->mixFX1Pot + encoded[XPos], 0, MIDI_CC_RANGE);
       allTracks[trackn]->mixFX1 = (float)(allTracks[trackn]->mixFX1Pot / MIDI_CC_RANGE_FLOAT);
       if (allTracks[trackn]->MIDI_channel_out == 17)
-        MasterOut.fx_section.FX1_1.gain(allTracks[trackn]->mixFX1);
+        fx_1.pl_1.gain(allTracks[trackn]->mixFX1);
       if (allTracks[trackn]->MIDI_channel_out == 18)
-        MasterOut.fx_section.FX1_2.gain(allTracks[trackn]->mixFX1);
+        fx_1.pl_2.gain(allTracks[trackn]->mixFX1);
       if (allTracks[trackn]->MIDI_channel_out == 19)
-        MasterOut.fx_section.FX1_3.gain(allTracks[trackn]->mixFX1);
+        fx_1.pl_3.gain(allTracks[trackn]->mixFX1);
       if (allTracks[trackn]->MIDI_channel_out == 20)
-        MasterOut.fx_section.FX1_4.gain(allTracks[trackn]->mixFX1);
+        fx_1.pl_4.gain(allTracks[trackn]->mixFX1);
       if (allTracks[trackn]->MIDI_channel_out == 21)
-        MasterOut.fx_section.FX1_5.gain(allTracks[trackn]->mixFX1);
+        fx_1.pl_5.gain(allTracks[trackn]->mixFX1);
       if (allTracks[trackn]->MIDI_channel_out == 22)
-        MasterOut.fx_section.FX1_6.gain(allTracks[trackn]->mixFX1);
+        fx_1.pl_6.gain(allTracks[trackn]->mixFX1);
       if (allTracks[trackn]->MIDI_channel_out == 23)
-        MasterOut.fx_section.FX1_7.gain(allTracks[trackn]->mixFX1);
+        fx_1.pl_7.gain(allTracks[trackn]->mixFX1);
       if (allTracks[trackn]->MIDI_channel_out == 24)
-        MasterOut.fx_section.FX1_8.gain(allTracks[trackn]->mixFX1);
+        fx_1.pl_8.gain(allTracks[trackn]->mixFX1);
 
       drawPot(XPos, YPos, allTracks[trackn]->mixFX1Pot, name);
     }
@@ -1552,21 +1557,21 @@ void set_mixer_FX2(byte XPos, byte YPos, const char *name, byte trackn)
       allTracks[trackn]->mixFX2Pot = constrain(allTracks[trackn]->mixFX2Pot + encoded[XPos], 0, MIDI_CC_RANGE);
       allTracks[trackn]->mixFX2 = (float)(allTracks[trackn]->mixFX2Pot / MIDI_CC_RANGE_FLOAT);
       if (allTracks[trackn]->MIDI_channel_out == 17)
-        MasterOut.fx_section.FX2_1.gain(allTracks[trackn]->mixFX2);
+        fx_2.pl_1.gain(allTracks[trackn]->mixFX2);
       if (allTracks[trackn]->MIDI_channel_out == 18)
-        MasterOut.fx_section.FX2_2.gain(allTracks[trackn]->mixFX2);
+        fx_2.pl_2.gain(allTracks[trackn]->mixFX2);
       if (allTracks[trackn]->MIDI_channel_out == 19)
-        MasterOut.fx_section.FX2_3.gain(allTracks[trackn]->mixFX2);
+        fx_2.pl_3.gain(allTracks[trackn]->mixFX2);
       if (allTracks[trackn]->MIDI_channel_out == 20)
-        MasterOut.fx_section.FX2_4.gain(allTracks[trackn]->mixFX2);
+        fx_2.pl_4.gain(allTracks[trackn]->mixFX2);
       if (allTracks[trackn]->MIDI_channel_out == 21)
-        MasterOut.fx_section.FX2_5.gain(allTracks[trackn]->mixFX2);
+        fx_2.pl_5.gain(allTracks[trackn]->mixFX2);
       if (allTracks[trackn]->MIDI_channel_out == 22)
-        MasterOut.fx_section.FX2_6.gain(allTracks[trackn]->mixFX2);
+        fx_2.pl_6.gain(allTracks[trackn]->mixFX2);
       if (allTracks[trackn]->MIDI_channel_out == 23)
-        MasterOut.fx_section.FX2_7.gain(allTracks[trackn]->mixFX2);
+        fx_2.pl_7.gain(allTracks[trackn]->mixFX2);
       if (allTracks[trackn]->MIDI_channel_out == 24)
-        MasterOut.fx_section.FX2_8.gain(allTracks[trackn]->mixFX2);
+        fx_2.pl_8.gain(allTracks[trackn]->mixFX2);
 
       drawPot(XPos, YPos, allTracks[trackn]->mixFX2Pot, name);
     }
@@ -1583,21 +1588,21 @@ void set_mixer_FX3(byte XPos, byte YPos, const char *name, byte trackn)
       allTracks[trackn]->mixFX3Pot = constrain(allTracks[trackn]->mixFX3Pot + encoded[XPos], 0, MIDI_CC_RANGE);
       allTracks[trackn]->mixFX3 = (float)(allTracks[trackn]->mixFX3Pot / MIDI_CC_RANGE_FLOAT);
       if (allTracks[trackn]->MIDI_channel_out == 17)
-        MasterOut.fx_section.FX3_1.gain(allTracks[trackn]->mixFX3);
+        fx_3.pl_1.gain(allTracks[trackn]->mixFX3);
       if (allTracks[trackn]->MIDI_channel_out == 18)
-        MasterOut.fx_section.FX3_2.gain(allTracks[trackn]->mixFX3);
+        fx_3.pl_2.gain(allTracks[trackn]->mixFX3);
       if (allTracks[trackn]->MIDI_channel_out == 19)
-        MasterOut.fx_section.FX3_3.gain(allTracks[trackn]->mixFX3);
+        fx_3.pl_3.gain(allTracks[trackn]->mixFX3);
       if (allTracks[trackn]->MIDI_channel_out == 20)
-        MasterOut.fx_section.FX3_4.gain(allTracks[trackn]->mixFX3);
+        fx_3.pl_4.gain(allTracks[trackn]->mixFX3);
       if (allTracks[trackn]->MIDI_channel_out == 21)
-        MasterOut.fx_section.FX3_5.gain(allTracks[trackn]->mixFX3);
+        fx_3.pl_5.gain(allTracks[trackn]->mixFX3);
       if (allTracks[trackn]->MIDI_channel_out == 22)
-        MasterOut.fx_section.FX3_6.gain(allTracks[trackn]->mixFX3);
+        fx_3.pl_6.gain(allTracks[trackn]->mixFX3);
       if (allTracks[trackn]->MIDI_channel_out == 23)
-        MasterOut.fx_section.FX3_7.gain(allTracks[trackn]->mixFX3);
+        fx_3.pl_7.gain(allTracks[trackn]->mixFX3);
       if (allTracks[trackn]->MIDI_channel_out == 24)
-        MasterOut.fx_section.FX3_8.gain(allTracks[trackn]->mixFX3);
+        fx_3.pl_8.gain(allTracks[trackn]->mixFX3);
 
       drawPot(XPos, YPos, allTracks[trackn]->mixFX3Pot, name);
     }
