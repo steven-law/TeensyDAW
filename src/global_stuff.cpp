@@ -6,7 +6,7 @@ extern ILI9341_t3n tft;
 // individual trackcolors
 int trackColor[9]{6150246, 8256638, 1095334, 12643941, 2583100, 9365295, 12943157, 5678954, ILI9341_WHITE};
 int encoder_colour[NUM_ENCODERS] = {ILI9341_BLUE, ILI9341_RED, ILI9341_GREEN, ILI9341_WHITE};
-const char* filterName[4]{"LPF", "BPF", "HPF", "LPF2"};
+const char *filterName[4]{"LPF", "BPF", "HPF", "LPF2"};
 int tuning = 440;
 float *note_frequency;
 
@@ -14,14 +14,11 @@ float *note_frequency;
 bool enc_moved[4]{0, 0, 0, 0};
 int encoded[4];
 
-
 int pixelTouchX = 0;
 int gridTouchY = 0;
 byte lastPotRow = 0;
 byte encoder_function = 0;
 bool change_plugin_row;
-
-
 
 byte active_track = ACTIVE_TRACK_1;
 
@@ -71,14 +68,14 @@ void drawPot(int XPos, byte YPos, int dvalue, const char *dname)
   tft.setCursor(STEP_FRAME_W * xPos + 4, STEP_FRAME_H * yPos - 3);
   tft.print(dvalue_old[XPos]);
   tft.setCursor(STEP_FRAME_W * xPos, STEP_FRAME_H * (yPos + 1) + 3);
-  //if (dname_old[XPos] != dname)
-    tft.print(dname_old[XPos]);
+  // if (dname_old[XPos] != dname)
+  tft.print(dname_old[XPos]);
   tft.setTextColor(ILI9341_WHITE);
   tft.setCursor(STEP_FRAME_W * xPos + 4, STEP_FRAME_H * yPos - 3);
   tft.print(dvalue);
   tft.setCursor(STEP_FRAME_W * xPos, STEP_FRAME_H * (yPos + 1) + 3);
-  //if (dname_old[XPos] != dname)
-    tft.print(dname);
+  // if (dname_old[XPos] != dname)
+  tft.print(dname);
 
   tft.fillCircle(STEP_FRAME_W * (xPos + 1) + 16 * cos((2.5 * circlePos_old[XPos]) + 2.25), STEP_FRAME_H * yPos + 16 * sin((2.5 * circlePos_old[XPos]) + 2.25), 4, ILI9341_DARKGREY);
   tft.drawCircle(STEP_FRAME_W * (xPos + 1), STEP_FRAME_H * yPos, 16, ILI9341_LIGHTGREY);
@@ -126,4 +123,73 @@ void draw_sequencer_option(byte x, const char *nameshort, int value, byte enc, c
   }
   else
     tft.print(value);
+}
+
+void drawEnvelope(byte YPos, byte attack, byte decay, byte sustain, byte release)
+{
+  int yPos;
+  int colorA = ILI9341_BLUE;
+  int colorD = ILI9341_RED;
+  int colorS = ILI9341_GREEN;
+  int colorR = ILI9341_WHITE;
+/*
+  if (YPos == 0)
+  {
+    yPos = 3 * STEP_FRAME_H;
+    // color = ILI9341_BLUE;
+  }
+  if (YPos == 1)
+  {
+    yPos = 7 * STEP_FRAME_H;
+    // color = ILI9341_RED;
+  }
+  if (YPos == 2)
+  {
+    yPos = 11 * STEP_FRAME_H;
+    // color = ILI9341_GREEN;
+  }
+  if (YPos == 3)
+  {
+    yPos = 15 * STEP_FRAME_H;
+    // color = ILI9341_WHITE;
+  }*/
+  if (YPos != lastPotRow)
+  {
+    colorA = ILI9341_LIGHTGREY;
+    colorD = ILI9341_LIGHTGREY;
+    colorS = ILI9341_LIGHTGREY;
+    colorR = ILI9341_LIGHTGREY;
+  }
+  byte envStart = 32;
+  byte envTop = yPos - 32;
+
+  int yPos = (YPos + 1) * 3;
+  static byte old_attackEnd;
+  static byte old_decayEnd;
+  static byte old_sustainLevel;
+  static byte old_sustainEnd;
+  static byte old_releaseEnd;
+
+  tft.drawLine(envStart, yPos, old_attackEnd, envTop, ILI9341_DARKGREY);
+  tft.drawLine(old_attackEnd, envTop, old_decayEnd, old_sustainLevel, ILI9341_DARKGREY);
+  tft.drawLine(old_decayEnd, old_sustainLevel, old_sustainEnd, old_sustainLevel, ILI9341_DARKGREY);
+  tft.drawLine(old_sustainEnd, old_sustainLevel, old_releaseEnd, yPos, ILI9341_DARKGREY);
+
+
+  byte attackEnd = map(attack, 0, 127, 0, 30) + envStart;
+  byte decayEnd = map(decay, 0, 127, 0, 15) + attackEnd;
+  byte sustainLevel = map(sustain, 0, 127, 0, 32) + yPos;
+  byte sustainEnd = decayEnd + 30;
+  byte releaseEnd = map(release, 0, 127, 0, 30) + sustainEnd;
+
+  tft.drawLine(envStart, yPos, attackEnd, envTop, colorA);
+  tft.drawLine(attackEnd, envTop, decayEnd, sustainLevel, colorD);
+  tft.drawLine(decayEnd, sustainLevel, sustainEnd, sustainLevel, colorS);
+  tft.drawLine(sustainEnd, sustainLevel, releaseEnd, yPos, colorR);
+
+  byte old_attackEnd = attackEnd;
+  byte old_decayEnd= decayEnd;
+  byte old_sustainLevel= sustainLevel;
+  byte old_sustainEnd= sustainEnd;
+  byte old_releaseEnd= releaseEnd;
 }

@@ -122,7 +122,7 @@ void drawPot(int XPos, byte YPos, int dvalue, const char *dname);
 byte getEncodervalue(byte XPos, byte YPos, const char *name, byte oldValue);
 void draw_sequencer_option(byte x, const char *nameshort, int value, byte enc, const char *pluginName);
 
-
+void drawEnvelope(byte YPos, byte attack, byte decay, byte sustain, byte release);
 
 
 
