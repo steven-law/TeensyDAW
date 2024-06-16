@@ -533,7 +533,7 @@ void setup()
   ts.setRotation(1);
   tft.fillScreen(ILI9341_BLACK);
   tft.setFrameBuffer(tft_frame_buffer);
-  tft.useFrameBuffer(true);
+  //tft.useFrameBuffer(true);
   tft.initDMASettings();
   // tft.updateChangedAreasOnly(true);
   tft.setTextColor(ILI9341_WHITE);

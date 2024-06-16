@@ -34,5 +34,6 @@ public:
 
     virtual void set_presetNr();
     virtual byte get_Potentiometer(byte XPos, byte YPos, const char *name);
+    
 };
 #endif // PLUGIN_CLASS

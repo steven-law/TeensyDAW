@@ -91,18 +91,30 @@ public:
     virtual void set_parameters(byte row) override;
     virtual void draw_plugin() override;
 
-    void set_voice_waveform(byte XPos, byte YPos, const char *name);
+    void set_voice_waveform(byte XPos, byte YPos, const char *name); //make virtual in baseclass
     void set_voice_amplitude(byte XPos, byte YPos, const char *name);
 
     void set_filter_frequency(byte XPos, byte YPos, const char *name);
     void set_filter_resonance(byte XPos, byte YPos, const char *name, float min, float max);
-    void set_filter_sweep(byte XPos, byte YPos, const char *name, float min, float max);
+    void set_filter_sweep(byte XPos, byte YPos, const char *name);
     void set_filter_type(byte XPos, byte YPos, const char *name);
     void selectFilterType(byte mixerchannel);
 
+void set_envelope_ADSR(byte YPos, int maxA, int maxD, int maxR);
     void set_envelope_attack(byte XPos, byte YPos, const char *name, int min, int max);
     void set_envelope_decay(byte XPos, byte YPos, const char *name, int min, int max);
     void set_envelope_sustain(byte XPos, byte YPos, const char *name);
     void set_envelope_release(byte XPos, byte YPos, const char *name, int min, int max);
+
+    void assign_voice_waveform(byte value); //make virtual in baseclass but override
+    void assign_voice_amplitude(byte value);
+    void assign_filter_frequency(byte value);
+    void assign_filter_resonance(byte value);
+    void assign_filter_sweep(byte value);
+
+    void assign_envelope_attack(byte value, int max);
+    void assign_envelope_decay(byte value, int max);
+    void assign_envelope_sustain(byte value);
+    void assign_envelope_release(byte value, int max);
 };
 #endif // PLUGIN_2_H
