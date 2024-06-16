@@ -50,7 +50,6 @@ public:
     Plugin_1(const char *Name, byte ID) : PluginControll(Name, ID)
     {
         int pci = 0; // used only for adding new patchcords
-
         patchCord[pci++] = new AudioConnection(mixer, 0, MixGain, 0);
         patchCord[pci++] = new AudioConnection(MixGain, 0, SongVol, 0);
         for (int i = 0; i < 12; i++)
@@ -66,7 +65,6 @@ public:
     virtual void set_parameters(byte row) override;
     virtual void draw_plugin() override;
 
-    void set_mixer_gain(byte XPos, byte YPos, const char *name);
+    virtual void assign_mixer_gain(byte value, byte channel) override;
 };
 #endif // PLUGIN_1_H
-// TeensyDAW: end automatically generated code

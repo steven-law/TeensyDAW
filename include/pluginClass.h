@@ -37,30 +37,32 @@ public:
     // ASSIGN audio functions
     virtual void assign_voice_waveform(byte value); // // Normale virtuelle Funktion (kann von Subklassen überschrieben werden)
     virtual void assign_voice_amplitude(byte value);
-
+    virtual void set_voice_waveform(byte XPos, byte YPos, const char *name);
+    virtual void set_voice_amplitude(byte XPos, byte YPos, const char *name);
+    // filter
     virtual void assign_filter_frequency(byte value);
     virtual void assign_filter_resonance(byte value);
     virtual void assign_filter_sweep(byte value);
-
-    virtual void assign_envelope_attack(byte value, int max);
-    virtual void assign_envelope_decay(byte value, int max);
-    virtual void assign_envelope_sustain(byte value);
-    virtual void assign_envelope_release(byte value, int max);
-
-    // SET audio functions
-    virtual void set_voice_waveform(byte XPos, byte YPos, const char *name); 
-    virtual void set_voice_amplitude(byte XPos, byte YPos, const char *name);
-
+    virtual void assign_filter_type(byte mixerchannel);
     virtual void set_filter_frequency(byte XPos, byte YPos, const char *name);
     virtual void set_filter_resonance(byte XPos, byte YPos, const char *name, float min, float max);
     virtual void set_filter_sweep(byte XPos, byte YPos, const char *name);
     virtual void set_filter_type(byte XPos, byte YPos, const char *name);
-    virtual void selectFilterType(byte mixerchannel);
 
-    virtual void set_envelope_ADSR(byte YPos, int maxA, int maxD, int maxR);
+    // envelope
+    virtual void assign_envelope_attack(byte value, int max);
+    virtual void assign_envelope_decay(byte value, int max);
+    virtual void assign_envelope_sustain(byte value);
+    virtual void assign_envelope_release(byte value, int max);
     virtual void set_envelope_attack(byte XPos, byte YPos, const char *name, int min, int max);
     virtual void set_envelope_decay(byte XPos, byte YPos, const char *name, int min, int max);
     virtual void set_envelope_sustain(byte XPos, byte YPos, const char *name);
     virtual void set_envelope_release(byte XPos, byte YPos, const char *name, int min, int max);
+    virtual void set_envelope_ADSR(byte YPos, int maxA, int maxD, int maxR);
+    // SET audio functions
+
+    // mixer
+    virtual void assign_mixer_gain(byte value, byte channel);
+    virtual void set_mixer_gain(byte XPos, byte YPos, const char *name);
 };
 #endif // PLUGIN_CLASS

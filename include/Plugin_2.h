@@ -112,7 +112,7 @@ public:
     virtual void assign_filter_frequency(byte value) override;
     virtual void assign_filter_resonance(byte value) override;
     virtual void assign_filter_sweep(byte value) override;
-    virtual void selectFilterType(byte mixerchannel) override;
+    virtual void assign_filter_type(byte mixerchannel) override;
 
     virtual void assign_envelope_attack(byte value, int max) override;
     virtual void assign_envelope_decay(byte value, int max) override;

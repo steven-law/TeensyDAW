@@ -29,6 +29,7 @@
 // Pot 10: Vol10
 // Pot 11: Vol11
 // Pot 12: Vol12
+
 extern bool enc_moved[4];
 extern int encoded[4];
 extern bool change_plugin_row;
@@ -64,7 +65,6 @@ public:
     virtual void set_parameters(byte row) override;
     virtual void draw_plugin() override;
 
-
-    void set_mixer_gain(byte XPos, byte YPos, const char *name);
+    virtual void assign_mixer_gain(byte value, byte channel) override;
 };
-#endif  // PLUGIN_3_H
+#endif  // PLUGIN_4_H

@@ -34,17 +34,6 @@ byte PluginControll::get_Potentiometer(byte XPos, byte YPos, const char *name)
 // ASSIGN audio functions
 void PluginControll::assign_voice_waveform(byte value) {} // // Normale virtuelle Funktion (kann von Subklassen überschrieben werden)
 void PluginControll::assign_voice_amplitude(byte value) {}
-
-void PluginControll::assign_filter_frequency(byte value) {}
-void PluginControll::assign_filter_resonance(byte value) {}
-void PluginControll::assign_filter_sweep(byte value) {}
-
-void PluginControll::assign_envelope_attack(byte value, int max) {}
-void PluginControll::assign_envelope_decay(byte value, int max) {}
-void PluginControll::assign_envelope_sustain(byte value) {}
-void PluginControll::assign_envelope_release(byte value, int max) {}
-// SET audio function
-
 void PluginControll::set_voice_waveform(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
@@ -60,6 +49,11 @@ void PluginControll::set_voice_amplitude(byte XPos, byte YPos, const char *name)
     }
 }
 
+// filter
+void PluginControll::assign_filter_frequency(byte value) {}
+void PluginControll::assign_filter_resonance(byte value) {}
+void PluginControll::assign_filter_sweep(byte value) {}
+void PluginControll::assign_filter_type(byte mixerchannel) {}
 void PluginControll::set_filter_frequency(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
@@ -85,12 +79,15 @@ void PluginControll::set_filter_type(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
-        selectFilterType(constrain(get_Potentiometer(XPos, YPos, name), 0, 3));
+        assign_filter_type(constrain(get_Potentiometer(XPos, YPos, name), 0, 3));
     }
 }
-void PluginControll::selectFilterType(byte mixerchannel) {}
 
-void PluginControll::set_envelope_ADSR(byte YPos, int maxA, int maxD, int maxR) {}
+// envelope
+void PluginControll::assign_envelope_attack(byte value, int max) {}
+void PluginControll::assign_envelope_decay(byte value, int max) {}
+void PluginControll::assign_envelope_sustain(byte value) {}
+void PluginControll::assign_envelope_release(byte value, int max) {}
 void PluginControll::set_envelope_attack(byte XPos, byte YPos, const char *name, int min, int max)
 {
     if (enc_moved[XPos])
@@ -119,3 +116,18 @@ void PluginControll::set_envelope_release(byte XPos, byte YPos, const char *name
         assign_envelope_release(get_Potentiometer(XPos, YPos, name), max);
     }
 }
+void PluginControll::set_envelope_ADSR(byte YPos, int maxA, int maxD, int maxR) {}
+
+// mixer
+void PluginControll::assign_mixer_gain(byte value, byte channel) {}
+void PluginControll::set_mixer_gain(byte XPos, byte YPos, const char *name)
+{
+    if (enc_moved[XPos])
+    {
+        int n = XPos + (YPos * NUM_ENCODERS);
+        assign_mixer_gain(get_Potentiometer(XPos, YPos, name), n);
+    }
+}
+// SET audio function
+
+// filter functions

@@ -103,15 +103,10 @@ void Plugin_1::draw_plugin()
     }
 }
 
-
-void Plugin_1::set_mixer_gain(byte XPos, byte YPos, const char *name)
+void Plugin_1::assign_mixer_gain(byte value, byte channel)
 {
-    if (enc_moved[XPos])
-    {
-        int n = XPos + (YPos * NUM_ENCODERS);
-        float sustain = (float)(get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT);
-        mixer.gain(n, sustain);
-    }
+    float sustain = (float)(value / MIDI_CC_RANGE_FLOAT);
+    mixer.gain(channel, sustain);
 }
 
 // TeensyDAW: end automatically generated code

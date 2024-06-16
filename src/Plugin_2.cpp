@@ -179,7 +179,7 @@ void Plugin_2::assign_filter_sweep(byte value)
         ladder[i].octaveControl(swp);
     }
 }
-void Plugin_2::selectFilterType(byte mixerchannel)
+void Plugin_2::assign_filter_type(byte mixerchannel)
 {
     for (int i = 0; i < MAX_VOICES; i++)
     {
