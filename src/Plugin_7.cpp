@@ -73,10 +73,10 @@ void Plugin_7::set_parameters(byte row)
     {
         if (row == 0)
         {
-            set_fmdrum_pitchMod(0, 0, "Sweep", 0, 1);
-            set_fmdrum_noise(1, 0, "Noise", 0, 1);
-            set_fmdrum_overdrive(2, 0, "O-Drive", 0, 1);
-            set_fmdrum_decay(3, 0, "Decay", 0, 2000);
+            set_fmdrum_pitchMod(0, 0, "Sweep");
+            set_fmdrum_noise(1, 0, "Noise");
+            set_fmdrum_overdrive(2, 0, "O-Drive");
+            set_fmdrum_decay(3, 0, "Decay");
         }
 
         if (row == 1)
@@ -135,43 +135,35 @@ void Plugin_7::draw_plugin()
     }
 }
 
-void Plugin_7::set_fmdrum_pitchMod(byte XPos, byte YPos, const char *name, int min, int max)
+void Plugin_7::set_fmdrum_pitchMod(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
-        int n = XPos + (YPos * NUM_ENCODERS);
-        potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
-        float sustain = (float)(potentiometer[presetNr][n] / MIDI_CC_RANGE_FLOAT);
+        float sustain = get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT;
         fm_drum.fm(sustain); // float 0-1
     }
 }
-void Plugin_7::set_fmdrum_decay(byte XPos, byte YPos, const char *name, int min, int max)
+void Plugin_7::set_fmdrum_decay(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
-        int n = XPos + (YPos * NUM_ENCODERS);
-        potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
-        float sustain = (float)(potentiometer[presetNr][n] / MIDI_CC_RANGE_FLOAT);
+        float sustain = get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT;
         fm_drum.decay(sustain); // float 0-1
     }
 }
-void Plugin_7::set_fmdrum_noise(byte XPos, byte YPos, const char *name, int min, int max)
+void Plugin_7::set_fmdrum_noise(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
-        int n = XPos + (YPos * NUM_ENCODERS);
-        potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
-        float sustain = (float)(potentiometer[presetNr][n] / MIDI_CC_RANGE_FLOAT);
+        float sustain = get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT;
         fm_drum.noise(sustain); // float 0-1
     }
 }
-void Plugin_7::set_fmdrum_overdrive(byte XPos, byte YPos, const char *name, int min, int max)
+void Plugin_7::set_fmdrum_overdrive(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
-        int n = XPos + (YPos * NUM_ENCODERS);
-        potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
-        float sustain = (float)(potentiometer[presetNr][n] / MIDI_CC_RANGE_FLOAT);
+        float sustain = get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT;
         fm_drum.overdrive(sustain); // float 0-1
     }
 }
@@ -180,9 +172,7 @@ void Plugin_7::set_dynamics_threshold(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
-        int n = XPos + (YPos * NUM_ENCODERS);
-        potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
-        threshold = (float)map(potentiometer[presetNr][n], 0, 127, MIN_DB, MAX_DB);
+        threshold = (float)map(get_Potentiometer(XPos, YPos, name), 0, 127, MIN_DB, MAX_DB);
         dynamics.gate(threshold, attack, release, hysterisis);              // float -110.0f-0.0f ;; 0.03f-4.00f ;; 0.03f-4.00f ;; 0.0f-6.0f
         dynamics.compression(threshold, attack, release, ratio, kneeWidth); // float -110.0f-0.0f ;; 0.03f-4.00f ;; 0.03f-4.00f ;; 1.0f-60.0f ;; 0.0f-32.0f
         dynamics.limit(threshold, attack, release);                         // float -110.0f-0.0f ;; 0.03f-4.00f ;; 0.03f-4.00f ;; 0.0f-6.0f
@@ -192,9 +182,7 @@ void Plugin_7::set_dynamics_attack(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
-        int n = XPos + (YPos * NUM_ENCODERS);
-        potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
-        attack = (float)map(potentiometer[presetNr][n], 0, 127, MIN_T, MAX_T);
+        attack = (float)map(get_Potentiometer(XPos, YPos, name), 0, 127, MIN_T, MAX_T);
         dynamics.gate(threshold, attack, release, hysterisis);              // float -110.0f-0.0f ;; 0.03f-4.00f ;; 0.03f-4.00f ;; 0.0f-6.0f
         dynamics.compression(threshold, attack, release, ratio, kneeWidth); // float -110.0f-0.0f ;; 0.03f-4.00f ;; 0.03f-4.00f ;; 1.0f-60.0f ;; 0.0f-32.0f
         dynamics.limit(threshold, attack, release);                         // float -110.0f-0.0f ;; 0.03f-4.00f ;; 0.03f-4.00f ;; 0.0f-6.0f
@@ -204,9 +192,7 @@ void Plugin_7::set_dynamics_release(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
-        int n = XPos + (YPos * NUM_ENCODERS);
-        potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
-        release = (float)map(potentiometer[presetNr][n], 0, 127, MIN_T, MAX_T);
+        release = (float)map(get_Potentiometer(XPos, YPos, name), 0, 127, MIN_T, MAX_T);
         dynamics.gate(threshold, attack, release, hysterisis);              // float -110.0f-0.0f ;; 0.03f-4.00f ;; 0.03f-4.00f ;; 0.0f-6.0f
         dynamics.compression(threshold, attack, release, ratio, kneeWidth); // float -110.0f-0.0f ;; 0.03f-4.00f ;; 0.03f-4.00f ;; 1.0f-60.0f ;; 0.0f-32.0f
         dynamics.limit(threshold, attack, release);                         // float -110.0f-0.0f ;; 0.03f-4.00f ;; 0.03f-4.00f ;; 0.0f-6.0f
@@ -216,9 +202,7 @@ void Plugin_7::set_dynamics_hysterisis(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
-        int n = XPos + (YPos * NUM_ENCODERS);
-        potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
-        hysterisis = (float)map(potentiometer[presetNr][n], 0, 127, 0.0f, 6.0f);
+        hysterisis = (float)map(get_Potentiometer(XPos, YPos, name), 0, 127, 0.0f, 6.0f);
         dynamics.gate(threshold, attack, release, hysterisis); // float -110.0f-0.0f ;; 0.03f-4.00f ;; 0.03f-4.00f ;; 0.0f-6.0f
     }
 }
@@ -227,9 +211,7 @@ void Plugin_7::set_dynamics_ratio(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
-        int n = XPos + (YPos * NUM_ENCODERS);
-        potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
-        ratio = (float)map(potentiometer[presetNr][n], 0, 127, RATIO_OFF, RATIO_INFINITY);
+        ratio = (float)map(get_Potentiometer(XPos, YPos, name), 0, 127, RATIO_OFF, RATIO_INFINITY);
         dynamics.compression(threshold, attack, release, ratio, kneeWidth); // float -110.0f-0.0f ;; 0.03f-4.00f ;; 0.03f-4.00f ;; 1.0f-60.0f ;; 0.0f-32.0f
     }
 }
@@ -237,9 +219,7 @@ void Plugin_7::set_dynamics_kneeWidth(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
-        int n = XPos + (YPos * NUM_ENCODERS);
-        potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
-        kneeWidth = (float)map(potentiometer[presetNr][n], 0, 127, 0.0f, 32.0f);
+        kneeWidth = (float)map(get_Potentiometer(XPos, YPos, name), 0, 127, 0.0f, 32.0f);
         dynamics.compression(threshold, attack, release, ratio, kneeWidth); // float -110.0f-0.0f ;; 0.03f-4.00f ;; 0.03f-4.00f ;; 1.0f-60.0f ;; 0.0f-32.0f
     }
 }
@@ -247,9 +227,7 @@ void Plugin_7::set_dynamics_makeupGain(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
-        int n = XPos + (YPos * NUM_ENCODERS);
-        potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
-        float sustain = (float)map(potentiometer[presetNr][n], 0, 127, -12.0f, 24.0f);
+        float sustain = (float)map(get_Potentiometer(XPos, YPos, name), 0, 127, -12.0f, 24.0f);
         dynamics.makeupGain(sustain); // float -12.0f, 24.0f
     }
 }
@@ -257,9 +235,7 @@ void Plugin_7::set_dynamics_autoMakeupGain(byte XPos, byte YPos, const char *nam
 {
     if (enc_moved[XPos])
     {
-        int n = XPos + (YPos * NUM_ENCODERS);
-        potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
-        float sustain = (float)map(potentiometer[presetNr][n], 0, 127, 0.0f, 60.0f);
+        float sustain = (float)map(get_Potentiometer(XPos, YPos, name), 0, 127, 0.0f, 60.0f);
         dynamics.autoMakeupGain(sustain); // float 0.0f, 60.0f
     }
 }
@@ -267,9 +243,7 @@ void Plugin_7::set_amp_gain(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
-        int n = XPos + (YPos * NUM_ENCODERS);
-        potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
-        float sustain = (float)map(potentiometer[presetNr][n], 0, 127, 0.0f, 6.0f);
+        float sustain = (float)map(get_Potentiometer(XPos, YPos, name), 0, 127, 0.0f, 6.0f);
         amp.gain(sustain); // float 0.0f, 60.0f
     }
 }

@@ -87,10 +87,10 @@ public:
     virtual void set_parameters(byte row) override;
     virtual void draw_plugin() override;
 
-    void set_fmdrum_pitchMod(byte XPos, byte YPos, const char *name, int min, int max);
-    void set_fmdrum_decay(byte XPos, byte YPos, const char *name, int min, int max);
-    void set_fmdrum_noise(byte XPos, byte YPos, const char *name, int min, int max);
-    void set_fmdrum_overdrive(byte XPos, byte YPos, const char *name, int min, int max);
+    void set_fmdrum_pitchMod(byte XPos, byte YPos, const char *name);
+    void set_fmdrum_decay(byte XPos, byte YPos, const char *name);
+    void set_fmdrum_noise(byte XPos, byte YPos, const char *name);
+    void set_fmdrum_overdrive(byte XPos, byte YPos, const char *name);
 
     void set_dynamics_threshold(byte XPos, byte YPos, const char *name);
     void set_dynamics_attack(byte XPos, byte YPos, const char *name);

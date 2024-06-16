@@ -91,16 +91,16 @@ public:
     virtual void draw_plugin() override;
 
     void set_fmsnare_frequency(byte XPos, byte YPos, const char *name, int min, int max);
-    void set_fmsnare_pitchMod(byte XPos, byte YPos, const char *name, int min, int max);
-    void set_fmsnare_decay(byte XPos, byte YPos, const char *name, int min, int max);
-    void set_fmsnare_noise(byte XPos, byte YPos, const char *name, int min, int max);
-    void set_fmsnare_overdrive(byte XPos, byte YPos, const char *name, int min, int max);
+    void set_fmsnare_pitchMod(byte XPos, byte YPos, const char *name);
+    void set_fmsnare_decay(byte XPos, byte YPos, const char *name);
+    void set_fmsnare_noise(byte XPos, byte YPos, const char *name);
+    void set_fmsnare_overdrive(byte XPos, byte YPos, const char *name);
 
     void set_fmdrum_frequency(byte XPos, byte YPos, const char *name, int min, int max);
-    void set_fmdrum_pitchMod(byte XPos, byte YPos, const char *name, int min, int max);
-    void set_fmdrum_decay(byte XPos, byte YPos, const char *name, int min, int max);
-    void set_fmdrum_noise(byte XPos, byte YPos, const char *name, int min, int max);
-    void set_fmdrum_overdrive(byte XPos, byte YPos, const char *name, int min, int max);
+    void set_fmdrum_pitchMod(byte XPos, byte YPos, const char *name);
+    void set_fmdrum_decay(byte XPos, byte YPos, const char *name);
+    void set_fmdrum_noise(byte XPos, byte YPos, const char *name);
+    void set_fmdrum_overdrive(byte XPos, byte YPos, const char *name);
 
     void set_hhfilter_frequency(byte XPos, byte YPos, const char *name, int min, int max);
     void set_hhfilter_resonance(byte XPos, byte YPos, const char *name, float min, float max);
@@ -108,12 +108,12 @@ public:
 
     void set_hhEnv_attack(byte XPos, byte YPos, const char *name, int min, int max);
     void set_hhEnv_decay(byte XPos, byte YPos, const char *name, int min, int max);
-    void set_hhEnv_sustain(byte XPos, byte YPos, const char *name, int min, int max);
+    void set_hhEnv_sustain(byte XPos, byte YPos, const char *name);
     void set_hhEnv_release(byte XPos, byte YPos, const char *name, int min, int max);
 
-    void set_tomL_frequency(byte XPos, byte YPos, const char *name, int min, int max);
-    void set_tomM_frequency(byte XPos, byte YPos, const char *name, int min, int max);
-    void set_tomH_frequency(byte XPos, byte YPos, const char *name, int min, int max);
+    void set_tomL_frequency(byte XPos, byte YPos, const char *name);
+    void set_tomM_frequency(byte XPos, byte YPos, const char *name);
+    void set_tomH_frequency(byte XPos, byte YPos, const char *name);
     void set_toms_decay(byte XPos, byte YPos, const char *name, int min, int max);
 };
 #endif // PLUGIN_5_H
