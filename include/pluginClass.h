@@ -20,13 +20,12 @@ public:
     {
         name = Name;
         myID = ID;
-
     }
     virtual ~PluginControll() = default;
     virtual const char *get_Name() { return name; }
     virtual byte get_ID() { return myID; }
 
-    virtual void setup() = 0;
+    virtual void setup() = 0; // Reine virtuelle Funktion (muss von Subklassen implementiert werden)
     virtual void noteOn(byte notePlayed, float velocity, byte voice) = 0;
     virtual void noteOff(byte notePlayed, byte voice) = 0;
     virtual void set_parameters(byte row) = 0;
@@ -34,6 +33,34 @@ public:
 
     virtual void set_presetNr();
     virtual byte get_Potentiometer(byte XPos, byte YPos, const char *name);
-    
+
+    // ASSIGN audio functions
+    virtual void assign_voice_waveform(byte value); // // Normale virtuelle Funktion (kann von Subklassen überschrieben werden)
+    virtual void assign_voice_amplitude(byte value);
+
+    virtual void assign_filter_frequency(byte value);
+    virtual void assign_filter_resonance(byte value);
+    virtual void assign_filter_sweep(byte value);
+
+    virtual void assign_envelope_attack(byte value, int max);
+    virtual void assign_envelope_decay(byte value, int max);
+    virtual void assign_envelope_sustain(byte value);
+    virtual void assign_envelope_release(byte value, int max);
+
+    // SET audio functions
+    virtual void set_voice_waveform(byte XPos, byte YPos, const char *name); 
+    virtual void set_voice_amplitude(byte XPos, byte YPos, const char *name);
+
+    virtual void set_filter_frequency(byte XPos, byte YPos, const char *name);
+    virtual void set_filter_resonance(byte XPos, byte YPos, const char *name, float min, float max);
+    virtual void set_filter_sweep(byte XPos, byte YPos, const char *name);
+    virtual void set_filter_type(byte XPos, byte YPos, const char *name);
+    virtual void selectFilterType(byte mixerchannel);
+
+    virtual void set_envelope_ADSR(byte YPos, int maxA, int maxD, int maxR);
+    virtual void set_envelope_attack(byte XPos, byte YPos, const char *name, int min, int max);
+    virtual void set_envelope_decay(byte XPos, byte YPos, const char *name, int min, int max);
+    virtual void set_envelope_sustain(byte XPos, byte YPos, const char *name);
+    virtual void set_envelope_release(byte XPos, byte YPos, const char *name, int min, int max);
 };
 #endif // PLUGIN_CLASS

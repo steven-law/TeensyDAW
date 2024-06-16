@@ -133,27 +133,12 @@ void Plugin_2::draw_plugin()
     }
 }
 
-void Plugin_2::set_voice_waveform(byte XPos, byte YPos, const char *name)
-{
-    if (enc_moved[XPos])
-    {
-        assign_voice_waveform(get_Potentiometer(XPos, YPos, name));
-    }
-}
 void Plugin_2::assign_voice_waveform(byte value)
 {
     int walveform = map(value, 0, MIDI_CC_RANGE, 0, 12);
     for (int i = 0; i < MAX_VOICES; i++)
     {
         waveform[i].begin(walveform);
-    }
-}
-
-void Plugin_2::set_voice_amplitude(byte XPos, byte YPos, const char *name)
-{
-    if (enc_moved[XPos])
-    {
-        assign_voice_amplitude(get_Potentiometer(XPos, YPos, name));
     }
 }
 void Plugin_2::assign_voice_amplitude(byte value)
@@ -165,13 +150,6 @@ void Plugin_2::assign_voice_amplitude(byte value)
     }
 }
 
-void Plugin_2::set_filter_frequency(byte XPos, byte YPos, const char *name)
-{
-    if (enc_moved[XPos])
-    {
-        assign_filter_frequency(get_Potentiometer(XPos, YPos, name));
-    }
-}
 void Plugin_2::assign_filter_frequency(byte value)
 {
 
@@ -180,14 +158,6 @@ void Plugin_2::assign_filter_frequency(byte value)
     {
         filter[i].frequency(frequency);
         ladder[i].frequency(frequency);
-    }
-}
-
-void Plugin_2::set_filter_resonance(byte XPos, byte YPos, const char *name, float min, float max)
-{
-    if (enc_moved[XPos])
-    {
-        assign_filter_resonance(get_Potentiometer(XPos, YPos, name));
     }
 }
 void Plugin_2::assign_filter_resonance(byte value)
@@ -200,13 +170,6 @@ void Plugin_2::assign_filter_resonance(byte value)
         ladder[i].resonance(reso);
     }
 }
-void Plugin_2::set_filter_sweep(byte XPos, byte YPos, const char *name)
-{
-    if (enc_moved[XPos])
-    {
-        assign_filter_sweep(get_Potentiometer(XPos, YPos, name));
-    }
-}
 void Plugin_2::assign_filter_sweep(byte value)
 {
     float swp = value / 18.14;
@@ -214,13 +177,6 @@ void Plugin_2::assign_filter_sweep(byte value)
     {
         filter[i].octaveControl(swp);
         ladder[i].octaveControl(swp);
-    }
-}
-void Plugin_2::set_filter_type(byte XPos, byte YPos, const char *name)
-{
-    if (enc_moved[XPos])
-    {
-        selectFilterType(constrain(get_Potentiometer(XPos, YPos, name), 0, 3));
     }
 }
 void Plugin_2::selectFilterType(byte mixerchannel)
@@ -305,55 +261,5 @@ void Plugin_2::set_envelope_ADSR(byte YPos, int maxA, int maxD, int maxR)
         assign_envelope_release(potentiometer[presetNr][3 + rowIx], maxR);
         drawEnvelope(YPos, potentiometer[presetNr][0 + rowIx], potentiometer[presetNr][1 + rowIx],
                      potentiometer[presetNr][2 + rowIx], potentiometer[presetNr][3 + rowIx]);
-    }
-}
-void Plugin_2::set_envelope_attack(byte XPos, byte YPos, const char *name, int min, int max)
-{
-    if (enc_moved[XPos])
-    {
-        int attack = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, min, max);
-        for (int i = 0; i < MAX_VOICES; i++)
-        {
-            Fenv[i].attack(attack);
-            Aenv[i].attack(attack);
-        }
-    }
-}
-void Plugin_2::set_envelope_decay(byte XPos, byte YPos, const char *name, int min, int max)
-{
-    if (enc_moved[XPos])
-    {
-
-        int decay = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, min, max);
-        for (int i = 0; i < MAX_VOICES; i++)
-        {
-            Fenv[i].decay(decay);
-            Aenv[i].decay(decay);
-        }
-    }
-}
-void Plugin_2::set_envelope_sustain(byte XPos, byte YPos, const char *name)
-{
-    if (enc_moved[XPos])
-    {
-
-        float sustain = (float)(get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT);
-        for (int i = 0; i < MAX_VOICES; i++)
-        {
-            Fenv[i].sustain(sustain);
-            Aenv[i].sustain(sustain);
-        }
-    }
-}
-void Plugin_2::set_envelope_release(byte XPos, byte YPos, const char *name, int min, int max)
-{
-    if (enc_moved[XPos])
-    {
-        int release = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, min, max);
-        for (int i = 0; i < MAX_VOICES; i++)
-        {
-            Fenv[i].release(release);
-            Aenv[i].release(release);
-        }
     }
 }
