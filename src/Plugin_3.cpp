@@ -83,7 +83,7 @@ void Plugin_3::set_parameters(byte row)
         {
             set_envelope_mattack(0, 1, "mAttack", 0, 1000);
             set_envelope_mdecay(1, 1, "mDecay", 0, 500);
-            set_envelope_msustain(2, 1, "mSustain", 0, 1);
+            set_envelope_msustain(2, 1, "mSustain");
             set_envelope_mrelease(3, 1, "mRelease", 0, 2000);
         }
 
@@ -234,9 +234,7 @@ void Plugin_3::set_envelope_mattack(byte XPos, byte YPos, const char *name, int 
 {
     if (enc_moved[XPos])
     {
-        int n = XPos + (YPos * NUM_ENCODERS);
-        potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
-        int attack = map(potentiometer[presetNr][n], 0, MIDI_CC_RANGE, min, max);
+        int attack = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, min, max);
         for (int i = 0; i < MAX_VOICES; i++)
         {
             modEnv[i].attack(attack);
@@ -247,22 +245,18 @@ void Plugin_3::set_envelope_mdecay(byte XPos, byte YPos, const char *name, int m
 {
     if (enc_moved[XPos])
     {
-        int n = XPos + (YPos * NUM_ENCODERS);
-        potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
-        int decay = map(potentiometer[presetNr][n], 0, MIDI_CC_RANGE, min, max);
+        int decay = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, min, max);
         for (int i = 0; i < MAX_VOICES; i++)
         {
             modEnv[i].decay(decay);
         }
     }
 }
-void Plugin_3::set_envelope_msustain(byte XPos, byte YPos, const char *name, int min, int max)
+void Plugin_3::set_envelope_msustain(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
-        int n = XPos + (YPos * NUM_ENCODERS);
-        potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
-        float sustain = (float)(potentiometer[presetNr][n] / MIDI_CC_RANGE_FLOAT);
+        float sustain = (float)(get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT);
         for (int i = 0; i < MAX_VOICES; i++)
         {
             modEnv[i].sustain(sustain);
@@ -273,9 +267,7 @@ void Plugin_3::set_envelope_mrelease(byte XPos, byte YPos, const char *name, int
 {
     if (enc_moved[XPos])
     {
-        int n = XPos + (YPos * NUM_ENCODERS);
-        potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
-        int release = map(potentiometer[presetNr][n], 0, MIDI_CC_RANGE, min, max);
+        int release = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, min, max);
         for (int i = 0; i < MAX_VOICES; i++)
         {
             modEnv[i].release(release);

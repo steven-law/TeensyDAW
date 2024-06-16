@@ -96,7 +96,7 @@ public:
 
     void set_envelope_mattack(byte XPos, byte YPos, const char *name, int min, int max);
     void set_envelope_mdecay(byte XPos, byte YPos, const char *name, int min, int max);
-    void set_envelope_msustain(byte XPos, byte YPos, const char *name, int min, int max);
+    void set_envelope_msustain(byte XPos, byte YPos, const char *name);
     void set_envelope_mrelease(byte XPos, byte YPos, const char *name, int min, int max);
 };
 #endif // PLUGIN_3_H
