@@ -32,20 +32,38 @@ byte PluginControll::get_Potentiometer(byte XPos, byte YPos, const char *name)
 }
 
 // ASSIGN audio functions
-void PluginControll::assign_voice_waveform(byte value) {} // // Normale virtuelle Funktion (kann von Subklassen überschrieben werden)
-void PluginControll::assign_voice_amplitude(byte value) {}
-void PluginControll::set_voice_waveform(byte XPos, byte YPos, const char *name)
+void PluginControll::assign_voice1_waveform(byte value) {} // // Normale virtuelle Funktion (kann von Subklassen überschrieben werden)
+void PluginControll::assign_voice1_amplitude(byte value) {}
+void PluginControll::set_voice1_waveform(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
-        assign_voice_waveform(get_Potentiometer(XPos, YPos, name));
+        assign_voice1_waveform(get_Potentiometer(XPos, YPos, name));
     }
 }
-void PluginControll::set_voice_amplitude(byte XPos, byte YPos, const char *name)
+void PluginControll::set_voice1_amplitude(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
-        assign_voice_amplitude(get_Potentiometer(XPos, YPos, name));
+        assign_voice1_amplitude(get_Potentiometer(XPos, YPos, name));
+    }
+}
+
+// WAVEFORM 2
+void PluginControll::assign_voice2_waveform(byte value) {} // // Normale virtuelle Funktion (kann von Subklassen überschrieben werden)
+void PluginControll::assign_voice2_amplitude(byte value) {}
+void PluginControll::set_voice2_waveform(byte XPos, byte YPos, const char *name)
+{
+    if (enc_moved[XPos])
+    {
+        assign_voice2_waveform(get_Potentiometer(XPos, YPos, name));
+    }
+}
+void PluginControll::set_voice2_amplitude(byte XPos, byte YPos, const char *name)
+{
+    if (enc_moved[XPos])
+    {
+        assign_voice2_amplitude(get_Potentiometer(XPos, YPos, name));
     }
 }
 
@@ -61,7 +79,7 @@ void PluginControll::set_filter_frequency(byte XPos, byte YPos, const char *name
         assign_filter_frequency(get_Potentiometer(XPos, YPos, name));
     }
 }
-void PluginControll::set_filter_resonance(byte XPos, byte YPos, const char *name, float min, float max)
+void PluginControll::set_filter_resonance(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
@@ -83,40 +101,209 @@ void PluginControll::set_filter_type(byte XPos, byte YPos, const char *name)
     }
 }
 
-// envelope
-void PluginControll::assign_envelope_attack(byte value, int max) {}
-void PluginControll::assign_envelope_decay(byte value, int max) {}
-void PluginControll::assign_envelope_sustain(byte value) {}
-void PluginControll::assign_envelope_release(byte value, int max) {}
-void PluginControll::set_envelope_attack(byte XPos, byte YPos, const char *name, int min, int max)
+// envelope 1
+void PluginControll::assign_envelope1_attack(byte value, int max) {}
+void PluginControll::assign_envelope1_decay(byte value, int max) {}
+void PluginControll::assign_envelope1_sustain(byte value) {}
+void PluginControll::assign_envelope1_release(byte value, int max) {}
+void PluginControll::set_envelope1_attack(byte XPos, byte YPos, const char *name, int max)
 {
     if (enc_moved[XPos])
     {
-        assign_envelope_attack(get_Potentiometer(XPos, YPos, name), max);
+        assign_envelope1_attack(get_Potentiometer(XPos, YPos, name), max);
     }
 }
-void PluginControll::set_envelope_decay(byte XPos, byte YPos, const char *name, int min, int max)
+void PluginControll::set_envelope1_decay(byte XPos, byte YPos, const char *name, int max)
 {
     if (enc_moved[XPos])
     {
-        assign_envelope_decay(get_Potentiometer(XPos, YPos, name), max);
+        assign_envelope1_decay(get_Potentiometer(XPos, YPos, name), max);
     }
 }
-void PluginControll::set_envelope_sustain(byte XPos, byte YPos, const char *name)
+void PluginControll::set_envelope1_sustain(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
-        assign_envelope_sustain(get_Potentiometer(XPos, YPos, name));
+        assign_envelope1_sustain(get_Potentiometer(XPos, YPos, name));
     }
 }
-void PluginControll::set_envelope_release(byte XPos, byte YPos, const char *name, int min, int max)
+void PluginControll::set_envelope1_release(byte XPos, byte YPos, const char *name, int max)
 {
     if (enc_moved[XPos])
     {
-        assign_envelope_release(get_Potentiometer(XPos, YPos, name), max);
+        assign_envelope1_release(get_Potentiometer(XPos, YPos, name), max);
     }
 }
-void PluginControll::set_envelope_ADSR(byte YPos, int maxA, int maxD, int maxR) {}
+void PluginControll::set_envelope1_ADSR(byte YPos, int maxA, int maxD, int maxR) {}
+// envelope 2
+void PluginControll::assign_envelope2_attack(byte value, int max) {}
+void PluginControll::assign_envelope2_decay(byte value, int max) {}
+void PluginControll::assign_envelope2_sustain(byte value) {}
+void PluginControll::assign_envelope2_release(byte value, int max) {}
+void PluginControll::set_envelope2_attack(byte XPos, byte YPos, const char *name, int min, int max)
+{
+    if (enc_moved[XPos])
+    {
+        assign_envelope2_attack(get_Potentiometer(XPos, YPos, name), max);
+    }
+}
+void PluginControll::set_envelope2_decay(byte XPos, byte YPos, const char *name, int min, int max)
+{
+    if (enc_moved[XPos])
+    {
+        assign_envelope2_decay(get_Potentiometer(XPos, YPos, name), max);
+    }
+}
+void PluginControll::set_envelope2_sustain(byte XPos, byte YPos, const char *name)
+{
+    if (enc_moved[XPos])
+    {
+        assign_envelope2_sustain(get_Potentiometer(XPos, YPos, name));
+    }
+}
+void PluginControll::set_envelope2_release(byte XPos, byte YPos, const char *name, int min, int max)
+{
+    if (enc_moved[XPos])
+    {
+        assign_envelope2_release(get_Potentiometer(XPos, YPos, name), max);
+    }
+}
+void PluginControll::set_envelope2_ADSR(byte YPos, int maxA, int maxD, int maxR) {}
+
+// FMDRUM 1
+void PluginControll::assign_fmdrum1_frequency(byte value) {}
+void PluginControll::assign_fmdrum1_pitchMod(byte value) {}
+void PluginControll::assign_fmdrum1_decay(byte value) {}
+void PluginControll::assign_fmdrum1_noise(byte value) {}
+void PluginControll::assign_fmdrum1_overdrive(byte value) {}
+void PluginControll::set_fmdrum1_frequency(byte XPos, byte YPos, const char *name)
+{
+    if (enc_moved[XPos])
+    {
+        assign_fmdrum1_frequency(get_Potentiometer(XPos, YPos, name));
+    }
+}
+void PluginControll::set_fmdrum1_pitchMod(byte XPos, byte YPos, const char *name)
+{
+    if (enc_moved[XPos])
+    {
+        assign_fmdrum1_pitchMod(get_Potentiometer(XPos, YPos, name));
+    }
+}
+void PluginControll::set_fmdrum1_decay(byte XPos, byte YPos, const char *name)
+{
+    if (enc_moved[XPos])
+    {
+        assign_fmdrum1_decay(get_Potentiometer(XPos, YPos, name));
+    }
+}
+void PluginControll::set_fmdrum1_noise(byte XPos, byte YPos, const char *name)
+{
+    if (enc_moved[XPos])
+    {
+        assign_fmdrum1_noise(get_Potentiometer(XPos, YPos, name));
+    }
+}
+void PluginControll::set_fmdrum1_overdrive(byte XPos, byte YPos, const char *name)
+{
+    if (enc_moved[XPos])
+    {
+        assign_fmdrum1_overdrive(get_Potentiometer(XPos, YPos, name));
+    }
+}
+// FMDRUM 2
+void PluginControll::assign_fmdrum2_frequency(byte value) {}
+void PluginControll::assign_fmdrum2_pitchMod(byte value) {}
+void PluginControll::assign_fmdrum2_decay(byte value) {}
+void PluginControll::assign_fmdrum2_noise(byte value) {}
+void PluginControll::assign_fmdrum2_overdrive(byte value) {}
+void PluginControll::set_fmdrum2_frequency(byte XPos, byte YPos, const char *name)
+{
+    if (enc_moved[XPos])
+    {
+        assign_fmdrum2_frequency(get_Potentiometer(XPos, YPos, name));
+    }
+}
+void PluginControll::set_fmdrum2_pitchMod(byte XPos, byte YPos, const char *name)
+{
+    if (enc_moved[XPos])
+    {
+        assign_fmdrum2_pitchMod(get_Potentiometer(XPos, YPos, name));
+    }
+}
+void PluginControll::set_fmdrum2_decay(byte XPos, byte YPos, const char *name)
+{
+    if (enc_moved[XPos])
+    {
+        assign_fmdrum2_decay(get_Potentiometer(XPos, YPos, name));
+    }
+}
+void PluginControll::set_fmdrum2_noise(byte XPos, byte YPos, const char *name)
+{
+    if (enc_moved[XPos])
+    {
+        assign_fmdrum2_noise(get_Potentiometer(XPos, YPos, name));
+    }
+}
+void PluginControll::set_fmdrum2_overdrive(byte XPos, byte YPos, const char *name)
+{
+    if (enc_moved[XPos])
+    {
+        assign_fmdrum2_overdrive(get_Potentiometer(XPos, YPos, name));
+    }
+}
+
+// DRUM 1
+void PluginControll::assign_drum1_frequency(byte value) {}
+void PluginControll::assign_drum1_decay(byte value) {}
+void PluginControll::set_drum1_frequency(byte XPos, byte YPos, const char *name)
+{
+    if (enc_moved[XPos])
+    {
+        assign_drum1_frequency(get_Potentiometer(XPos, YPos, name));
+    }
+}
+void PluginControll::set_drum1_decay(byte XPos, byte YPos, const char *name)
+{
+    if (enc_moved[XPos])
+    {
+        assign_drum1_decay(get_Potentiometer(XPos, YPos, name));
+    }
+}
+// DRUM 2
+void PluginControll::assign_drum2_frequency(byte value) {}
+void PluginControll::assign_drum2_decay(byte value) {}
+void PluginControll::set_drum2_frequency(byte XPos, byte YPos, const char *name)
+{
+    if (enc_moved[XPos])
+    {
+        assign_drum2_frequency(get_Potentiometer(XPos, YPos, name));
+    }
+}
+void PluginControll::set_drum2_decay(byte XPos, byte YPos, const char *name)
+{
+    if (enc_moved[XPos])
+    {
+        assign_drum2_decay(get_Potentiometer(XPos, YPos, name));
+    }
+}
+// DRUM 3
+void PluginControll::assign_drum3_frequency(byte value) {}
+void PluginControll::assign_drum3_decay(byte value) {}
+void PluginControll::set_drum3_frequency(byte XPos, byte YPos, const char *name)
+{
+    if (enc_moved[XPos])
+    {
+        assign_drum3_frequency(get_Potentiometer(XPos, YPos, name));
+    }
+}
+void PluginControll::set_drum3_decay(byte XPos, byte YPos, const char *name)
+{
+    if (enc_moved[XPos])
+    {
+        assign_drum3_decay(get_Potentiometer(XPos, YPos, name));
+    }
+}
 
 // mixer
 void PluginControll::assign_mixer_gain(byte value, byte channel) {}

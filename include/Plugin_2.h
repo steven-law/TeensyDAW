@@ -100,23 +100,20 @@ public:
     // virtual void set_filter_type(byte XPos, byte YPos, const char *name);
     // 
 
-    virtual void set_envelope_ADSR(byte YPos, int maxA, int maxD, int maxR);
-    // virtual void set_envelope_attack(byte XPos, byte YPos, const char *name, int min, int max);
-    // virtual void set_envelope_decay(byte XPos, byte YPos, const char *name, int min, int max);
-    // virtual void set_envelope_sustain(byte XPos, byte YPos, const char *name);
-    // virtual void set_envelope_release(byte XPos, byte YPos, const char *name, int min, int max);
+   
 
-    virtual void assign_voice_waveform(byte value) override; // make virtual in baseclass but override
-    virtual void assign_voice_amplitude(byte value) override;
+    virtual void assign_voice1_waveform(byte value) override; // make virtual in baseclass but override
+    virtual void assign_voice1_amplitude(byte value) override;
 
     virtual void assign_filter_frequency(byte value) override;
     virtual void assign_filter_resonance(byte value) override;
     virtual void assign_filter_sweep(byte value) override;
     virtual void assign_filter_type(byte mixerchannel) override;
 
-    virtual void assign_envelope_attack(byte value, int max) override;
-    virtual void assign_envelope_decay(byte value, int max) override;
-    virtual void assign_envelope_sustain(byte value) override;
-    virtual void assign_envelope_release(byte value, int max) override;
+    virtual void assign_envelope1_attack(byte value, int max) override;
+    virtual void assign_envelope1_decay(byte value, int max) override;
+    virtual void assign_envelope1_sustain(byte value) override;
+    virtual void assign_envelope1_release(byte value, int max) override;
+     virtual void set_envelope1_ADSR(byte YPos, int maxA, int maxD, int maxR);
 };
 #endif // PLUGIN_2_H

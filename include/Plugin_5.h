@@ -90,30 +90,32 @@ public:
     virtual void set_parameters(byte row) override;
     virtual void draw_plugin() override;
 
-    void set_fmsnare_frequency(byte XPos, byte YPos, const char *name, int min, int max);
-    void set_fmsnare_pitchMod(byte XPos, byte YPos, const char *name);
-    void set_fmsnare_decay(byte XPos, byte YPos, const char *name);
-    void set_fmsnare_noise(byte XPos, byte YPos, const char *name);
-    void set_fmsnare_overdrive(byte XPos, byte YPos, const char *name);
+    virtual void assign_fmdrum1_frequency(byte value) override;
+    virtual void assign_fmdrum1_pitchMod(byte value) override;
+    virtual void assign_fmdrum1_decay(byte value) override;
+    virtual void assign_fmdrum1_noise(byte value) override;
+    virtual void assign_fmdrum1_overdrive(byte value) override;
 
-    void set_fmdrum_frequency(byte XPos, byte YPos, const char *name, int min, int max);
-    void set_fmdrum_pitchMod(byte XPos, byte YPos, const char *name);
-    void set_fmdrum_decay(byte XPos, byte YPos, const char *name);
-    void set_fmdrum_noise(byte XPos, byte YPos, const char *name);
-    void set_fmdrum_overdrive(byte XPos, byte YPos, const char *name);
+    virtual void assign_fmdrum2_frequency(byte value) override;
+    virtual void assign_fmdrum2_pitchMod(byte value) override;
+    virtual void assign_fmdrum2_decay(byte value) override;
+    virtual void assign_fmdrum2_noise(byte value) override;
+    virtual void assign_fmdrum2_overdrive(byte value) override;
 
-    void set_hhfilter_frequency(byte XPos, byte YPos, const char *name, int min, int max);
-    void set_hhfilter_resonance(byte XPos, byte YPos, const char *name, float min, float max);
-    void set_hhfilter_sweep(byte XPos, byte YPos, const char *name, float min, float max);
+    virtual void assign_filter_frequency(byte value) override;
+    virtual void assign_filter_resonance(byte value) override;
+    virtual void assign_filter_sweep(byte value) override;
 
-    void set_hhEnv_attack(byte XPos, byte YPos, const char *name, int min, int max);
-    void set_hhEnv_decay(byte XPos, byte YPos, const char *name, int min, int max);
-    void set_hhEnv_sustain(byte XPos, byte YPos, const char *name);
-    void set_hhEnv_release(byte XPos, byte YPos, const char *name, int min, int max);
+    virtual void assign_envelope1_attack(byte value, int max) override; //envelope for modulator
+    virtual void assign_envelope1_decay(byte value, int max) override;
+    virtual void assign_envelope1_sustain(byte value) override;
+    virtual void assign_envelope1_release(byte value, int max) override;
 
-    void set_tomL_frequency(byte XPos, byte YPos, const char *name);
-    void set_tomM_frequency(byte XPos, byte YPos, const char *name);
-    void set_tomH_frequency(byte XPos, byte YPos, const char *name);
-    void set_toms_decay(byte XPos, byte YPos, const char *name, int min, int max);
+    virtual void assign_drum1_frequency(byte value) override;
+    virtual void assign_drum2_frequency(byte value) override;
+    virtual void assign_drum3_frequency(byte value) override;
+    virtual void assign_drum1_decay(byte value) override;
+
+
 };
 #endif // PLUGIN_5_H

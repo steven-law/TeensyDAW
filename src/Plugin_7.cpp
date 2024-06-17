@@ -73,10 +73,10 @@ void Plugin_7::set_parameters(byte row)
     {
         if (row == 0)
         {
-            set_fmdrum_pitchMod(0, 0, "Sweep");
-            set_fmdrum_noise(1, 0, "Noise");
-            set_fmdrum_overdrive(2, 0, "O-Drive");
-            set_fmdrum_decay(3, 0, "Decay");
+            set_fmdrum1_pitchMod(0, 0, "Sweep");
+            set_fmdrum1_noise(1, 0, "Noise");
+            set_fmdrum1_overdrive(2, 0, "O-Drive");
+            set_fmdrum1_decay(3, 0, "Decay");
         }
 
         if (row == 1)
@@ -135,37 +135,31 @@ void Plugin_7::draw_plugin()
     }
 }
 
-void Plugin_7::set_fmdrum_pitchMod(byte XPos, byte YPos, const char *name)
+// kick
+void Plugin_7::assign_fmdrum1_frequency(byte value)
 {
-    if (enc_moved[XPos])
-    {
-        float sustain = get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT;
-        fm_drum.fm(sustain); // float 0-1
-    }
+    int freq = map(value, 0, MIDI_CC_RANGE, 10, 300);
+    fm_drum.frequency(freq);
 }
-void Plugin_7::set_fmdrum_decay(byte XPos, byte YPos, const char *name)
+void Plugin_7::assign_fmdrum1_pitchMod(byte value)
 {
-    if (enc_moved[XPos])
-    {
-        float sustain = get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT;
-        fm_drum.decay(sustain); // float 0-1
-    }
+    float sustain = value / MIDI_CC_RANGE_FLOAT;
+    fm_drum.fm(sustain);
 }
-void Plugin_7::set_fmdrum_noise(byte XPos, byte YPos, const char *name)
+void Plugin_7::assign_fmdrum1_decay(byte value)
 {
-    if (enc_moved[XPos])
-    {
-        float sustain = get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT;
-        fm_drum.noise(sustain); // float 0-1
-    }
+    float sustain = value / MIDI_CC_RANGE_FLOAT;
+    fm_drum.decay(sustain);
 }
-void Plugin_7::set_fmdrum_overdrive(byte XPos, byte YPos, const char *name)
+void Plugin_7::assign_fmdrum1_noise(byte value)
 {
-    if (enc_moved[XPos])
-    {
-        float sustain = get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT;
-        fm_drum.overdrive(sustain); // float 0-1
-    }
+    float sustain = value / MIDI_CC_RANGE_FLOAT;
+    fm_drum.noise(sustain);
+}
+void Plugin_7::assign_fmdrum1_overdrive(byte value)
+{
+    float sustain = value / MIDI_CC_RANGE_FLOAT;
+    fm_drum.overdrive(sustain);
 }
 
 void Plugin_7::set_dynamics_threshold(byte XPos, byte YPos, const char *name)

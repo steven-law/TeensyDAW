@@ -75,35 +75,34 @@ void Plugin_5::set_parameters(byte row)
     {
         if (row == 0)
         {
-            set_fmdrum_frequency(0, 0, "Freq", 10, 300);
-            set_fmdrum_pitchMod(1, 0, "Sweep");
-            set_fmdrum_overdrive(2, 0, "O-Drive");
-            set_fmdrum_decay(3, 0, "Decay");
+            set_fmdrum1_frequency(0, 0, "Freq");
+            set_fmdrum1_pitchMod(1, 0, "Sweep");
+            set_fmdrum1_overdrive(2, 0, "O-Drive");
+            set_fmdrum1_decay(3, 0, "Decay");
         }
 
         if (row == 1)
         {
-            set_fmsnare_frequency(0, 1, "Freq", 10, 300);
-            set_fmsnare_pitchMod(1, 1, "Sweep");
-            set_fmsnare_noise(2, 1, "Noise");
-            set_fmsnare_decay(3, 1, "Decay");
+            set_fmdrum2_frequency(0, 1, "Freq");
+            set_fmdrum2_pitchMod(1, 1, "Sweep");
+            set_fmdrum2_noise(2, 1, "Noise");
+            set_fmdrum2_decay(3, 1, "Decay");
         }
 
         if (row == 2)
         {
-            set_hhfilter_frequency(0, 2, "Freq", 1000, 8000);
-            set_hhfilter_resonance(1, 2, "Reso", 0, 5.00);
-            set_hhEnv_attack(2, 2, "Attack", 0, 50);
-            // set_hhEnv_decay(3, 2, "Decay", 0, 50);
-            set_hhEnv_release(3, 2, "Decay", 0, 2000);
+            set_envelope1_attack(2, 2, "Attack", 50);
+            set_envelope1_release(3, 2, "Decay", 2000);
+            set_filter_frequency(0, 2, "Freq");
+            set_filter_resonance(1, 2, "Reso");
         }
 
         if (row == 3)
         {
-            set_tomL_frequency(0, 3, "TomL");
-            set_tomM_frequency(1, 3, "TomM");
-            set_tomH_frequency(2, 3, "TomH");
-            set_toms_decay(3, 3, "Decay", 0, 2000);
+            set_drum1_frequency(0, 3, "TomL");
+            set_drum2_frequency(1, 3, "TomM");
+            set_drum3_frequency(2, 3, "TomH");
+            set_drum1_decay(3, 3, "Decay");
         }
     }
     if (buttonPressed[BUTTON_SHIFT])
@@ -143,191 +142,121 @@ void Plugin_5::draw_plugin()
     }
 }
 
-void Plugin_5::set_fmsnare_frequency(byte XPos, byte YPos, const char *name, int min, int max)
+// kick
+void Plugin_5::assign_fmdrum1_frequency(byte value)
 {
-    if (enc_moved[XPos])
-    {
-        int freq = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, min, max);
-        fm_snare.frequency(freq);
-    }
+    int freq = map(value, 0, MIDI_CC_RANGE, 10, 300);
+    fm_drum.frequency(freq);
 }
-void Plugin_5::set_fmsnare_pitchMod(byte XPos, byte YPos, const char *name)
+void Plugin_5::assign_fmdrum1_pitchMod(byte value)
 {
-    if (enc_moved[XPos])
-    {
-        float sustain = (float)(get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT);
-        fm_snare.fm(sustain);
-    }
+    float sustain = value / MIDI_CC_RANGE_FLOAT;
+    fm_drum.fm(sustain);
 }
-void Plugin_5::set_fmsnare_decay(byte XPos, byte YPos, const char *name)
+void Plugin_5::assign_fmdrum1_decay(byte value)
 {
-    if (enc_moved[XPos])
-    {
-        float sustain = (float)(get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT);
-        fm_snare.decay(sustain);
-    }
+    float sustain = value / MIDI_CC_RANGE_FLOAT;
+    fm_drum.decay(sustain);
 }
-void Plugin_5::set_fmsnare_noise(byte XPos, byte YPos, const char *name)
+void Plugin_5::assign_fmdrum1_noise(byte value)
 {
-    if (enc_moved[XPos])
-    {
-        float sustain = (float)(get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT);
-        fm_snare.noise(sustain);
-        fm_snare.overdrive(sustain);
-    }
+    float sustain = value / MIDI_CC_RANGE_FLOAT;
+    fm_drum.noise(sustain);
 }
-void Plugin_5::set_fmsnare_overdrive(byte XPos, byte YPos, const char *name)
+void Plugin_5::assign_fmdrum1_overdrive(byte value)
 {
-    if (enc_moved[XPos])
-    {
-        float sustain = (float)(get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT);
-        fm_snare.overdrive(sustain);
-    }
+    float sustain = value / MIDI_CC_RANGE_FLOAT;
+    fm_drum.overdrive(sustain);
 }
-
-void Plugin_5::set_fmdrum_frequency(byte XPos, byte YPos, const char *name, int min, int max)
+// snare
+void Plugin_5::assign_fmdrum2_frequency(byte value)
 {
-    if (enc_moved[XPos])
-    {
-        int n = XPos + (YPos * NUM_ENCODERS);
-        potentiometer[presetNr][n] = getEncodervalue(XPos, YPos, name, potentiometer[presetNr][n]);
-        int freq = map(potentiometer[presetNr][n], 0, MIDI_CC_RANGE, min, max);
-        fm_drum.frequency(freq);
-    }
+    int freq = map(value, 0, MIDI_CC_RANGE, 10, 300);
+    fm_snare.frequency(freq);
 }
-void Plugin_5::set_fmdrum_pitchMod(byte XPos, byte YPos, const char *name)
+void Plugin_5::assign_fmdrum2_pitchMod(byte value)
 {
-    if (enc_moved[XPos])
-    {
-        float sustain = (float)(get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT);
-        fm_drum.fm(sustain);
-    }
+    float sustain = value / MIDI_CC_RANGE_FLOAT;
+    fm_snare.fm(sustain);
 }
-void Plugin_5::set_fmdrum_decay(byte XPos, byte YPos, const char *name)
+void Plugin_5::assign_fmdrum2_decay(byte value)
 {
-    if (enc_moved[XPos])
-    {
-        float sustain = (float)(get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT);
-        fm_drum.decay(sustain);
-    }
+    float sustain = value / MIDI_CC_RANGE_FLOAT;
+    fm_snare.decay(sustain);
 }
-void Plugin_5::set_fmdrum_noise(byte XPos, byte YPos, const char *name)
+void Plugin_5::assign_fmdrum2_noise(byte value)
 {
-    if (enc_moved[XPos])
-    {
-        float sustain = (float)(get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT);
-        fm_drum.noise(sustain);
-    }
+    float sustain = value / MIDI_CC_RANGE_FLOAT;
+    fm_snare.noise(sustain);
 }
-void Plugin_5::set_fmdrum_overdrive(byte XPos, byte YPos, const char *name)
+void Plugin_5::assign_fmdrum2_overdrive(byte value)
 {
-    if (enc_moved[XPos])
-    {
-        float sustain = (float)(get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT);
-        fm_drum.overdrive(sustain);
-    }
+    float sustain = value / MIDI_CC_RANGE_FLOAT;
+    fm_snare.overdrive(sustain);
 }
-
-void Plugin_5::set_hhfilter_frequency(byte XPos, byte YPos, const char *name, int min, int max)
+// hihat
+void Plugin_5::assign_envelope1_attack(byte value, int max)
 {
-    if (enc_moved[XPos])
-    {
-        int frequency = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, min, max);
-        filter.frequency(frequency);
-    }
+    int attack = map(value, 0, MIDI_CC_RANGE, 0, max);
+    hhFilterEnv.attack(attack);
+    hhEnv.attack(attack);
 }
-void Plugin_5::set_hhfilter_resonance(byte XPos, byte YPos, const char *name, float min, float max)
+void Plugin_5::assign_envelope1_decay(byte value, int max)
 {
-    if (enc_moved[XPos])
-    {
-        float reso = (float)(get_Potentiometer(XPos, YPos, name) / (MIDI_CC_RANGE_FLOAT / max)) + min;
-        for (int i = 0; i < MAX_VOICES; i++)
-        {
-            filter.resonance(reso);
-        }
-    }
+    int decay = map(value, 0, MIDI_CC_RANGE, 0, max);
+    hhFilterEnv.decay(decay);
+    hhEnv.decay(decay);
 }
-void Plugin_5::set_hhfilter_sweep(byte XPos, byte YPos, const char *name, float min, float max)
+void Plugin_5::assign_envelope1_sustain(byte value)
 {
-    if (enc_moved[XPos])
-    {
-        float swp = get_Potentiometer(XPos, YPos, name) / (MIDI_CC_RANGE_FLOAT / max) + min;
-        for (int i = 0; i < MAX_VOICES; i++)
-        {
-            filter.octaveControl(swp);
-        }
-    }
+    float ampl = value / MIDI_CC_RANGE_FLOAT;
+    hhFilterEnv.sustain(ampl);
+    hhEnv.sustain(ampl);
+}
+void Plugin_5::assign_envelope1_release(byte value, int max)
+{
+    int release = map(value, 0, MIDI_CC_RANGE, 0, max);
+    hhFilterEnv.release(release);
+    hhEnv.release(release);
+    hhFilterEnv.decay(release / 4);
+    hhEnv.decay(release / 4);
+}
+void Plugin_5::assign_filter_frequency(byte value)
+{
+    int frequency = note_frequency[value] * tuning;
+    filter.frequency(frequency);
+}
+void Plugin_5::assign_filter_resonance(byte value)
+{
+    float reso = value / 25.40;
+    filter.resonance(reso);
+}
+void Plugin_5::assign_filter_sweep(byte value)
+{
+    float swp = value / 18.14;
+    filter.octaveControl(swp);
 }
 
-void Plugin_5::set_hhEnv_attack(byte XPos, byte YPos, const char *name, int min, int max)
+// toms
+void Plugin_5::assign_drum1_frequency(byte value)
 {
-    if (enc_moved[XPos])
-    {
-        int attack = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, min, max);
-        hhEnv.attack(attack);
-    }
+    int freq = note_frequency[value] * tuning;
+    tomL.frequency(freq);
 }
-void Plugin_5::set_hhEnv_decay(byte XPos, byte YPos, const char *name, int min, int max)
+void Plugin_5::assign_drum2_frequency(byte value)
 {
-    if (enc_moved[XPos])
-    {
-        int decay = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, min, max);
-        hhEnv.decay(decay);
-        hhFilterEnv.decay(decay);
-    }
+    int freq = note_frequency[value] * tuning;
+    tomM.frequency(freq);
 }
-void Plugin_5::set_hhEnv_sustain(byte XPos, byte YPos, const char *name)
+void Plugin_5::assign_drum3_frequency(byte value)
 {
-    if (enc_moved[XPos])
-    {
-        float sustain = (float)(get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT);
-        hhEnv.sustain(sustain);
-        hhFilterEnv.sustain(sustain);
-    }
+    int freq = note_frequency[value] * tuning;
+    tomH.frequency(freq);
 }
-void Plugin_5::set_hhEnv_release(byte XPos, byte YPos, const char *name, int min, int max)
+void Plugin_5::assign_drum1_decay(byte value)
 {
-    if (enc_moved[XPos])
-    {
-        int release = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, min, max);
-        hhEnv.release(release);
-        hhFilterEnv.release(release);
-        hhEnv.decay(release / 4);
-        hhFilterEnv.decay(release / 4);
-    }
-}
-
-void Plugin_5::set_tomL_frequency(byte XPos, byte YPos, const char *name)
-{
-    if (enc_moved[XPos])
-    {
-        int freq = note_frequency[get_Potentiometer(XPos, YPos, name)] * tuning;
-        tomL.frequency(freq);
-    }
-}
-void Plugin_5::set_tomM_frequency(byte XPos, byte YPos, const char *name)
-{
-    if (enc_moved[XPos])
-    {
-        int freq = note_frequency[get_Potentiometer(XPos, YPos, name)] * tuning;
-        tomM.frequency(freq);
-    }
-}
-void Plugin_5::set_tomH_frequency(byte XPos, byte YPos, const char *name)
-{
-    if (enc_moved[XPos])
-    {
-        int freq = note_frequency[get_Potentiometer(XPos, YPos, name)] * tuning;
-        tomH.frequency(freq);
-    }
-}
-void Plugin_5::set_toms_decay(byte XPos, byte YPos, const char *name, int min, int max)
-{
-    if (enc_moved[XPos])
-    {
-        int decay = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, min, max);
-        tomL.length(decay);
-        tomM.length(decay);
-        tomH.length(decay);
-    }
+    int decay = map(value, 0, MIDI_CC_RANGE, 0, 2000);
+    tomL.length(decay);
+    tomM.length(decay);
+    tomH.length(decay);
 }

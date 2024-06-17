@@ -84,19 +84,20 @@ public:
     virtual void draw_plugin() override;
 
     void get_peak();
-    void set_mod_waveform(byte XPos, byte YPos, const char *name);
-    void set_mod_amplitude(byte XPos, byte YPos, const char *name);
+    virtual void assign_voice1_waveform(byte value) override; // make virtual in baseclass but override
+    virtual void assign_voice1_amplitude(byte value) override;
     void set_mod_ratio(byte XPos, byte YPos, const char *name);
-    void set_car_waveform(byte XPos, byte YPos, const char *name);
+    virtual void assign_voice2_waveform(byte value) override; // make virtual in baseclass but override
 
-    void set_envelope_attack(byte XPos, byte YPos, const char *name, int min, int max);
-    void set_envelope_decay(byte XPos, byte YPos, const char *name, int min, int max);
-    void set_envelope_sustain(byte XPos, byte YPos, const char *name);
-    void set_envelope_release(byte XPos, byte YPos, const char *name, int min, int max);
+    virtual void assign_envelope1_attack(byte value, int max) override; //envelope for modulator
+    virtual void assign_envelope1_decay(byte value, int max) override;
+    virtual void assign_envelope1_sustain(byte value) override;
+    virtual void assign_envelope1_release(byte value, int max) override;
 
-    void set_envelope_mattack(byte XPos, byte YPos, const char *name, int min, int max);
-    void set_envelope_mdecay(byte XPos, byte YPos, const char *name, int min, int max);
-    void set_envelope_msustain(byte XPos, byte YPos, const char *name);
-    void set_envelope_mrelease(byte XPos, byte YPos, const char *name, int min, int max);
+    virtual void assign_envelope2_attack(byte value, int max) override;
+    virtual void assign_envelope2_decay(byte value, int max) override;
+    virtual void assign_envelope2_sustain(byte value) override;
+    virtual void assign_envelope2_release(byte value, int max) override;
+    virtual void set_envelope2_ADSR(byte YPos, int maxA, int maxD, int maxR); //envelope for output
 };
 #endif // PLUGIN_3_H

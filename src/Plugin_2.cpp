@@ -77,8 +77,8 @@ void Plugin_2::set_parameters(byte row)
     {
         if (row == 0)
         {
-            set_voice_waveform(0, 0, "W~Form");
-            set_voice_amplitude(1, 0, "Volume");
+            set_voice1_waveform(0, 0, "W~Form");
+            set_voice1_amplitude(1, 0, "Volume");
         }
 
         if (row == 1)
@@ -88,14 +88,14 @@ void Plugin_2::set_parameters(byte row)
         if (row == 2)
         {
             set_filter_frequency(0, 2, "Filt-Frq");
-            set_filter_resonance(1, 2, "Resonance", 0, 5.00);
+            set_filter_resonance(1, 2, "Resonance");
             set_filter_sweep(2, 2, "Sweep");
             set_filter_type(3, 2, filterName[potentiometer[presetNr][11]]);
         }
 
         if (row == 3)
         {
-            set_envelope_ADSR(3, 1000, 500, 2000);
+            set_envelope1_ADSR(3, 1000, 500, 2000);
             // set_envelope_attack(0, 3, "Attack", 0, 1000);
             // set_envelope_sustain(2, 3, "Sustain");
             // set_envelope_decay(1, 3, "Decay", 0, 500);
@@ -133,7 +133,7 @@ void Plugin_2::draw_plugin()
     }
 }
 
-void Plugin_2::assign_voice_waveform(byte value)
+void Plugin_2::assign_voice1_waveform(byte value)
 {
     int walveform = map(value, 0, MIDI_CC_RANGE, 0, 12);
     for (int i = 0; i < MAX_VOICES; i++)
@@ -141,7 +141,7 @@ void Plugin_2::assign_voice_waveform(byte value)
         waveform[i].begin(walveform);
     }
 }
-void Plugin_2::assign_voice_amplitude(byte value)
+void Plugin_2::assign_voice1_amplitude(byte value)
 {
     float ampl = value / MIDI_CC_RANGE_FLOAT;
     for (int i = 0; i < MAX_VOICES; i++)
@@ -191,7 +191,7 @@ void Plugin_2::assign_filter_type(byte mixerchannel)
     }
 }
 
-void Plugin_2::assign_envelope_attack(byte value, int max)
+void Plugin_2::assign_envelope1_attack(byte value, int max)
 {
     int attack = map(value, 0, MIDI_CC_RANGE, 0, max);
     for (int i = 0; i < MAX_VOICES; i++)
@@ -200,7 +200,7 @@ void Plugin_2::assign_envelope_attack(byte value, int max)
         Aenv[i].attack(attack);
     }
 }
-void Plugin_2::assign_envelope_decay(byte value, int max)
+void Plugin_2::assign_envelope1_decay(byte value, int max)
 {
     int decay = map(value, 0, MIDI_CC_RANGE, 0, max);
     for (int i = 0; i < MAX_VOICES; i++)
@@ -209,7 +209,7 @@ void Plugin_2::assign_envelope_decay(byte value, int max)
         Aenv[i].decay(decay);
     }
 }
-void Plugin_2::assign_envelope_sustain(byte value)
+void Plugin_2::assign_envelope1_sustain(byte value)
 {
     float ampl = value / MIDI_CC_RANGE_FLOAT;
     for (int i = 0; i < MAX_VOICES; i++)
@@ -218,7 +218,7 @@ void Plugin_2::assign_envelope_sustain(byte value)
         Aenv[i].sustain(ampl);
     }
 }
-void Plugin_2::assign_envelope_release(byte value, int max)
+void Plugin_2::assign_envelope1_release(byte value, int max)
 {
     int release = map(value, 0, MIDI_CC_RANGE, 0, max);
     for (int i = 0; i < MAX_VOICES; i++)
@@ -227,14 +227,14 @@ void Plugin_2::assign_envelope_release(byte value, int max)
         Aenv[i].release(release);
     }
 }
-void Plugin_2::set_envelope_ADSR(byte YPos, int maxA, int maxD, int maxR)
+void Plugin_2::set_envelope1_ADSR(byte YPos, int maxA, int maxD, int maxR)
 {
 
     if (enc_moved[0])
     {
         byte rowIx = YPos * 4;
         potentiometer[presetNr][0 + rowIx] = constrain(potentiometer[presetNr][0 + rowIx] + encoded[0], 0, MIDI_CC_RANGE);
-        assign_envelope_attack(potentiometer[presetNr][0 + rowIx], maxA);
+        assign_envelope1_attack(potentiometer[presetNr][0 + rowIx], maxA);
         drawEnvelope(YPos, potentiometer[presetNr][0 + rowIx], potentiometer[presetNr][1 + rowIx],
                      potentiometer[presetNr][2 + rowIx], potentiometer[presetNr][3 + rowIx]);
     }
@@ -242,7 +242,7 @@ void Plugin_2::set_envelope_ADSR(byte YPos, int maxA, int maxD, int maxR)
     {
         byte rowIx = YPos * 4;
         potentiometer[presetNr][1 + rowIx] = constrain(potentiometer[presetNr][1 + rowIx] + encoded[1], 0, MIDI_CC_RANGE);
-        assign_envelope_decay(potentiometer[presetNr][1 + rowIx], maxD);
+        assign_envelope1_decay(potentiometer[presetNr][1 + rowIx], maxD);
         drawEnvelope(YPos, potentiometer[presetNr][0 + rowIx], potentiometer[presetNr][1 + rowIx],
                      potentiometer[presetNr][2 + rowIx], potentiometer[presetNr][3 + rowIx]);
     }
@@ -250,7 +250,7 @@ void Plugin_2::set_envelope_ADSR(byte YPos, int maxA, int maxD, int maxR)
     {
         byte rowIx = YPos * 4;
         potentiometer[presetNr][2 + rowIx] = constrain(potentiometer[presetNr][2 + rowIx] + encoded[2], 0, MIDI_CC_RANGE);
-        assign_envelope_sustain(potentiometer[presetNr][2 + rowIx]);
+        assign_envelope1_sustain(potentiometer[presetNr][2 + rowIx]);
         drawEnvelope(YPos, potentiometer[presetNr][0 + rowIx], potentiometer[presetNr][1 + rowIx],
                      potentiometer[presetNr][2 + rowIx], potentiometer[presetNr][3 + rowIx]);
     }
@@ -258,7 +258,7 @@ void Plugin_2::set_envelope_ADSR(byte YPos, int maxA, int maxD, int maxR)
     {
         byte rowIx = YPos * 4;
         potentiometer[presetNr][3 + rowIx] = constrain(potentiometer[presetNr][3 + rowIx] + encoded[3], 0, MIDI_CC_RANGE);
-        assign_envelope_release(potentiometer[presetNr][3 + rowIx], maxR);
+        assign_envelope1_release(potentiometer[presetNr][3 + rowIx], maxR);
         drawEnvelope(YPos, potentiometer[presetNr][0 + rowIx], potentiometer[presetNr][1 + rowIx],
                      potentiometer[presetNr][2 + rowIx], potentiometer[presetNr][3 + rowIx]);
     }

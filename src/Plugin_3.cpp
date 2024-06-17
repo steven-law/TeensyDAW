@@ -1,6 +1,6 @@
 
 #include <Arduino.h>
- #include <Audio.h>
+#include <Audio.h>
 #include <Wire.h>
 #include <SPI.h>
 #include <SD.h>
@@ -19,7 +19,6 @@ void clearWorkSpace();
 
 void Plugin_3::setup()
 {
-
 
     for (int i = 0; i < MAX_VOICES; i++)
     {
@@ -73,26 +72,23 @@ void Plugin_3::set_parameters(byte row)
     {
         if (row == 0)
         {
-            set_mod_waveform(0, 0, "mW~Form");
+            set_voice1_waveform(0, 0, "mW~Form");
             set_mod_ratio(1, 0, "mRatio");
-            set_mod_amplitude(2, 0, "mVolume");
-            set_car_waveform(3, 0, "cW~Form");
+            set_voice1_amplitude(2, 0, "mVolume");
+            set_voice2_waveform(3, 0, "cW~Form");
         }
 
         if (row == 1)
         {
-            set_envelope_mattack(0, 1, "mAttack", 0, 1000);
-            set_envelope_mdecay(1, 1, "mDecay", 0, 500);
-            set_envelope_msustain(2, 1, "mSustain");
-            set_envelope_mrelease(3, 1, "mRelease", 0, 2000);
+            set_envelope1_attack(0, 1, "mAttack", 1000);
+            set_envelope1_decay(1, 1, "mDecay", 500);
+            set_envelope1_sustain(2, 1, "mSustain");
+            set_envelope1_release(3, 1, "mRelease", 2000);
         }
 
         if (row == 2)
         {
-            set_envelope_attack(0, 2, "Attack", 0, 1000);
-            set_envelope_decay(1, 2, "Decay", 0, 500);
-            set_envelope_sustain(2, 2, "Sustain");
-            set_envelope_release(3, 2, "Release", 0, 2000);
+            set_envelope2_ADSR(2, 1000, 500, 2000);
         }
 
         if (row == 3)
@@ -125,10 +121,8 @@ void Plugin_3::draw_plugin()
         drawPot(2, 1, potentiometer[presetNr][6], "mSustain");
         drawPot(3, 1, potentiometer[presetNr][7], "mRelease");
 
-        drawPot(0, 2, potentiometer[presetNr][8], "Attack");
-        drawPot(1, 2, potentiometer[presetNr][9], "Decay");
-        drawPot(2, 2, potentiometer[presetNr][10], "Sustain");
-        drawPot(3, 2, potentiometer[presetNr][11], "Release");
+        drawEnvelope(2, potentiometer[presetNr][8], potentiometer[presetNr][9],
+                     potentiometer[presetNr][10], potentiometer[presetNr][11]);
 
         draw_sequencer_option(SEQUENCER_OPTIONS_VERY_RIGHT, "Prset", presetNr, 3, 0);
     }
@@ -139,26 +133,20 @@ void Plugin_3::get_peak()
     Serial.printf("Pl3: %f  ", peak.read());
 }
 
-void Plugin_3::set_mod_waveform(byte XPos, byte YPos, const char *name)
+void Plugin_3::assign_voice1_waveform(byte value)
 {
-    if (enc_moved[XPos])
+    int walveform = map(value, 0, MIDI_CC_RANGE, 0, 12);
+    for (int i = 0; i < MAX_VOICES; i++)
     {
-        int walveform = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, 0, 12);
-        for (int i = 0; i < MAX_VOICES; i++)
-        {
-            modulator[i].begin(walveform);
-        }
+        modulator[i].begin(walveform);
     }
 }
-void Plugin_3::set_mod_amplitude(byte XPos, byte YPos, const char *name)
+void Plugin_3::assign_voice1_amplitude(byte value)
 {
-    if (enc_moved[XPos])
+    float ampl = value / MIDI_CC_RANGE_FLOAT;
+    for (int i = 0; i < MAX_VOICES; i++)
     {
-        float ampl = (float)(get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT);
-        for (int i = 0; i < MAX_VOICES; i++)
-        {
-            modulator[i].amplitude(ampl);
-        }
+        modulator[i].amplitude(ampl);
     }
 }
 void Plugin_3::set_mod_ratio(byte XPos, byte YPos, const char *name)
@@ -172,107 +160,115 @@ void Plugin_3::set_mod_ratio(byte XPos, byte YPos, const char *name)
         }
     }
 }
-
-void Plugin_3::set_car_waveform(byte XPos, byte YPos, const char *name)
+void Plugin_3::assign_voice2_waveform(byte value)
 {
-    if (enc_moved[XPos])
+    int walveform = map(value, 0, MIDI_CC_RANGE, 0, 12);
+    for (int i = 0; i < MAX_VOICES; i++)
     {
-        int walveform = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, 0, 12);
-        for (int i = 0; i < MAX_VOICES; i++)
-        {
-            carrier[i].begin(walveform);
-        }
+        carrier[i].begin(walveform);
     }
 }
 
-void Plugin_3::set_envelope_attack(byte XPos, byte YPos, const char *name, int min, int max)
+void Plugin_3::assign_envelope1_attack(byte value, int max)
 {
-    if (enc_moved[XPos])
+    int attack = map(value, 0, MIDI_CC_RANGE, 0, max);
+    for (int i = 0; i < MAX_VOICES; i++)
     {
-        int attack = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, min, max);
-        for (int i = 0; i < MAX_VOICES; i++)
-        {
-            outEnv[i].attack(attack);
-        }
+        modEnv[i].attack(attack);
     }
 }
-void Plugin_3::set_envelope_decay(byte XPos, byte YPos, const char *name, int min, int max)
+void Plugin_3::assign_envelope1_decay(byte value, int max)
 {
-    if (enc_moved[XPos])
+    int decay = map(value, 0, MIDI_CC_RANGE, 0, max);
+    for (int i = 0; i < MAX_VOICES; i++)
     {
-        int decay = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, min, max);
-        for (int i = 0; i < MAX_VOICES; i++)
-        {
-            outEnv[i].decay(decay);
-        }
+        modEnv[i].decay(decay);
     }
 }
-void Plugin_3::set_envelope_sustain(byte XPos, byte YPos, const char *name)
+void Plugin_3::assign_envelope1_sustain(byte value)
 {
-    if (enc_moved[XPos])
+    float ampl = value / MIDI_CC_RANGE_FLOAT;
+    for (int i = 0; i < MAX_VOICES; i++)
     {
-        float sustain = (float)(get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT);
-        for (int i = 0; i < MAX_VOICES; i++)
-        {
-            outEnv[i].sustain(sustain);
-        }
+        modEnv[i].sustain(ampl);
     }
 }
-void Plugin_3::set_envelope_release(byte XPos, byte YPos, const char *name, int min, int max)
+void Plugin_3::assign_envelope1_release(byte value, int max)
 {
-    if (enc_moved[XPos])
+    int release = map(value, 0, MIDI_CC_RANGE, 0, max);
+    for (int i = 0; i < MAX_VOICES; i++)
     {
-        int release = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, min, max);
-        for (int i = 0; i < MAX_VOICES; i++)
-        {
-            outEnv[i].release(release);
-        }
+        modEnv[i].release(release);
     }
 }
 
-void Plugin_3::set_envelope_mattack(byte XPos, byte YPos, const char *name, int min, int max)
+void Plugin_3::assign_envelope2_attack(byte value, int max)
 {
-    if (enc_moved[XPos])
+    int attack = map(value, 0, MIDI_CC_RANGE, 0, max);
+    for (int i = 0; i < MAX_VOICES; i++)
     {
-        int attack = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, min, max);
-        for (int i = 0; i < MAX_VOICES; i++)
-        {
-            modEnv[i].attack(attack);
-        }
+        outEnv[i].attack(attack);
     }
 }
-void Plugin_3::set_envelope_mdecay(byte XPos, byte YPos, const char *name, int min, int max)
+void Plugin_3::assign_envelope2_decay(byte value, int max)
 {
-    if (enc_moved[XPos])
+    int decay = map(value, 0, MIDI_CC_RANGE, 0, max);
+    for (int i = 0; i < MAX_VOICES; i++)
     {
-        int decay = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, min, max);
-        for (int i = 0; i < MAX_VOICES; i++)
-        {
-            modEnv[i].decay(decay);
-        }
+        outEnv[i].decay(decay);
     }
 }
-void Plugin_3::set_envelope_msustain(byte XPos, byte YPos, const char *name)
+void Plugin_3::assign_envelope2_sustain(byte value)
 {
-    if (enc_moved[XPos])
+    float ampl = value / MIDI_CC_RANGE_FLOAT;
+    for (int i = 0; i < MAX_VOICES; i++)
     {
-        float sustain = (float)(get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT);
-        for (int i = 0; i < MAX_VOICES; i++)
-        {
-            modEnv[i].sustain(sustain);
-        }
+        outEnv[i].sustain(ampl);
     }
 }
-void Plugin_3::set_envelope_mrelease(byte XPos, byte YPos, const char *name, int min, int max)
+void Plugin_3::assign_envelope2_release(byte value, int max)
 {
-    if (enc_moved[XPos])
+    int release = map(value, 0, MIDI_CC_RANGE, 0, max);
+    for (int i = 0; i < MAX_VOICES; i++)
     {
-        int release = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, min, max);
-        for (int i = 0; i < MAX_VOICES; i++)
-        {
-            modEnv[i].release(release);
-        }
+        outEnv[i].release(release);
     }
 }
 
+void Plugin_3::set_envelope2_ADSR(byte YPos, int maxA, int maxD, int maxR)
+{
+
+    if (enc_moved[0])
+    {
+        byte rowIx = YPos * 4;
+        potentiometer[presetNr][0 + rowIx] = constrain(potentiometer[presetNr][0 + rowIx] + encoded[0], 0, MIDI_CC_RANGE);
+        assign_envelope2_attack(potentiometer[presetNr][0 + rowIx], maxA);
+        drawEnvelope(YPos, potentiometer[presetNr][0 + rowIx], potentiometer[presetNr][1 + rowIx],
+                     potentiometer[presetNr][2 + rowIx], potentiometer[presetNr][3 + rowIx]);
+    }
+    if (enc_moved[1])
+    {
+        byte rowIx = YPos * 4;
+        potentiometer[presetNr][1 + rowIx] = constrain(potentiometer[presetNr][1 + rowIx] + encoded[1], 0, MIDI_CC_RANGE);
+        assign_envelope2_decay(potentiometer[presetNr][1 + rowIx], maxD);
+        drawEnvelope(YPos, potentiometer[presetNr][0 + rowIx], potentiometer[presetNr][1 + rowIx],
+                     potentiometer[presetNr][2 + rowIx], potentiometer[presetNr][3 + rowIx]);
+    }
+    if (enc_moved[2])
+    {
+        byte rowIx = YPos * 4;
+        potentiometer[presetNr][2 + rowIx] = constrain(potentiometer[presetNr][2 + rowIx] + encoded[2], 0, MIDI_CC_RANGE);
+        assign_envelope2_sustain(potentiometer[presetNr][2 + rowIx]);
+        drawEnvelope(YPos, potentiometer[presetNr][0 + rowIx], potentiometer[presetNr][1 + rowIx],
+                     potentiometer[presetNr][2 + rowIx], potentiometer[presetNr][3 + rowIx]);
+    }
+    if (enc_moved[3])
+    {
+        byte rowIx = YPos * 4;
+        potentiometer[presetNr][3 + rowIx] = constrain(potentiometer[presetNr][3 + rowIx] + encoded[3], 0, MIDI_CC_RANGE);
+        assign_envelope2_release(potentiometer[presetNr][3 + rowIx], maxR);
+        drawEnvelope(YPos, potentiometer[presetNr][0 + rowIx], potentiometer[presetNr][1 + rowIx],
+                     potentiometer[presetNr][2 + rowIx], potentiometer[presetNr][3 + rowIx]);
+    }
+}
 // TeensyDAW: end automatically generated code
