@@ -21,6 +21,7 @@
 #define MIDI_CC_RANGE 127
 #define MIDI_CC_RANGE_FLOAT 127.00
 #define MAX_VOICES 12
+#define MAX_VOICES_PLUGIN 6
 #define NUM_PRESETS 8
 #define PRESET_ENCODER 3
 #define phraseSegmentLength 16 // a variable for the zoomfactor in songmode

@@ -66,16 +66,16 @@ public:
     int xpos_old;
     int ypos_old;
     int16_t old_singleCycleValue = 0;
-    AudioSynthWaveformDc dc[12];
-    AudioSynthWaveform waveform[12];
-    AudioEffectEnvelope Fenv[12];
-    AudioFilterStateVariable filter[12];
-    AudioMixer4 fMixer[12];
-    AudioEffectEnvelope Aenv[12];
+    AudioSynthWaveformDc dc[MAX_VOICES_PLUGIN];
+    AudioSynthWaveform waveform[MAX_VOICES_PLUGIN];
+    AudioEffectEnvelope Fenv[MAX_VOICES_PLUGIN];
+    AudioFilterStateVariable filter[MAX_VOICES_PLUGIN];
+    AudioMixer4 fMixer[MAX_VOICES_PLUGIN];
+    AudioEffectEnvelope Aenv[MAX_VOICES_PLUGIN];
     AudioMixer12 mixer;
     AudioAmplifier MixGain;
     AudioAmplifier SongVol;
-    AudioConnection *patchCord[98]; // total patchCordCount:98 including array typed ones.
+    AudioConnection *patchCord[MAX_VOICES_PLUGIN*8+2]; // total patchCordCount:98 including array typed ones.
 
     // constructor (this is called when class-object is created)
     Plugin_6(const char *Name, byte ID) : PluginControll(Name, ID)
@@ -85,7 +85,7 @@ public:
 
         patchCord[pci++] = new AudioConnection(mixer, 0, MixGain, 0);
         patchCord[pci++] = new AudioConnection(MixGain, 0, SongVol, 0);
-        for (int i = 0; i < 12; i++)
+        for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
         {
             patchCord[pci++] = new AudioConnection(dc[i], 0, Fenv[i], 0);
             patchCord[pci++] = new AudioConnection(waveform[i], 0, filter[i], 0);
@@ -109,18 +109,31 @@ public:
     void smooth_waveform();
     void clearSingleCycleWaveform();
 
-    void set_voice_waveform(byte XPos, byte YPos, const char *name);
+    void set_voice_waveform(byte XPos, byte YPos, const char *name); // make virtual in baseclass
     void set_voice_amplitude(byte XPos, byte YPos, const char *name);
 
-    void set_filter_frequency(byte XPos, byte YPos, const char *name, int min, int max);
-    void set_filter_resonance(byte XPos, byte YPos, const char *name, float min, float max);
-    void set_filter_sweep(byte XPos, byte YPos, const char *name, float min, float max);
+    void set_filter_frequency(byte XPos, byte YPos, const char *name);
+    void set_filter_resonance(byte XPos, byte YPos, const char *name);
+    void set_filter_sweep(byte XPos, byte YPos, const char *name);
     void set_filter_type(byte XPos, byte YPos, const char *name);
     void selectFilterType(byte mixerchannel);
 
-    void set_envelope_attack(byte XPos, byte YPos, const char *name, int min, int max);
-    void set_envelope_decay(byte XPos, byte YPos, const char *name, int min, int max);
+    void set_envelope_ADSR(byte YPos, int maxA, int maxD, int maxR);
+    void set_envelope_attack(byte XPos, byte YPos, const char *name,  int max);
+    void set_envelope_decay(byte XPos, byte YPos, const char *name,  int max);
     void set_envelope_sustain(byte XPos, byte YPos, const char *name);
-    void set_envelope_release(byte XPos, byte YPos, const char *name, int min, int max);
+    void set_envelope_release(byte XPos, byte YPos, const char *name,  int max);
+
+    void assign_voice_waveform(byte value); // make virtual in baseclass but override
+    void assign_voice_amplitude(byte value);
+    
+    void assign_filter_frequency(byte value);
+    void assign_filter_resonance(byte value);
+    void assign_filter_sweep(byte value);
+
+    void assign_envelope_attack(byte value, int max);
+    void assign_envelope_decay(byte value, int max);
+    void assign_envelope_sustain(byte value);
+    void assign_envelope_release(byte value, int max);
 };
 #endif // PLUGIN_6_H

@@ -50,15 +50,15 @@ public:
 #define NUM_RATIOS 10
     const float ratios[NUM_RATIOS] = {0.125, 0.25, 0.5, 0.75, 1, 2, 3, 4, 6, 8};
     float modulator_ratio = 1;
-    AudioSynthWaveformModulated modulator[12];
-    AudioEffectEnvelope modEnv[12];
-    AudioSynthWaveformModulated carrier[12];
-    AudioEffectEnvelope outEnv[12];
+    AudioSynthWaveformModulated modulator[MAX_VOICES_PLUGIN];
+    AudioEffectEnvelope modEnv[MAX_VOICES_PLUGIN];
+    AudioSynthWaveformModulated carrier[MAX_VOICES_PLUGIN];
+    AudioEffectEnvelope outEnv[MAX_VOICES_PLUGIN];
     AudioMixer12 mixer;
     AudioAmplifier MixGain;
     AudioAmplifier SongVol;
-    AudioConnection *patchCord[51]; // total patchCordCount:50 including array typed ones.
-    AudioAnalyzePeak peak;
+    AudioConnection *patchCord[MAX_VOICES_PLUGIN+2]; // total patchCordCount:50 including array typed ones.
+    //AudioAnalyzePeak peak;
     // constructor (this is called when class-object is created)
     Plugin_3(const char *Name, byte ID) : PluginControll(Name, ID)
     {
@@ -66,8 +66,8 @@ public:
 
         patchCord[pci++] = new AudioConnection(mixer, 0, MixGain, 0);
         patchCord[pci++] = new AudioConnection(MixGain, 0, SongVol, 0);
-        patchCord[pci++] = new AudioConnection(modulator[0], 0, peak, 0);
-        for (int i = 0; i < 12; i++)
+        //patchCord[pci++] = new AudioConnection(modulator[0], 0, peak, 0);
+        for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
         {
             patchCord[pci++] = new AudioConnection(modulator[i], 0, modEnv[i], 0);
             patchCord[pci++] = new AudioConnection(modEnv[i], 0, carrier[i], 0);

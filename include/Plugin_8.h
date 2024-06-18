@@ -49,18 +49,18 @@ class Plugin_8 : public PluginControll
 public:
     float detune1;
     float detune2;
-    AudioSynthWaveform waveform[12];
-    AudioSynthWaveform waveform1[12];
-    AudioSynthWaveformDc dc[12];
-    AudioMixer4 vcoMixer[12];
-    AudioEffectEnvelope Fenv[12];
-    AudioFilterStateVariable filter[12];
-    AudioMixer4 fmixer[12];
-    AudioEffectEnvelope Aenv[12];
+    AudioSynthWaveform waveform[MAX_VOICES_PLUGIN];
+    AudioSynthWaveform waveform1[MAX_VOICES_PLUGIN];
+    AudioSynthWaveformDc dc[MAX_VOICES_PLUGIN];
+    AudioMixer4 vcoMixer[MAX_VOICES_PLUGIN];
+    AudioEffectEnvelope Fenv[MAX_VOICES_PLUGIN];
+    AudioFilterStateVariable filter[MAX_VOICES_PLUGIN];
+    AudioMixer4 fmixer[MAX_VOICES_PLUGIN];
+    AudioEffectEnvelope Aenv[MAX_VOICES_PLUGIN];
     AudioMixer12 mixer;
     AudioAmplifier MixGain;
     AudioAmplifier SongVol;
-    AudioConnection *patchCord[122]; // total patchCordCount:122 including array typed ones.
+    AudioConnection *patchCord[MAX_VOICES_PLUGIN*10+2]; // total patchCordCount:122 including array typed ones.
 
     // constructor (this is called when class-object is created)
     Plugin_8(const char *Name, byte ID) : PluginControll(Name, ID)

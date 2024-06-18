@@ -40,11 +40,11 @@ void clearWorkSpace();
 class Plugin_1 : public PluginControll
 {
 public:
-    AudioSynthKarplusStrong string[12];
+    AudioSynthKarplusStrong string[MAX_VOICES_PLUGIN];
     AudioMixer12 mixer;
     AudioAmplifier MixGain;
     AudioAmplifier SongVol;
-    AudioConnection *patchCord[14]; // total patchCordCount:14 including array typed ones.
+    AudioConnection *patchCord[MAX_VOICES_PLUGIN+2]; // total patchCordCount:14 including array typed ones.
 
     // constructor (this is called when class-object is created)
     Plugin_1(const char *Name, byte ID) : PluginControll(Name, ID)
@@ -53,7 +53,7 @@ public:
 
         patchCord[pci++] = new AudioConnection(mixer, 0, MixGain, 0);
         patchCord[pci++] = new AudioConnection(MixGain, 0, SongVol, 0);
-        for (int i = 0; i < 12; i++)
+        for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
         {
             patchCord[pci++] = new AudioConnection(string[i], 0, mixer, i);
         }
@@ -67,6 +67,7 @@ public:
     virtual void draw_plugin() override;
 
     void set_mixer_gain(byte XPos, byte YPos, const char *name);
+    void assign_mixer_gain(byte value, byte channel);
 };
 #endif // PLUGIN_1_H
 // TeensyDAW: end automatically generated code

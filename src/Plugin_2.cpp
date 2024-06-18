@@ -20,7 +20,7 @@ extern const char *filterName[4];
 void Plugin_2::setup()
 {
 
-    for (int i = 0; i < MAX_VOICES; i++)
+    for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
     {
         dc[i].amplitude(1);
 
@@ -37,9 +37,9 @@ void Plugin_2::setup()
         filter[i].frequency(2000);
         filter[i].resonance(1);
         filter[i].octaveControl(4);
-        ladder[i].frequency(2000);
-        ladder[i].resonance(1);
-        ladder[i].octaveControl(4);
+        //ladder[i].frequency(2000);
+        //ladder[i].resonance(1);
+        //ladder[i].octaveControl(4);
 
         fMixer[i].gain(0, 1);
         fMixer[i].gain(1, 0);
@@ -142,11 +142,12 @@ void Plugin_2::set_voice_waveform(byte XPos, byte YPos, const char *name)
 }
 void Plugin_2::assign_voice_waveform(byte value)
 {
-    int walveform = map(value, 0, MIDI_CC_RANGE, 0, 12);
-    for (int i = 0; i < MAX_VOICES; i++)
+    byte walveform = map(value, 0, MIDI_CC_RANGE, 0, 12);
+    for (byte i = 0; i < MAX_VOICES_PLUGIN; i++)
     {
         waveform[i].begin(walveform);
     }
+    
 }
 
 void Plugin_2::set_voice_amplitude(byte XPos, byte YPos, const char *name)
@@ -159,7 +160,7 @@ void Plugin_2::set_voice_amplitude(byte XPos, byte YPos, const char *name)
 void Plugin_2::assign_voice_amplitude(byte value)
 {
     float ampl = value / MIDI_CC_RANGE_FLOAT;
-    for (int i = 0; i < MAX_VOICES; i++)
+    for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
     {
         waveform[i].amplitude(ampl);
     }
@@ -176,10 +177,10 @@ void Plugin_2::assign_filter_frequency(byte value)
 {
 
     int frequency = note_frequency[value] * tuning;
-    for (int i = 0; i < MAX_VOICES; i++)
+    for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
     {
         filter[i].frequency(frequency);
-        ladder[i].frequency(frequency);
+        //ladder[i].frequency(frequency);
     }
 }
 
@@ -194,10 +195,10 @@ void Plugin_2::assign_filter_resonance(byte value)
 {
 
     float reso = value / 25.40;
-    for (int i = 0; i < MAX_VOICES; i++)
+    for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
     {
         filter[i].resonance(reso);
-        ladder[i].resonance(reso);
+        //ladder[i].resonance(reso);
     }
 }
 void Plugin_2::set_filter_sweep(byte XPos, byte YPos, const char *name)
@@ -210,10 +211,10 @@ void Plugin_2::set_filter_sweep(byte XPos, byte YPos, const char *name)
 void Plugin_2::assign_filter_sweep(byte value)
 {
     float swp = value / 18.14;
-    for (int i = 0; i < MAX_VOICES; i++)
+    for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
     {
         filter[i].octaveControl(swp);
-        ladder[i].octaveControl(swp);
+       // ladder[i].octaveControl(swp);
     }
 }
 void Plugin_2::set_filter_type(byte XPos, byte YPos, const char *name)
@@ -225,7 +226,7 @@ void Plugin_2::set_filter_type(byte XPos, byte YPos, const char *name)
 }
 void Plugin_2::selectFilterType(byte mixerchannel)
 {
-    for (int i = 0; i < MAX_VOICES; i++)
+    for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
     {
         fMixer[i].gain(0, 0);
         fMixer[i].gain(1, 0);
@@ -238,7 +239,7 @@ void Plugin_2::selectFilterType(byte mixerchannel)
 void Plugin_2::assign_envelope_attack(byte value, int max)
 {
     int attack = map(value, 0, MIDI_CC_RANGE, 0, max);
-    for (int i = 0; i < MAX_VOICES; i++)
+    for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
     {
         Fenv[i].attack(attack);
         Aenv[i].attack(attack);
@@ -247,7 +248,7 @@ void Plugin_2::assign_envelope_attack(byte value, int max)
 void Plugin_2::assign_envelope_decay(byte value, int max)
 {
     int decay = map(value, 0, MIDI_CC_RANGE, 0, max);
-    for (int i = 0; i < MAX_VOICES; i++)
+    for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
     {
         Fenv[i].decay(decay);
         Aenv[i].decay(decay);
@@ -256,7 +257,7 @@ void Plugin_2::assign_envelope_decay(byte value, int max)
 void Plugin_2::assign_envelope_sustain(byte value)
 {
     float ampl = value / MIDI_CC_RANGE_FLOAT;
-    for (int i = 0; i < MAX_VOICES; i++)
+    for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
     {
         Fenv[i].sustain(ampl);
         Aenv[i].sustain(ampl);
@@ -265,7 +266,7 @@ void Plugin_2::assign_envelope_sustain(byte value)
 void Plugin_2::assign_envelope_release(byte value, int max)
 {
     int release = map(value, 0, MIDI_CC_RANGE, 0, max);
-    for (int i = 0; i < MAX_VOICES; i++)
+    for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
     {
         Fenv[i].release(release);
         Aenv[i].release(release);
@@ -307,29 +308,18 @@ void Plugin_2::set_envelope_ADSR(byte YPos, int maxA, int maxD, int maxR)
                      potentiometer[presetNr][2 + rowIx], potentiometer[presetNr][3 + rowIx]);
     }
 }
-void Plugin_2::set_envelope_attack(byte XPos, byte YPos, const char *name, int min, int max)
+void Plugin_2::set_envelope_attack(byte XPos, byte YPos, const char *name,  int max)
 {
     if (enc_moved[XPos])
     {
-        int attack = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, min, max);
-        for (int i = 0; i < MAX_VOICES; i++)
-        {
-            Fenv[i].attack(attack);
-            Aenv[i].attack(attack);
-        }
+       assign_envelope_attack(get_Potentiometer(XPos, YPos, name), max);
     }
 }
-void Plugin_2::set_envelope_decay(byte XPos, byte YPos, const char *name, int min, int max)
+void Plugin_2::set_envelope_decay(byte XPos, byte YPos, const char *name,  int max)
 {
     if (enc_moved[XPos])
     {
-
-        int decay = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, min, max);
-        for (int i = 0; i < MAX_VOICES; i++)
-        {
-            Fenv[i].decay(decay);
-            Aenv[i].decay(decay);
-        }
+       assign_envelope_decay(get_Potentiometer(XPos, YPos, name), max);
     }
 }
 void Plugin_2::set_envelope_sustain(byte XPos, byte YPos, const char *name)
@@ -337,23 +327,14 @@ void Plugin_2::set_envelope_sustain(byte XPos, byte YPos, const char *name)
     if (enc_moved[XPos])
     {
 
-        float sustain = (float)(get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT);
-        for (int i = 0; i < MAX_VOICES; i++)
-        {
-            Fenv[i].sustain(sustain);
-            Aenv[i].sustain(sustain);
-        }
+        assign_envelope_sustain(get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT);
+        
     }
 }
-void Plugin_2::set_envelope_release(byte XPos, byte YPos, const char *name, int min, int max)
+void Plugin_2::set_envelope_release(byte XPos, byte YPos, const char *name,  int max)
 {
     if (enc_moved[XPos])
     {
-        int release = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, min, max);
-        for (int i = 0; i < MAX_VOICES; i++)
-        {
-            Fenv[i].release(release);
-            Aenv[i].release(release);
-        }
+        assign_envelope_release(get_Potentiometer(XPos, YPos, name), max);
     }
 }

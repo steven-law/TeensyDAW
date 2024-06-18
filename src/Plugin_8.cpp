@@ -19,7 +19,7 @@ void clearWorkSpace();
 void Plugin_8::setup()
 {
 
-    for (int i = 0; i < MAX_VOICES; i++)
+    for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
     {
         dc[i].amplitude(1);
 
@@ -148,7 +148,7 @@ void Plugin_8::set_voice_waveform(byte XPos, byte YPos, const char *name)
     {
         int walveform = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, 0, 12);
 
-        for (int i = 0; i < MAX_VOICES; i++)
+        for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
         {
             waveform[i].begin(walveform);
         }
@@ -159,7 +159,7 @@ void Plugin_8::set_voice_amplitude(byte XPos, byte YPos, const char *name)
     if (enc_moved[XPos])
     {
         float ampl = get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT;
-        for (int i = 0; i < MAX_VOICES; i++)
+        for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
         {
             waveform[i].amplitude(ampl);
         }
@@ -177,7 +177,7 @@ void Plugin_8::set_voice1_waveform(byte XPos, byte YPos, const char *name)
     if (enc_moved[XPos])
     {
         int walveform = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, 0, 12);
-        for (int i = 0; i < MAX_VOICES; i++)
+        for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
         {
             waveform1[i].begin(walveform);
         }
@@ -188,7 +188,7 @@ void Plugin_8::set_voice1_amplitude(byte XPos, byte YPos, const char *name)
     if (enc_moved[XPos])
     {
         float ampl = get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT;
-        for (int i = 0; i < MAX_VOICES; i++)
+        for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
         {
             waveform1[i].amplitude(ampl);
         }
@@ -207,7 +207,7 @@ void Plugin_8::set_filter_frequency(byte XPos, byte YPos, const char *name)
     if (enc_moved[XPos])
     {
         int frequency = note_frequency[get_Potentiometer(XPos, YPos, name)] * tuning;
-        for (int i = 0; i < MAX_VOICES; i++)
+        for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
         {
             filter[i].frequency(frequency);
         }
@@ -229,7 +229,7 @@ void Plugin_8::set_filter_sweep(byte XPos, byte YPos, const char *name, float mi
     if (enc_moved[XPos])
     {
         float swp = get_Potentiometer(XPos, YPos, name) / (MIDI_CC_RANGE_FLOAT / max) + min;
-        for (int i = 0; i < MAX_VOICES; i++)
+        for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
         {
             filter[i].octaveControl(swp);
         }
@@ -244,7 +244,7 @@ void Plugin_8::set_filter_type(byte XPos, byte YPos, const char *name)
 }
 void Plugin_8::selectFilterType(byte mixerchannel)
 {
-    for (int i = 0; i < MAX_VOICES; i++)
+    for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
     {
         fmixer[i].gain(0, 0);
         fmixer[i].gain(1, 0);
@@ -258,7 +258,7 @@ void Plugin_8::set_envelope_attack(byte XPos, byte YPos, const char *name, int m
     if (enc_moved[XPos])
     {
         int attack = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, min, max);
-        for (int i = 0; i < MAX_VOICES; i++)
+        for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
         {
             Fenv[i].attack(attack);
             Aenv[i].attack(attack);
@@ -270,7 +270,7 @@ void Plugin_8::set_envelope_decay(byte XPos, byte YPos, const char *name, int mi
     if (enc_moved[XPos])
     {
         int decay = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, min, max);
-        for (int i = 0; i < MAX_VOICES; i++)
+        for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
         {
             Fenv[i].decay(decay);
             Aenv[i].decay(decay);
@@ -282,7 +282,7 @@ void Plugin_8::set_envelope_sustain(byte XPos, byte YPos, const char *name)
     if (enc_moved[XPos])
     {
         float sustain = get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT;
-        for (int i = 0; i < MAX_VOICES; i++)
+        for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
         {
             Fenv[i].sustain(sustain);
             Aenv[i].sustain(sustain);
@@ -294,7 +294,7 @@ void Plugin_8::set_envelope_release(byte XPos, byte YPos, const char *name, int 
     if (enc_moved[XPos])
     {
         int release = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, min, max);
-        for (int i = 0; i < MAX_VOICES; i++)
+        for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
         {
             Fenv[i].release(release);
             Aenv[i].release(release);

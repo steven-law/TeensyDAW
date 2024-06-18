@@ -19,7 +19,7 @@ void clearWorkSpace();
 void Plugin_4::setup()
 {
 
-    for (int i = 0; i < MAX_VOICES; i++)
+    for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
     {
         mixer.gain(i, 1);
     }
@@ -40,10 +40,10 @@ void Plugin_4::noteOn(byte notePlayed, float velocity, byte voice)
         playMem[3].play(AudioSampleP2);
     if (notePlayed == 53)
         playMem[3].play(AudioSamplePongblip);
-    if (notePlayed == 54)
-        playMem[3].play(AudioSampleTomtom);
-    if (notePlayed == 55)
-        playMem[3].play(AudioSampleCashregister);
+    //if (notePlayed == 54)
+        //playMem[3].play(AudioSampleTomtom);
+   // if (notePlayed == 55)
+        //playMem[3].play(AudioSampleCashregister);
 }
 void Plugin_4::noteOff(byte notePlayed, byte voice)
 {
@@ -65,16 +65,16 @@ void Plugin_4::set_parameters(byte row)
         {
             set_mixer_gain(0, 1, "Tick");
             set_mixer_gain(1, 1, "Pong");
-            set_mixer_gain(2, 1, "Tom");
-            set_mixer_gain(3, 1, "Cash");
+            //set_mixer_gain(2, 1, "Tom");
+            //set_mixer_gain(3, 1, "Cash");
         }
 
         if (row == 2)
         {
-            set_mixer_gain(0, 2, "Vol");
-            set_mixer_gain(1, 2, "Vol");
-            set_mixer_gain(2, 2, "Vol");
-            set_mixer_gain(3, 2, "Vol");
+            //set_mixer_gain(0, 2, "Vol");
+            //set_mixer_gain(1, 2, "Vol");
+            //set_mixer_gain(2, 2, "Vol");
+            //set_mixer_gain(3, 2, "Vol");
         }
 
         if (row == 3)
@@ -117,9 +117,13 @@ void Plugin_4::set_mixer_gain(byte XPos, byte YPos, const char *name)
     if (enc_moved[XPos])
     {
         int n = XPos + (YPos * NUM_ENCODERS);
-        float sustain = (float)(get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT);
-        mixer.gain(n, sustain);
+        assign_mixer_gain(n, get_Potentiometer(XPos, YPos, name));
     }
+}
+void Plugin_4::assign_mixer_gain(byte value, byte channel)
+{
+    float sustain = value / MIDI_CC_RANGE_FLOAT;
+    mixer.gain(channel, sustain);
 }
 
 // TeensyDAW: end automatically generated code

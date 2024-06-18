@@ -18,7 +18,7 @@ void clearWorkSpace();
 
 void Plugin_1::setup()
 {
-    for (int i = 0; i < MAX_VOICES; i++)
+    for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
     {
         mixer.gain(i, 1);
     }
@@ -55,17 +55,10 @@ void Plugin_1::set_parameters(byte row)
 
             set_mixer_gain(0, 1, "Vol");
             set_mixer_gain(1, 1, "Vol");
-            set_mixer_gain(2, 1, "Vol");
-            set_mixer_gain(3, 1, "Vol");
         }
 
         if (row == 2)
         {
-
-            set_mixer_gain(0, 2, "Vol");
-            set_mixer_gain(1, 2, "Vol");
-            set_mixer_gain(2, 2, "Vol");
-            set_mixer_gain(3, 2, "Vol");
         }
 
         if (row == 3)
@@ -103,15 +96,18 @@ void Plugin_1::draw_plugin()
     }
 }
 
-
 void Plugin_1::set_mixer_gain(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
         int n = XPos + (YPos * NUM_ENCODERS);
-        float sustain = (float)(get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT);
-        mixer.gain(n, sustain);
+        assign_mixer_gain(n, get_Potentiometer(XPos, YPos, name));
     }
+}
+void Plugin_1::assign_mixer_gain(byte value, byte channel)
+{
+    float sustain = value / MIDI_CC_RANGE_FLOAT;
+    mixer.gain(channel, sustain);
 }
 
 // TeensyDAW: end automatically generated code

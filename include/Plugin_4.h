@@ -39,11 +39,11 @@ void clearWorkSpace();
 class Plugin_4 : public PluginControll
 {
 public:
-    AudioPlayMemory playMem[12];
+    AudioPlayMemory playMem[MAX_VOICES_PLUGIN];
     AudioMixer12 mixer;
     AudioAmplifier MixGain;
     AudioAmplifier SongVol;
-    AudioConnection *patchCord[14]; // total patchCordCount:14 including array typed ones.
+    AudioConnection *patchCord[MAX_VOICES_PLUGIN+2]; // total patchCordCount:14 including array typed ones.
 
     // constructor (this is called when class-object is created)
     Plugin_4(const char *Name, byte ID) : PluginControll(Name, ID)
@@ -52,7 +52,7 @@ public:
 
         patchCord[pci++] = new AudioConnection(mixer, 0, MixGain, 0);
         patchCord[pci++] = new AudioConnection(MixGain, 0, SongVol, 0);
-        for (int i = 0; i < 12; i++)
+        for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
         {
             patchCord[pci++] = new AudioConnection(playMem[i], 0, mixer, i);
         }
@@ -64,7 +64,7 @@ public:
     virtual void set_parameters(byte row) override;
     virtual void draw_plugin() override;
 
-
     void set_mixer_gain(byte XPos, byte YPos, const char *name);
+    void assign_mixer_gain(byte value, byte channel);
 };
-#endif  // PLUGIN_3_H
+#endif // PLUGIN_3_H

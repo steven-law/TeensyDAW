@@ -19,7 +19,7 @@ void clearWorkSpace();
 void Plugin_5::setup()
 {
 
-    for (int i = 0; i < MAX_VOICES; i++)
+    for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
     {
         mixer.gain(i, 1);
     }
@@ -155,7 +155,7 @@ void Plugin_5::set_fmsnare_pitchMod(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
-        float sustain = (float)(get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT);
+        float sustain = get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT;
         fm_snare.fm(sustain);
     }
 }
@@ -163,7 +163,7 @@ void Plugin_5::set_fmsnare_decay(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
-        float sustain = (float)(get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT);
+        float sustain = get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT;
         fm_snare.decay(sustain);
     }
 }
@@ -171,7 +171,7 @@ void Plugin_5::set_fmsnare_noise(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
-        float sustain = (float)(get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT);
+        float sustain = get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT;
         fm_snare.noise(sustain);
         fm_snare.overdrive(sustain);
     }
@@ -180,7 +180,7 @@ void Plugin_5::set_fmsnare_overdrive(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
-        float sustain = (float)(get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT);
+        float sustain = get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT;
         fm_snare.overdrive(sustain);
     }
 }
@@ -199,7 +199,7 @@ void Plugin_5::set_fmdrum_pitchMod(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
-        float sustain = (float)(get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT);
+        float sustain = get_Potentiometer(XPos, YPos, name) / MIDI_CC_RANGE_FLOAT;
         fm_drum.fm(sustain);
     }
 }
