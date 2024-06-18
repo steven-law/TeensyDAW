@@ -134,7 +134,7 @@ void Plugin_7::draw_plugin()
         draw_sequencer_option(SEQUENCER_OPTIONS_VERY_RIGHT, "Prset", presetNr, 3, 0);
     }
 }
-
+//test
 void Plugin_7::set_fmdrum_pitchMod(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
