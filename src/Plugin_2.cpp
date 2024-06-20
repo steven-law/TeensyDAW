@@ -77,6 +77,7 @@ void Plugin_2::set_parameters(byte row)
     {
         if (row == 0)
         {
+           
             set_voice_waveform(0, 0, "W~Form");
             set_voice_amplitude(1, 0, "Volume");
         }

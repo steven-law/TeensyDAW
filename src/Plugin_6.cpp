@@ -57,7 +57,7 @@ extern int gridTouchY;
 void Plugin_6::setup()
 {
 
-    for (int i = 0; i < MAX_VOICES; i++)
+    for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
     {
         dc[i].amplitude(1);
 
@@ -303,7 +303,7 @@ void Plugin_6::set_voice_waveform(byte XPos, byte YPos, const char *name)
     {
         int walveform = map(get_Potentiometer(XPos, YPos, name), 0, MIDI_CC_RANGE, 0, 12);
 
-        for (int i = 0; i < MAX_VOICES; i++)
+        for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
         {
             waveform[i].begin(walveform);
         }

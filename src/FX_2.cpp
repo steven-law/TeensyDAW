@@ -42,19 +42,13 @@ void FX_2::set_BC_bits(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
-        potentiometer[presetNr][XPos] = constrain(potentiometer[presetNr][XPos] + encoded[XPos], 0, MIDI_CC_RANGE);
-        bitcrusher.bits(map(potentiometer[presetNr][XPos], 0, 127, 1, 16));
-
-        drawPot(XPos, YPos, potentiometer[presetNr][XPos], name);
+        bitcrusher.bits(map(get_Potentiometer(XPos,YPos,name), 0, 127, 1, 16));
     }
 }
 void FX_2::set_BC_smplRate(byte XPos, byte YPos, const char *name)
 {
     if (enc_moved[XPos])
     {
-        potentiometer[presetNr][XPos] = constrain(potentiometer[presetNr][XPos] + encoded[XPos], 0, MIDI_CC_RANGE);
-        bitcrusher.sampleRate(map(potentiometer[presetNr][XPos], 0, 127, 1, 44100));
-
-        drawPot(XPos, YPos, potentiometer[presetNr][XPos], name);
+        bitcrusher.sampleRate(map(get_Potentiometer(XPos,YPos,name), 0, 127, 1, 44100));
     }
 }

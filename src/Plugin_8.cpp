@@ -218,7 +218,7 @@ void Plugin_8::set_filter_resonance(byte XPos, byte YPos, const char *name, floa
     if (enc_moved[XPos])
     {
         float reso = get_Potentiometer(XPos, YPos, name) / (MIDI_CC_RANGE_FLOAT / max) + min;
-        for (int i = 0; i < MAX_VOICES; i++)
+        for (int i = 0; i < MAX_VOICES_PLUGIN; i++)
         {
             filter[i].resonance(reso);
         }
