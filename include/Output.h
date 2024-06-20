@@ -49,6 +49,7 @@ public:
         {
             allPlugins[i]->setup();
         }
+        Serial.println("Output setup");
     }
     void noteOn(byte note, byte velo, byte channel, byte voice)
     {

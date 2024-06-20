@@ -524,7 +524,7 @@ void setup()
 
   Serial.begin(115200); // set MIDI baud
                         // while the serial stream is not open, do nothing:
-  // while (!Serial) ;
+   while (!Serial) ;
   // initialize the TFT- and Touchscreen
 
   tft.begin();
@@ -564,7 +564,9 @@ void setup()
   usbMIDI.setHandleNoteOff(myNoteOff);
   usbMIDI.setHandleNoteOn(myNoteOn);
   AudioMemory(200);
+   
   MasterOut.setup();
+  
   note_frequency = new float[128];
   for (int r = 0; r < 128; r++)
   {
@@ -573,6 +575,7 @@ void setup()
 
   usbMIDI.begin(); // Launch MIDI and listen to channel 4
   startUpScreen();
+  Serial.println("Hello");
 }
 
 void loop()
@@ -1135,7 +1138,7 @@ void startUpScreen()
 
   // static Display rendering
   tft.fillScreen(ILI9341_DARKGREY);
-
+Serial.println("Hello");
   tft.setFont(Arial_9);
 
   // songmode button
